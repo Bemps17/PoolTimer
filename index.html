@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Timer de Billard Pro v3</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎱</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <!-- Ajout de Tone.js pour l'audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        :root {
+            --c-background: #0a0a0a;
+            --c-bezel: #1a1a1a;
+            --c-screen: #000000;
+            --c-digit-default: #e0e0e0;
+            --c-digit-warning: #ff8c00;
+            --c-digit-critical: #f83333;
+            --c-ext-available: #2ecc71;
+            --c-ext-used: #c0392b;
+            --c-primary: #3498db;
+            --c-button-bg: #282828;
+            --c-play: #20c20e;
+            --font-body: 'Poppins', sans-serif;
+            --font-timer: 'Chakra Petch', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; background-color: var(--c-background); }
+
+        body {
+            font-family: var(--font-body);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            padding-top: 5vh; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .scoreboard-body {
+            background-color: var(--c-bezel);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5);
+            width: 95vw;
+            max-width: 500px;
+            height: 85vh; 
+            max-height: 900px;
+            position: relative;
+            border: 4px solid #000;
+            border-radius: 30px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            transition: box-shadow 0.5s ease;
+        }
+        
+        .scoreboard-body.is-flashing-warning { animation: flash-warning 1.5s infinite; }
+        .scoreboard-body.is-flashing-critical { animation: flash-critical 0.5s infinite; }
+
+        @keyframes flash-warning {
+            50% { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px var(--c-digit-warning); }
+        }
+        @keyframes flash-critical {
+            50% { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 40px var(--c-digit-critical); }
+        }
+
+        .top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0.5rem;
+        }
+
+        .player-status {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #eee;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+        .player-status.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        .ext-status.ext-available { color: var(--c-ext-available); }
+        .ext-status.ext-used { color: var(--c-ext-used); }
+
+        .menu-arbitre {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            z-index: 1000;
+            color: #888;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-arbitre:hover svg { color: #fff; transform: rotate(45deg); }
+        .menu-arbitre svg { 
+            width: 32px; 
+            height: 32px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
+        }
+        .menu-arbitre.active svg {
+            transform: rotate(135deg);
+            color: var(--c-primary);
+        }
+
+        .timer-screen {
+            width: 100%;
+            flex-grow: 1;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            align-items: center;
+            justify-items: center;
+            background: var(--c-screen);
+            border-radius: 10px;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.7);
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .timer-screen::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .timer-content {
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+
+        .timer-officiel {
+            font-family: var(--font-timer);
+            font-weight: 700;
+            font-size: clamp(10rem, 35vmin, 22rem);
+            line-height: 1;
+            color: var(--c-digit-default);
+            /* Texte plus net, moins de flou */
+            text-shadow: 0 0 2px var(--c-digit-default), 0 0 8px rgba(224, 224, 224, 0.5);
+            transition: color 0.4s ease, text-shadow 0.4s ease;
+        }
+        
+        .timer-officiel.state-warning { color: var(--c-digit-warning); text-shadow: 0 0 2px var(--c-digit-warning), 0 0 10px var(--c-digit-warning); }
+        .timer-officiel.state-critical { color: var(--c-digit-critical); text-shadow: 0 0 3px var(--c-digit-critical), 0 0 15px var(--c-digit-critical); }
+
+        .timer-extension-bar {
+            width: 80%;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: white;
+            background: rgba(52, 152, 219, 0.5);
+            border: 1px solid rgba(52, 152, 219, 0.8);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .timer-extension-bar.disabled {
+            background: rgba(51, 51, 51, 0.5);
+            border-color: rgba(51, 51, 51, 0.8);
+            color: #666;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .timer-extension-bar.game-used {
+            background: rgba(192, 57, 43, 0.5);
+            border-color: rgba(192, 57, 43, 0.8);
+            box-shadow: 0 0 10px rgba(192, 57, 43, 0.7);
+        }
+
+        .control-panel {
+            width: 100%;
+            max-width: 500px;
+            padding: 0.5rem;
+            background: var(--c-bezel);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .scoreboard-body.tactile-mode .control-panel {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .bouton-sport {
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid #000;
+            background: var(--c-button-bg); box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3);
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: all 0.1s ease-out; color: #aaa;
+            font-family: var(--font-body); font-weight: 600; font-size: 1.2rem;
+        }
+        .bouton-sport:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.5); }
+        .bouton-sport svg { width: 30px; height: 30px; }
+        
+        #btnPlayPause { 
+            color: var(--c-play);
+            opacity: 0.6;
+        }
+        #btnPlayPause.playing { 
+            opacity: 1;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 10px var(--c-play);
+        }
+        
+        .bouton-sport:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(80%); }
+        
+        .bouton-carré {
+            border-radius: 12px;
+            color: var(--c-ext-used);
+        }
+
+        /* --- Menu & Help Panel --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        .panel {
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%;
+            background: #1f2128; border-left: 1px solid #111;
+            padding: 0; box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1001; color: #e1e3e8;
+            display: flex; flex-direction: column;
+        }
+        .panel.active { right: 0; }
+        
+        .panel-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .panel-help {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90vw; max-width: 600px; max-height: 80vh;
+            background: #1f2128; border: 1px solid #333; border-radius: 15px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1003;
+            display: flex; flex-direction: column;
+        }
+        .panel-help.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+
+        .header-panel { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .header-panel h2 { font-size: 1.5rem; font-weight: 600; }
+        .fermer-panel { background: none; border: none; font-size: 2rem; cursor: pointer; color: #8b949e; transition: color 0.2s, transform 0.2s; }
+        .fermer-panel:hover { color: white; transform: rotate(90deg); }
+        .section-panel { margin-bottom: 2.5rem; }
+        .section-panel h3 { margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; border-left: 3px solid var(--c-primary); padding-left: 1rem; }
+        .parametre-groupe { margin-bottom: 1rem; }
+        .parametre-groupe label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #8b949e; font-size: 0.9rem; }
+        .parametre-groupe input, .parametre-groupe select {
+            width: 100%; padding: 0.75rem; border: 1px solid #333; border-radius: 8px; font-size: 1rem;
+            background-color: #111; color: #e1e3e8; transition: border-color 0.3s ease; font-family: var(--font-body);
+        }
+        .parametre-groupe input[type="color"] { padding: 0.2rem; height: 40px; }
+        .player-config { display: flex; gap: 1rem; align-items: center; }
+        .player-config input[type="text"] { flex-grow: 1; }
+        .player-config input[type="color"] { flex-shrink: 0; width: 50px; }
+
+        .parametre-groupe input:focus, .parametre-groupe select:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3); }
+        .bouton-menu {
+            background: var(--c-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 10px; cursor: pointer;
+            font-size: 1rem; font-weight: 600; width: 100%; margin-top: 0.5rem; transition: all 0.2s ease;
+        }
+        .bouton-menu.danger { background-color: #c0392b; }
+        .bouton-menu.secondary { background-color: #444; }
+        .bouton-menu:hover:not(:disabled) { filter: brightness(1.1); }
+        .bouton-menu:disabled { background-color: #555; cursor: not-allowed; }
+        
+        .panel-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #333;
+            background: #181a1f;
+            flex-shrink: 0;
+        }
+        
+        .help-content { padding: 0 1.5rem 1.5rem 1.5rem; line-height: 1.6; color: #ccc; overflow-y: auto; flex-grow: 1; }
+        .help-content h3 { color: var(--c-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .help-content ul { list-style-position: inside; padding-left: 0.5rem; }
+        .help-content li { margin-bottom: 0.5rem; }
+        .help-content code { background-color: #111; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        
+        /* Agrandissement du timer sur mobile */
+        @media (max-width: 500px), (max-height: 750px) {
+            .timer-officiel {
+                font-size: clamp(12rem, 45vmin, 25rem);
+            }
+            .scoreboard-body { padding: 1rem; border-radius: 20px; }
+            .timer-screen { margin: 0.5rem 0; }
+            .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 0.5rem; }
+            .bouton-sport { width: 60px; height: 60px; }
+            .bouton-sport svg { width: 26px; height: 26px; }
+            .bouton-carré { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard-body" id="container">
+        <div class="top-bar">
+            <div class="player-status" id="p1Status">
+                <span class="player-name">P1</span> <span class="ext-status">EXT</span>
+            </div>
+            <div class="player-status" id="p2Status">
+                <span class="player-name">P2</span> <span class="ext-status">EXT</span>
+            </div>
+            <div class="menu-arbitre" id="menuArbitre" aria-label="Ouvrir le menu">
+                <!-- Nouvelle icône SVG (roue crantée) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2-1.55a.39.39 0 0 0 .09-.58l-1.73-3a.38.38 0 0 0-.5-.24l-2.38.96a6.38 6.38 0 0 0-1.64-.94l-.38-2.61a.38.38 0 0 0-.38-.34H8.46a.38.38 0 0 0-.38.34l-.38 2.61a6.38 6.38 0 0 0-1.64.94l-2.38-.96a.38.38 0 0 0-.5.24l-1.73 3a.39.39 0 0 0 .09.58l2 1.55c-.05.3-.07.64-.07.94s.02.64.07.94l-2 1.55a.39.39 0 0 0-.09.58l1.73 3a.38.38 0 0 0 .5.24l2.38-.96a6.38 6.38 0 0 0 1.64.94l.38 2.61a.38.38 0 0 0 .38.34h3.46a.38.38 0 0 0 .38-.34l.38-2.61a6.38 6.38 0 0 0 1.64-.94l2.38.96a.38.38 0 0 0 .5-.24l1.73-3a.39.39 0 0 0-.09-.58l-2-1.55zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+            </div>
+        </div>
+
+        <div class="timer-screen" id="timerScreen">
+            <div class="timer-content">
+                <div class="timer-officiel state-default" id="timerDisplay">45</div>
+            </div>
+            <div class="timer-extension-bar" id="btnExtension">EXTENSION</div>
+        </div>
+
+        <div class="control-panel" id="controlPanel">
+            <button class="bouton-sport" id="btnNextPlayer" aria-label="Joueur Suivant">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>
+            </button>
+            <button class="bouton-sport" id="btnPlayPause" aria-label="Démarrer"></button>
+            <button class="bouton-sport bouton-carré" id="btnNewGame" aria-label="Nouvelle Partie">NEW</button>
+        </div>
+    </div>
+
+    <!-- Menu Panel -->
+    <div class="overlay" id="overlayMenu"></div>
+    <div class="panel" id="panelArbitre">
+        <div class="header-panel">
+            <h2>Configuration</h2>
+            <button class="fermer-panel" id="fermerPanel" aria-label="Fermer le menu">&times;</button>
+        </div>
+        <div class="panel-content">
+            <div class="section-panel">
+                <h3>Joueurs</h3>
+                <div class="parametre-groupe">
+                    <label for="p1Name">Joueur 1</label>
+                    <div class="player-config">
+                        <input type="text" id="p1Name" maxlength="5" placeholder="P1">
+                        <input type="color" id="p1Color">
+                    </div>
+                </div>
+                <div class="parametre-groupe">
+                    <label for="p2Name">Joueur 2</label>
+                    <div class="player-config">
+                        <input type="text" id="p2Name" maxlength="5" placeholder="P2">
+                        <input type="color" id="p2Color">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-panel">
+                <h3>Paramètres de Jeu</h3>
+                <div class="parametre-groupe">
+                    <label for="tempsBase">Temps de base (sec)</label>
+                    <input type="number" id="tempsBase" min="10" max="120">
+                </div>
+                <div class="parametre-groupe">
+                    <label for="tempsExtension">Temps d'extension (sec)</label>
+                    <input type="number" id="tempsExtension" min="5" max="60">
+                </div>
+                <div class="parametre-groupe">
+                    <label for="seuilAlerte">Seuil Alerte Orange (sec)</label>
+                    <input type="number" id="seuilAlerte" min="1" max="119">
+                </div>
+                <div class="parametre-groupe">
+                    <label for="seuilCritique">Seuil Alerte Rouge (sec)</label>
+                    <input type="number" id="seuilCritique" min="1" max="119">
+                </div>
+            </div>
+            
+            <div class="section-panel">
+                <h3>Interface & Audio</h3>
+                <div class="parametre-groupe">
+                    <label for="modeInterface">Mode d'interface</label>
+                    <select id="modeInterface">
+                        <option value="boutons">Boutons Visibles</option>
+                        <option value="tactile">Mode Tactile Complet</option>
+                    </select>
+                </div>
+                 <div class="parametre-groupe">
+                    <label for="affichageMs">Affichage millisecondes (sous 10s)</label>
+                    <select id="affichageMs">
+                        <option value="true">Oui</option>
+                        <option value="false">Non</option>
+                    </select>
+                </div>
+                 <div class="parametre-groupe">
+                    <label for="volumeSonore">Volume des alertes</label>
+                    <input type="range" id="volumeSonore" min="0" max="1" step="0.1">
+                </div>
+                <div class="parametre-groupe">
+                    <label for="vibrationMobile">Vibration mobile</label>
+                     <select id="vibrationMobile">
+                        <option value="true">Activée</option>
+                        <option value="false">Désactivée</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-panel">
+                <h3>Automatisation</h3>
+                <div class="parametre-groupe">
+                    <label for="autoReset">Après temps écoulé</label>
+                     <select id="autoReset">
+                        <option value="false">Ne rien faire</option>
+                        <option value="true">Passer au joueur suivant</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="bouton-menu secondary" id="btnShowHelp">Mode d'emploi</button>
+            <button class="bouton-menu" id="appliquerConfig" disabled>Appliquer</button>
+        </div>
+    </div>
+
+    <!-- Help Panel -->
+    <div class="overlay" id="overlayHelp"></div>
+    <div class="panel-help" id="panelHelp">
+        <div class="header-panel">
+            <h2>Mode d'emploi</h2>
+            <button class="fermer-panel" id="fermerHelp" aria-label="Fermer l'aide">&times;</button>
+        </div>
+        <div class="help-content">
+            <p>Bienvenue sur le Timer de Billard Pro ! Cette application est conçue pour arbitrer vos parties avec précision, simplicité et style.</p>
+            <h3>1. Interface Principale</h3>
+            <ul>
+                <li><strong>Chronomètre Central :</strong> Affiche le temps restant. Il change de couleur pour indiquer l'urgence (Blanc → Orange → Rouge).</li>
+                <li><strong>Indicateurs Joueurs (P1 / P2) :</strong> Montrent le joueur actif et le statut de son extension (<code>EXT</code>). Vert si disponible, Rouge si utilisée.</li>
+            </ul>
+            <h3>2. Contrôles et Actions</h3>
+            <h4>Écran Tactile (Toujours Actif)</h4>
+            <ul>
+                <li><strong>Simple Clic :</strong> Lance (▶) ou met en pause (⏸) le chronomètre.</li>
+                <li><strong>Double Clic :</strong> Passe au joueur suivant et réinitialise le temps.</li>
+            </ul>
+            <h4>Panneau de Contrôle (en bas)</h4>
+            <ul>
+                <li><strong>Icône 🔄 :</strong> Passe au joueur suivant.</li>
+                <li><strong>Icônes ▶ / ⏸ :</strong> Lance ou met en pause le chronomètre.</li>
+                <li><strong>Bouton NEW :</strong> Réinitialise complètement la partie (extensions incluses).</li>
+            </ul>
+             <h4>Barre d'Extension</h4>
+            <p>La barre <strong>EXTENSION</strong> sous le chronomètre ajoute du temps supplémentaire (1 fois par joueur par partie).</p>
+            <h3>3. Accéder aux Paramètres</h3>
+            <p>Cliquez sur l'icône roue crantée (⚙️) en haut à droite pour personnaliser les temps, les alertes, le son, les vibrations et le mode d'interface. Vos choix sont sauvegardés automatiquement.</p>
+        </div>
+    </div>
+
+    <script>
+        class BilliardTimer {
+            constructor() {
+                this.domElements = {};
+                this.state = {
+                    remainingTime: 0,
+                    isRunning: false,
+                    currentPlayer: 1,
+                    extensionsUsedInGame: { 1: false, 2: false },
+                    isExtensionUsedForShot: false,
+                    lastClickTime: 0,
+                };
+                this.config = this.loadConfig();
+                this.timerInterval = null;
+                this.finalCountdownInterval = null;
+                this.expectedTime = 0;
+                this.audio = {
+                    isInitialized: false,
+                    context: null,
+                    synth: null,
+                    gong: null,
+                    clickSynth: null,
+                    countdownSynth: null,
+                    volumeNode: null
+                };
+                this.alertsFired = {};
+
+                this.icons = {
+                    play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>',
+                    pause: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>'
+                };
+
+                this.initDomElements();
+                this.initEventListeners();
+                this.applyConfigToUI();
+                this.newGame();
+            }
+
+            // SECTION: Initialisation
+            // =================================================================
+
+            initDomElements() {
+                const ids = [
+                    'container', 'timerDisplay', 'timerScreen', 'p1Status', 'p2Status',
+                    'controlPanel', 'btnPlayPause', 'btnNextPlayer', 'btnExtension', 'btnNewGame',
+                    'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel', 'appliquerConfig',
+                    'btnShowHelp', 'overlayHelp', 'panelHelp', 'fermerHelp', 'p1Name', 'p1Color',
+                    'p2Name', 'p2Color', 'tempsBase', 'tempsExtension', 'seuilAlerte',
+                    'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 'autoReset'
+                ];
+                ids.forEach(id => this.domElements[id] = document.getElementById(id));
+            }
+
+            initEventListeners() {
+                // Clics avec son
+                this.domElements.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
+                this.domElements.btnNextPlayer.addEventListener('click', () => { this.playSound('click'); this.changePlayer(); });
+                this.domElements.btnExtension.addEventListener('click', () => { this.playSound('click'); this.useExtension(); });
+                this.domElements.btnNewGame.addEventListener('click', () => { this.playSound('click'); this.newGame(); });
+                
+                // Clic sans son (géré dans la méthode)
+                this.domElements.timerScreen.addEventListener('click', (e) => this.handleTimerScreenClick(e));
+                
+                // Menu
+                this.domElements.menuArbitre.addEventListener('click', () => { this.playSound('click'); this.toggleMenu(true); });
+                this.domElements.overlayMenu.addEventListener('click', () => this.toggleMenu(false));
+                this.domElements.fermerPanel.addEventListener('click', () => this.toggleMenu(false));
+                this.domElements.appliquerConfig.addEventListener('click', () => { this.playSound('click'); this.applyAndSaveConfig(); });
+                
+                // Help
+                this.domElements.btnShowHelp.addEventListener('click', () => { this.playSound('click'); this.toggleHelp(true); });
+                this.domElements.overlayHelp.addEventListener('click', () => this.toggleHelp(false));
+                this.domElements.fermerHelp.addEventListener('click', () => this.toggleHelp(false));
+
+                // Config change detection
+                Object.values(this.domElements).forEach(element => {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+                        element.addEventListener('change', () => this.domElements.appliquerConfig.disabled = false);
+                        element.addEventListener('input', () => this.domElements.appliquerConfig.disabled = false);
+                    }
+                });
+            }
+            
+            async initializeAudio() {
+                if (this.audio.isInitialized) return;
+                try {
+                    await Tone.start();
+                    this.audio.context = Tone.getContext();
+                    
+                    this.audio.volumeNode = new Tone.Volume(Tone.dbToGain(this.config.volume)).toDestination();
+
+                    // Son d'alerte simple
+                    this.audio.synth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 } }).connect(this.audio.volumeNode);
+                    
+                    // Son de fin de temps
+                    this.audio.gong = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).connect(this.audio.volumeNode);
+                    
+                    // Son de clic
+                    this.audio.clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).connect(this.audio.volumeNode);
+
+                    // Son du compte à rebours final
+                    this.audio.countdownSynth = new Tone.Synth({ oscillator: { type: 'sine' }, volume: -5, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).connect(this.audio.volumeNode);
+
+                    this.audio.isInitialized = true;
+                    console.log("Audio context started successfully.");
+
+                } catch (e) {
+                    console.error("Could not start audio context.", e);
+                }
+            }
+
+            // SECTION: Configuration Management
+            // =================================================================
+
+            getDefaultConfig() {
+                return {
+                    tempsBase: 45, tempsExtension: 15, seuilAlerte: 15, seuilCritique: 5,
+                    volume: -10, // in dB
+                    vibration: true, affichageMs: true, modeInterface: 'boutons', autoReset: false,
+                    p1Name: 'P1', p1Color: '#3498db', p2Name: 'P2', p2Color: '#e74c3c'
+                };
+            }
+
+            loadConfig() {
+                try {
+                    const savedConfig = localStorage.getItem('billiardTimerConfig');
+                    const defaultConfig = this.getDefaultConfig();
+                    return savedConfig ? { ...defaultConfig, ...JSON.parse(savedConfig) } : defaultConfig;
+                } catch (e) {
+                    console.error("Failed to load config from localStorage", e);
+                    return this.getDefaultConfig();
+                }
+            }
+
+            saveConfig() {
+                try {
+                    localStorage.setItem('billiardTimerConfig', JSON.stringify(this.config));
+                } catch (e) {
+                    console.error("Failed to save config to localStorage", e);
+                }
+            }
+            
+            applyConfigToUI() {
+                for (const key in this.config) {
+                    const element = this.domElements[key];
+                    if (element) {
+                        if (key.includes('Color')) {
+                            element.value = this.config[key];
+                        } else if (typeof this.config[key] === 'boolean') {
+                            element.value = String(this.config[key]);
+                        } else if (key === 'volumeSonore') {
+                            element.value = Tone.dbToGain(this.config.volume);
+                        }
+                        else {
+                            element.value = this.config[key];
+                        }
+                    }
+                }
+                this.updateUI();
+            }
+
+            applyAndSaveConfig() {
+                this.config.tempsBase = parseInt(this.domElements.tempsBase.value) || 45;
+                this.config.tempsExtension = parseInt(this.domElements.tempsExtension.value) || 15;
+                this.config.seuilAlerte = parseInt(this.domElements.seuilAlerte.value) || 15;
+                this.config.seuilCritique = parseInt(this.domElements.seuilCritique.value) || 5;
+                this.config.volume = Tone.gainToDb(parseFloat(this.domElements.volumeSonore.value));
+                this.config.vibration = this.domElements.vibrationMobile.value === 'true';
+                this.config.affichageMs = this.domElements.affichageMs.value === 'true';
+                this.config.modeInterface = this.domElements.modeInterface.value;
+                this.config.autoReset = this.domElements.autoReset.value === 'true';
+                this.config.p1Name = this.domElements.p1Name.value.substring(0, 5) || 'P1';
+                this.config.p1Color = this.domElements.p1Color.value;
+                this.config.p2Name = this.domElements.p2Name.value.substring(0, 5) || 'P2';
+                this.config.p2Color = this.domElements.p2Color.value;
+
+                this.saveConfig();
+                this.applyConfigToUI();
+                this.setupNewShot();
+                this.toggleMenu(false);
+                this.domElements.appliquerConfig.disabled = true;
+            }
+
+            // SECTION: Game Logic
+            // =================================================================
+
+            newGame() {
+                this.state.extensionsUsedInGame = { 1: false, 2: false };
+                this.state.currentPlayer = 1;
+                this.setupNewShot();
+            }
+
+            setupNewShot() {
+                this.pause();
+                this.state.remainingTime = this.config.tempsBase * 1000;
+                this.state.isExtensionUsedForShot = false;
+                this.alertsFired = { warning: false, critical: false, final_countdown: false };
+                this.updateUI();
+            }
+
+            changePlayer() {
+                this.state.currentPlayer = this.state.currentPlayer === 1 ? 2 : 1;
+                this.setupNewShot();
+            }
+
+            async togglePlayPause() {
+                await this.initializeAudio();
+                this.playSound('click');
+                if (this.state.isRunning) this.pause();
+                else this.start();
+            }
+
+            start() {
+                if (this.state.isRunning || this.state.remainingTime <= 0) return;
+                this.state.isRunning = true;
+                this.expectedTime = Date.now() + this.state.remainingTime;
+                
+                this.timerInterval = setInterval(() => this.tick(), 50);
+                
+                this.updateUI();
+            }
+
+            pause() {
+                if (!this.state.isRunning) return;
+                this.state.isRunning = false;
+                clearInterval(this.timerInterval);
+                clearInterval(this.finalCountdownInterval);
+                this.finalCountdownInterval = null;
+                this.updateUI();
+            }
+
+            tick() {
+                const now = Date.now();
+                this.state.remainingTime = this.expectedTime - now;
+
+                if (this.state.remainingTime <= 0) {
+                    this.timeUp();
+                    return;
+                }
+                this.updateDisplay();
+                this.handleAlerts();
+            }
+            
+            timeUp() {
+                this.pause();
+                this.state.remainingTime = 0;
+                this.updateDisplay();
+                this.playSound('gong');
+                this.vibrate([200, 100, 200]);
+                if (this.config.autoReset) {
+                    setTimeout(() => this.changePlayer(), 1500);
+                }
+            }
+
+            useExtension() {
+                if (!this.state.isRunning || this.state.isExtensionUsedForShot || this.state.extensionsUsedInGame[this.state.currentPlayer]) return;
+                this.expectedTime += this.config.tempsExtension * 1000;
+                this.state.isExtensionUsedForShot = true;
+                this.state.extensionsUsedInGame[this.state.currentPlayer] = true;
+                this.updateUI();
+            }
+
+            async handleTimerScreenClick(e) {
+                if (e.target.id === 'btnExtension') return;
+                await this.initializeAudio();
+                const now = Date.now();
+                if (now - this.state.lastClickTime < 300) { // Double click
+                    this.changePlayer();
+                } else { // Single click
+                    // Pas de son de clic ici, c'est intentionnel
+                    if (this.state.isRunning) this.pause();
+                    else this.start();
+                }
+                this.state.lastClickTime = now;
+            }
+
+            // SECTION: UI Updates
+            // =================================================================
+
+            updateUI() {
+                this.updateDisplay();
+                this.updatePlayPauseButton();
+                this.updateExtensionButton();
+                this.updatePlayerIndicators();
+                this.updateInterfaceMode();
+            }
+
+            updateDisplay() {
+                const time = this.state.remainingTime;
+                let displayText;
+
+                if (this.config.affichageMs && time < 10000 && time > 0) {
+                    displayText = (time / 1000).toFixed(1);
+                } else {
+                    displayText = Math.ceil(time / 1000).toString().padStart(2, '0');
+                }
+                this.domElements.timerDisplay.textContent = displayText;
+                
+                const container = this.domElements.container;
+                const timerDisplay = this.domElements.timerDisplay;
+                container.className = 'scoreboard-body';
+                timerDisplay.className = 'timer-officiel';
+                
+                if (time <= this.config.seuilCritique * 1000 && time > 0) {
+                    timerDisplay.classList.add('state-critical');
+                    if(this.state.isRunning) container.classList.add('is-flashing-critical');
+                } else if (time <= this.config.seuilAlerte * 1000 && time > 0) {
+                    timerDisplay.classList.add('state-warning');
+                    if(this.state.isRunning) container.classList.add('is-flashing-warning');
+                } else {
+                    timerDisplay.classList.add('state-default');
+                }
+                this.updateInterfaceMode();
+            }
+            
+            updatePlayPauseButton() {
+                this.domElements.btnPlayPause.innerHTML = this.state.isRunning ? this.icons.pause : this.icons.play;
+                this.domElements.btnPlayPause.classList.toggle('playing', this.state.isRunning);
+            }
+
+            updateExtensionButton() {
+                const extUsedInGame = this.state.extensionsUsedInGame[this.state.currentPlayer];
+                const isEnabled = this.state.isRunning && !this.state.isExtensionUsedForShot && !extUsedInGame;
+                this.domElements.btnExtension.classList.toggle('disabled', !isEnabled);
+                this.domElements.btnExtension.classList.toggle('game-used', extUsedInGame);
+            }
+
+            updatePlayerIndicators() {
+                ['p1', 'p2'].forEach((p, i) => {
+                    const playerNum = i + 1;
+                    const statusEl = this.domElements[`${p}Status`];
+                    const nameEl = statusEl.querySelector('.player-name');
+                    const extEl = statusEl.querySelector('.ext-status');
+
+                    nameEl.textContent = this.config[`${p}Name`];
+                    statusEl.classList.toggle('active', this.state.currentPlayer === playerNum);
+                    
+                    if (this.state.currentPlayer === playerNum) {
+                        statusEl.style.borderColor = this.config[`${p}Color`];
+                        statusEl.style.boxShadow = `0 0 10px ${this.config[`${p}Color`]}80`;
+                    } else {
+                        statusEl.style.borderColor = 'transparent';
+                        statusEl.style.boxShadow = 'none';
+                    }
+
+                    extEl.classList.toggle('ext-available', !this.state.extensionsUsedInGame[playerNum]);
+                    extEl.classList.toggle('ext-used', this.state.extensionsUsedInGame[playerNum]);
+                });
+            }
+            
+            updateInterfaceMode() {
+                this.domElements.container.classList.toggle('tactile-mode', this.config.modeInterface === 'tactile');
+            }
+
+            // SECTION: Alerts & Audio
+            // =================================================================
+            
+            handleAlerts() {
+                const timeInSeconds = this.state.remainingTime / 1000;
+
+                // Compte à rebours final "bombe"
+                if (timeInSeconds <= 5 && !this.alertsFired.final_countdown) {
+                    this.alertsFired.final_countdown = true;
+                    if (this.finalCountdownInterval) clearInterval(this.finalCountdownInterval);
+                    this.finalCountdownInterval = setInterval(() => {
+                        this.playSound('countdown_tick');
+                        this.vibrate(50);
+                    }, 1000);
+                }
+
+                // Alerte simple
+                if (timeInSeconds <= this.config.seuilAlerte && !this.alertsFired.warning) {
+                    this.alertsFired.warning = true;
+                    this.playSound('warning');
+                }
+            }
+
+            playSound(type) {
+                if (!this.audio.isInitialized) return;
+                
+                const now = this.audio.context.currentTime;
+                if (this.audio.volumeNode) {
+                    this.audio.volumeNode.volume.value = this.config.volume;
+                }
+
+                switch(type) {
+                    case 'warning':
+                        this.audio.synth?.triggerAttackRelease('C5', '8n', now);
+                        break;
+                    case 'countdown_tick':
+                        this.audio.countdownSynth?.triggerAttackRelease('G5', '16n', now);
+                        break;
+                    case 'gong':
+                        this.audio.gong?.triggerAttackRelease('C2', '1n', now);
+                        break;
+                    case 'click':
+                        this.audio.clickSynth?.triggerAttackRelease("C4", "32n", now, 0.5);
+                        break;
+                }
+            }
+
+            vibrate(pattern) {
+                if (this.config.vibration && 'vibrate' in navigator) {
+                    try {
+                        navigator.vibrate(pattern);
+                    } catch (e) {
+                        console.warn("Vibration failed", e);
+                    }
+                }
+            }
+
+            // SECTION: Panel Management
+            // =================================================================
+
+            toggleMenu(open) {
+                if (open) {
+                    this.applyConfigToUI();
+                    this.domElements.appliquerConfig.disabled = true;
+                }
+                this.domElements.panelArbitre.classList.toggle('active', open);
+                this.domElements.overlayMenu.classList.toggle('active', open);
+                this.domElements.menuArbitre.classList.toggle('active', open);
+            }
+            
+            toggleHelp(open) {
+                this.domElements.panelHelp.classList.toggle('active', open);
+                this.domElements.overlayHelp.classList.toggle('active', open);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new BilliardTimer();
+        });
+    </script>
+</body>
+</html>

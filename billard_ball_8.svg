@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Définitions -->
+  <defs>
+    <!-- Masque circulaire pour la boule -->
+    <mask id="circleMask">
+      <circle cx="100" cy="100" r="90" fill="white"/>
+    </mask>
+  </defs>
+  
+  <!-- Fond blanc crème complet -->
+  <circle cx="100" cy="100" r="90" fill="#f5f0e6"/>
+  
+  <!-- Bande noire centrale -->
+  <rect x="10" y="52" width="180" height="96" fill="#000000" mask="url(#circleMask)"/>
+  
+  <!-- Reflet brillant principal -->
+  <ellipse cx="65" cy="45" rx="25" ry="15" fill="#ffffff" opacity="0.6" transform="rotate(-25 65 45)"/>
+  
+  <!-- Petit reflet secondaire -->
+  <ellipse cx="75" cy="55" rx="10" ry="6" fill="#ffffff" opacity="0.4" transform="rotate(-25 75 55)"/>
+  
+  <!-- Cercle blanc crème central -->
+  <circle cx="100" cy="100" r="26" fill="#f5f0e6"/>
+  
+  <!-- Numéro 8 noir -->
+  <text x="100" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" dominant-baseline="central" fill="#000000">8</text>
+</svg>
