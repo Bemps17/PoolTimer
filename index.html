@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Timer de Billard Pro v14 (UI Polished)</title>
+    <title>Timer de Billard Pro v15 (Swipe to Close)</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎱</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,6 @@
             --font-body: 'Poppins', sans-serif;
             --font-timer: 'Chakra Petch', sans-serif;
             
-            /* Couleurs du Thème Sombre (Défaut) */
             --c-background: #0a0a0a;
             --c-bezel: #1a1a1a;
             --c-screen: #000000;
@@ -289,7 +288,7 @@
             position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%;
             background: var(--c-panel-bg); border-left: 1px solid var(--c-panel-header-border);
             padding: 0; box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
-            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease;
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 1001; color: var(--c-panel-text-primary);
             display: flex; flex-direction: column;
         }
@@ -428,7 +427,7 @@
             <h2>Configuration</h2>
             <button class="fermer-panel" id="fermerPanel" aria-label="Fermer le menu">&times;</button>
         </div>
-        <div class="panel-content">
+        <div class="panel-content" id="panelContent">
             <div class="section-panel">
                 <h3>Joueurs</h3>
                 <div class="parametre-groupe">
@@ -598,6 +597,7 @@
                 };
                 this.alertsFired = {};
                 this.toastTimeout = null;
+                this.panelTouch = { startX: 0, startY: 0, moveX: 0, moveY: 0, isDragging: false };
 
                 this.icons = {
                     play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>',
@@ -617,7 +617,7 @@
                 const ids = [
                     'container', 'timerDisplay', 'timerScreen', 'p1Status', 'p2Status',
                     'controlPanel', 'btnPlayPause', 'btnNextPlayer', 'btnExtension', 'btnNewGame',
-                    'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel',
+                    'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel', 'panelContent',
                     'btnShowHelp', 'overlayHelp', 'panelHelp', 'fermerHelp', 'p1Name', 'p1Color',
                     'p2Name', 'p2Color', 'tempsBase', 'tempsExtension', 'seuilAlerte',
                     'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 'autoReset',
@@ -651,6 +651,11 @@
                 document.addEventListener('fullscreenchange', () => this.resizeTimerDisplay());
 
                 window.addEventListener('resize', () => this.resizeTimerDisplay());
+                
+                // Swipe to close menu
+                this.domElements.panelArbitre.addEventListener('touchstart', (e) => this.handlePanelTouchStart(e), { passive: false });
+                this.domElements.panelArbitre.addEventListener('touchmove', (e) => this.handlePanelTouchMove(e), { passive: false });
+                this.domElements.panelArbitre.addEventListener('touchend', (e) => this.handlePanelTouchEnd(e));
             }
             
             async initializeAudio() {
@@ -1067,6 +1072,54 @@
                 } else {
                     document.exitFullscreen();
                 }
+            }
+
+            handlePanelTouchStart(e) {
+                this.panelTouch.startX = e.touches[0].clientX;
+                this.panelTouch.startY = e.touches[0].clientY;
+                this.panelTouch.isDragging = false;
+            }
+
+            handlePanelTouchMove(e) {
+                if (this.domElements.panelContent.scrollTop > 0 && !this.panelTouch.isDragging) return;
+
+                this.panelTouch.moveX = e.touches[0].clientX;
+                this.panelTouch.moveY = e.touches[0].clientY;
+                const deltaX = this.panelTouch.moveX - this.panelTouch.startX;
+                const deltaY = this.panelTouch.moveY - this.panelTouch.startY;
+
+                if (!this.panelTouch.isDragging) {
+                    if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
+                        this.panelTouch.isDragging = true;
+                        this.domElements.panelArbitre.style.transition = 'none';
+                    } else {
+                        return;
+                    }
+                }
+                
+                if (this.panelTouch.isDragging) {
+                    e.preventDefault();
+                    if (deltaX > 0) {
+                        this.domElements.panelArbitre.style.transform = `translateX(${deltaX}px)`;
+                    }
+                }
+            }
+
+            handlePanelTouchEnd(e) {
+                if (!this.panelTouch.isDragging) return;
+
+                const panel = this.domElements.panelArbitre;
+                panel.style.transition = 'right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                panel.style.transform = '';
+
+                const deltaX = this.panelTouch.moveX - this.panelTouch.startX;
+                const panelWidth = panel.offsetWidth;
+
+                if (deltaX > panelWidth * 0.3) {
+                    this.toggleMenu(false);
+                }
+                
+                this.panelTouch.isDragging = false;
             }
         }
         
