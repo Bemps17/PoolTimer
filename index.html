@@ -2,33 +2,80 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Timer de Billard Pro v3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Timer de Billard Pro v14 (UI Polished)</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎱</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <!-- Ajout de Tone.js pour l'audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         :root {
+            --font-body: 'Poppins', sans-serif;
+            --font-timer: 'Chakra Petch', sans-serif;
+            
+            /* Couleurs du Thème Sombre (Défaut) */
             --c-background: #0a0a0a;
             --c-bezel: #1a1a1a;
             --c-screen: #000000;
+            --c-button-bg: #282828;
+            --c-text-primary: #e0e0e0;
+            --c-text-secondary: #888;
+            --c-border: #000;
+            --c-primary: #3498db;
+            --c-play: #20c20e;
             --c-digit-default: #e0e0e0;
             --c-digit-warning: #ff8c00;
             --c-digit-critical: #f83333;
             --c-ext-available: #2ecc71;
             --c-ext-used: #c0392b;
-            --c-primary: #3498db;
-            --c-button-bg: #282828;
-            --c-play: #20c20e;
-            --font-body: 'Poppins', sans-serif;
-            --font-timer: 'Chakra Petch', sans-serif;
+            --c-panel-bg: #1f2128;
+            --c-panel-header-border: #333;
+            --c-panel-input-bg: #111;
+            --c-panel-input-border: #333;
+            --c-panel-text-primary: #e1e3e8;
+            --c-panel-text-secondary: #8b949e;
+        }
+        
+        body.theme-light {
+            --c-background: #f0f0f0;
+            --c-bezel: #dcdcdc;
+            --c-screen: #ffffff;
+            --c-button-bg: #e9e9e9;
+            --c-text-primary: #111;
+            --c-text-secondary: #555;
+            --c-border: #aaa;
+            --c-digit-default: #333333;
+            --c-panel-bg: #f5f5f5;
+            --c-panel-header-border: #ddd;
+            --c-panel-input-bg: #fff;
+            --c-panel-input-border: #ccc;
+            --c-panel-text-primary: #222;
+            --c-panel-text-secondary: #666;
+        }
+        
+        body.theme-cyberpunk {
+            --c-background: #0d0221;
+            --c-bezel: #240046;
+            --c-screen: #000;
+            --c-primary: #ff00e5;
+            --c-play: #00f5d4;
+            --c-digit-warning: #f7b801;
+            --c-digit-critical: #ff0054;
+            --c-ext-available: var(--c-play);
+            --c-ext-used: var(--c-digit-critical);
+            --c-border: #7b2cbf;
+            --c-panel-bg: #10002b;
+            --c-panel-header-border: #3c096c;
+            --c-panel-input-bg: #240046;
+            --c-panel-input-border: #3c096c;
+            --c-panel-text-primary: #f0f0f0;
+            --c-panel-text-secondary: #a992c1;
         }
 
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; overflow: hidden; background-color: var(--c-background); }
+        html, body { height: 100%; overflow: hidden; background-color: var(--c-background); transition: background-color 0.4s ease; }
 
         body {
             font-family: var(--font-body);
@@ -48,15 +95,16 @@
             height: 85vh; 
             max-height: 900px;
             position: relative;
-            border: 4px solid #000;
+            border: 4px solid var(--c-border);
             border-radius: 30px; 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem;
-            transition: box-shadow 0.5s ease;
+            transition: box-shadow 0.5s ease, background-color 0.4s ease, border-color 0.4s ease;
         }
+        body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px #7b2cbf80; }
         
         .scoreboard-body.is-flashing-warning { animation: flash-warning 1.5s infinite; }
         .scoreboard-body.is-flashing-critical { animation: flash-critical 0.5s infinite; }
@@ -75,12 +123,15 @@
             align-items: center;
             padding: 0 0.5rem;
         }
+        
+        .top-bar-players { display: flex; gap: 0.5rem; flex-grow: 1; }
+        .top-bar-controls { display: flex; align-items: center; gap: 0.5rem; }
 
         .player-status {
             font-family: var(--font-body);
             font-weight: 600;
             font-size: 1.2rem;
-            color: #eee;
+            color: var(--c-text-primary);
             background: rgba(0, 0, 0, 0.4);
             padding: 0.5rem 1rem;
             border-radius: 8px;
@@ -89,35 +140,34 @@
             opacity: 0.5;
             transition: all 0.3s ease;
         }
-        .player-status.active {
-            opacity: 1;
-            transform: scale(1.05);
-        }
+        body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333; }
+        .player-status.active { opacity: 1; transform: scale(1.05); }
         .ext-status.ext-available { color: var(--c-ext-available); }
         .ext-status.ext-used { color: var(--c-ext-used); }
 
-        .menu-arbitre {
+        .icon-button {
             position: relative;
             width: 48px;
             height: 48px;
             cursor: pointer;
             z-index: 1000;
-            color: #888;
+            color: var(--c-text-secondary);
             transition: color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .menu-arbitre:hover svg { color: #fff; transform: rotate(45deg); }
-        .menu-arbitre svg { 
+        .icon-button:hover svg { color: var(--c-text-primary); }
+        .icon-button svg { 
             width: 32px; 
             height: 32px;
             transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
         }
-        .menu-arbitre.active svg {
-            transform: rotate(135deg);
-            color: var(--c-primary);
-        }
+        #menuArbitre:hover svg { transform: rotate(45deg); }
+        #menuArbitre.active svg { transform: rotate(135deg); color: var(--c-primary); }
+        #btnFullScreen .compress-icon { display: none; }
+        :fullscreen #btnFullScreen .expand-icon { display: none; }
+        :fullscreen #btnFullScreen .compress-icon { display: block; }
 
         .timer-screen {
             width: 100%;
@@ -134,6 +184,7 @@
             position: relative;
             cursor: pointer;
             overflow: hidden;
+            transition: background-color 0.4s ease;
         }
         .timer-screen::after {
             content: '';
@@ -144,25 +195,23 @@
             pointer-events: none;
         }
         
-        .timer-content {
-            display: grid;
-            place-items: center;
-            position: relative;
-        }
+        .timer-content { display: grid; place-items: center; position: relative; }
 
         .timer-officiel {
             font-family: var(--font-timer);
             font-weight: 700;
-            font-size: clamp(10rem, 35vmin, 22rem);
+            font-size: 10rem;
             line-height: 1;
             color: var(--c-digit-default);
-            /* Texte plus net, moins de flou */
             text-shadow: 0 0 2px var(--c-digit-default), 0 0 8px rgba(224, 224, 224, 0.5);
             transition: color 0.4s ease, text-shadow 0.4s ease;
         }
+        body.theme-cyberpunk .timer-officiel { text-shadow: 0 0 5px var(--c-digit-default), 0 0 15px var(--c-digit-default); }
         
         .timer-officiel.state-warning { color: var(--c-digit-warning); text-shadow: 0 0 2px var(--c-digit-warning), 0 0 10px var(--c-digit-warning); }
         .timer-officiel.state-critical { color: var(--c-digit-critical); text-shadow: 0 0 3px var(--c-digit-critical), 0 0 15px var(--c-digit-critical); }
+        body.theme-cyberpunk .timer-officiel.state-warning { text-shadow: 0 0 5px var(--c-digit-warning), 0 0 15px var(--c-digit-warning); }
+        body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(--c-digit-critical), 0 0 15px var(--c-digit-critical); }
 
         .timer-extension-bar {
             width: 80%;
@@ -204,41 +253,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
             flex-shrink: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.4s ease;
         }
         
-        .scoreboard-body.tactile-mode .control-panel {
-            opacity: 0;
-            visibility: hidden;
-        }
+        .scoreboard-body.tactile-mode .control-panel { opacity: 0; visibility: hidden; }
 
         .bouton-sport {
             width: 70px; height: 70px; border-radius: 50%; border: 2px solid #000;
             background: var(--c-button-bg); box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3);
             cursor: pointer; display: flex; justify-content: center; align-items: center;
-            transition: all 0.1s ease-out; color: #aaa;
+            transition: all 0.1s ease-out; color: var(--c-text-secondary);
             font-family: var(--font-body); font-weight: 600; font-size: 1.2rem;
         }
         .bouton-sport:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.5); }
         .bouton-sport svg { width: 30px; height: 30px; }
         
-        #btnPlayPause { 
-            color: var(--c-play);
-            opacity: 0.6;
-        }
-        #btnPlayPause.playing { 
-            opacity: 1;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 10px var(--c-play);
-        }
+        #btnPlayPause { color: var(--c-play); opacity: 0.6; }
+        #btnPlayPause.playing { opacity: 1; box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 10px var(--c-play); }
+        body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play); }
         
         .bouton-sport:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(80%); }
-        
-        .bouton-carré {
-            border-radius: 12px;
-            color: var(--c-ext-used);
-        }
+        .bouton-carré { border-radius: 12px; color: var(--c-ext-used); }
 
         /* --- Menu & Help Panel --- */
         .overlay {
@@ -250,10 +287,10 @@
 
         .panel {
             position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%;
-            background: #1f2128; border-left: 1px solid #111;
+            background: var(--c-panel-bg); border-left: 1px solid var(--c-panel-header-border);
             padding: 0; box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
-            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            z-index: 1001; color: #e1e3e8;
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.4s ease;
+            z-index: 1001; color: var(--c-panel-text-primary);
             display: flex; flex-direction: column;
         }
         .panel.active { right: 0; }
@@ -262,13 +299,15 @@
             padding: 1.5rem;
             overflow-y: auto;
             flex-grow: 1;
+            min-height: 0;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
         }
 
         .panel-help {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
             width: 90vw; max-width: 600px; max-height: 80vh;
-            background: #1f2128; border: 1px solid #333; border-radius: 15px;
+            background: var(--c-panel-bg); border: 1px solid var(--c-panel-header-border); border-radius: 15px;
             opacity: 0; visibility: hidden;
             transition: all 0.3s ease;
             z-index: 1003;
@@ -276,72 +315,93 @@
         }
         .panel-help.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        .header-panel { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--c-panel-header-border); flex-shrink: 0; }
         .header-panel h2 { font-size: 1.5rem; font-weight: 600; }
-        .fermer-panel { background: none; border: none; font-size: 2rem; cursor: pointer; color: #8b949e; transition: color 0.2s, transform 0.2s; }
-        .fermer-panel:hover { color: white; transform: rotate(90deg); }
+        .fermer-panel { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--c-panel-text-secondary); transition: color 0.2s, transform 0.2s; }
+        .fermer-panel:hover { color: var(--c-panel-text-primary); transform: rotate(90deg); }
         .section-panel { margin-bottom: 2.5rem; }
         .section-panel h3 { margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; border-left: 3px solid var(--c-primary); padding-left: 1rem; }
         .parametre-groupe { margin-bottom: 1rem; }
-        .parametre-groupe label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #8b949e; font-size: 0.9rem; }
+        .parametre-groupe label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--c-panel-text-secondary); font-size: 0.9rem; }
         .parametre-groupe input, .parametre-groupe select {
-            width: 100%; padding: 0.75rem; border: 1px solid #333; border-radius: 8px; font-size: 1rem;
-            background-color: #111; color: #e1e3e8; transition: border-color 0.3s ease; font-family: var(--font-body);
+            width: 100%; padding: 0.75rem; border: 1px solid var(--c-panel-input-border); border-radius: 8px; font-size: 1rem;
+            background-color: var(--c-panel-input-bg); color: var(--c-panel-text-primary); transition: border-color 0.3s ease; font-family: var(--font-body);
         }
         .parametre-groupe input[type="color"] { padding: 0.2rem; height: 40px; }
         .player-config { display: flex; gap: 1rem; align-items: center; }
         .player-config input[type="text"] { flex-grow: 1; }
         .player-config input[type="color"] { flex-shrink: 0; width: 50px; }
 
-        .parametre-groupe input:focus, .parametre-groupe select:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3); }
+        .parametre-groupe input:focus, .parametre-groupe select:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 30%, transparent); }
         .bouton-menu {
             background: var(--c-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 10px; cursor: pointer;
             font-size: 1rem; font-weight: 600; width: 100%; margin-top: 0.5rem; transition: all 0.2s ease;
         }
-        .bouton-menu.danger { background-color: #c0392b; }
-        .bouton-menu.secondary { background-color: #444; }
         .bouton-menu:hover:not(:disabled) { filter: brightness(1.1); }
         .bouton-menu:disabled { background-color: #555; cursor: not-allowed; }
         
-        .panel-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #333;
-            background: #181a1f;
-            flex-shrink: 0;
-        }
-        
-        .help-content { padding: 0 1.5rem 1.5rem 1.5rem; line-height: 1.6; color: #ccc; overflow-y: auto; flex-grow: 1; }
+        .help-content { padding: 0 1.5rem 1.5rem 1.5rem; line-height: 1.6; color: var(--c-panel-text-primary); overflow-y: auto; flex-grow: 1; }
         .help-content h3 { color: var(--c-primary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .help-content ul { list-style-position: inside; padding-left: 0.5rem; }
         .help-content li { margin-bottom: 0.5rem; }
-        .help-content code { background-color: #111; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .help-content code { background-color: color-mix(in srgb, var(--c-panel-bg) 70%, black); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
         
-        /* Agrandissement du timer sur mobile */
+        .save-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translate(-50%, -200%);
+            background-color: #2ecc71;
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);
+        }
+        .save-toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        .save-toast svg {
+            width: 24px;
+            height: 24px;
+        }
+
         @media (max-width: 500px), (max-height: 750px) {
-            .timer-officiel {
-                font-size: clamp(12rem, 45vmin, 25rem);
-            }
             .scoreboard-body { padding: 1rem; border-radius: 20px; }
             .timer-screen { margin: 0.5rem 0; }
-            .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 0.5rem; }
+            .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 1rem; }
             .bouton-sport { width: 60px; height: 60px; }
             .bouton-sport svg { width: 26px; height: 26px; }
             .bouton-carré { font-size: 1rem; }
         }
     </style>
 </head>
-<body>
+<body id="appBody">
     <div class="scoreboard-body" id="container">
         <div class="top-bar">
-            <div class="player-status" id="p1Status">
-                <span class="player-name">P1</span> <span class="ext-status">EXT</span>
+            <div class="top-bar-players">
+                <div class="player-status" id="p1Status">
+                    <span class="player-name">P1</span> <span class="ext-status">EXT</span>
+                </div>
+                <div class="player-status" id="p2Status">
+                    <span class="player-name">P2</span> <span class="ext-status">EXT</span>
+                </div>
             </div>
-            <div class="player-status" id="p2Status">
-                <span class="player-name">P2</span> <span class="ext-status">EXT</span>
-            </div>
-            <div class="menu-arbitre" id="menuArbitre" aria-label="Ouvrir le menu">
-                <!-- Nouvelle icône SVG (roue crantée) -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2-1.55a.39.39 0 0 0 .09-.58l-1.73-3a.38.38 0 0 0-.5-.24l-2.38.96a6.38 6.38 0 0 0-1.64-.94l-.38-2.61a.38.38 0 0 0-.38-.34H8.46a.38.38 0 0 0-.38.34l-.38 2.61a6.38 6.38 0 0 0-1.64.94l-2.38-.96a.38.38 0 0 0-.5.24l-1.73 3a.39.39 0 0 0 .09.58l2 1.55c-.05.3-.07.64-.07.94s.02.64.07.94l-2 1.55a.39.39 0 0 0-.09.58l1.73 3a.38.38 0 0 0 .5.24l2.38-.96a6.38 6.38 0 0 0 1.64.94l.38 2.61a.38.38 0 0 0 .38.34h3.46a.38.38 0 0 0 .38-.34l.38-2.61a6.38 6.38 0 0 0 1.64-.94l2.38.96a.38.38 0 0 0 .5-.24l1.73-3a.39.39 0 0 0-.09-.58l-2-1.55zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+            <div class="top-bar-controls">
+                <div class="icon-button" id="btnFullScreen" aria-label="Plein écran">
+                    <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    <svg class="compress-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                </div>
+                <div class="icon-button" id="menuArbitre" aria-label="Ouvrir le menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2-1.55a.39.39 0 0 0 .09-.58l-1.73-3a.38.38 0 0 0-.5-.24l-2.38.96a6.38 6.38 0 0 0-1.64-.94l-.38-2.61a.38.38 0 0 0-.38-.34H8.46a.38.38 0 0 0-.38.34l-.38 2.61a6.38 6.38 0 0 0-1.64.94l-2.38-.96a.38.38 0 0 0-.5.24l-1.73 3a.39.39 0 0 0 .09.58l2 1.55c-.05.3-.07.64-.07.94s.02.64.07.94l-2 1.55a.39.39 0 0 0-.09.58l1.73 3a.38.38 0 0 0 .5.24l2.38-.96a6.38 6.38 0 0 0 1.64.94l.38 2.61a.38.38 0 0 0 .38.34h3.46a.38.38 0 0 0 .38-.34l.38-2.61a6.38 6.38 0 0 0 1.64-.94l2.38.96a.38.38 0 0 0 .5-.24l1.73-3a.39.39 0 0 0-.09-.58l-2-1.55zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+                </div>
             </div>
         </div>
 
@@ -410,6 +470,14 @@
             <div class="section-panel">
                 <h3>Interface & Audio</h3>
                 <div class="parametre-groupe">
+                    <label for="themeVisuel">Thème visuel</label>
+                     <select id="themeVisuel">
+                        <option value="sombre">Sombre</option>
+                        <option value="light">Clair</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                    </select>
+                </div>
+                <div class="parametre-groupe">
                     <label for="modeInterface">Mode d'interface</label>
                     <select id="modeInterface">
                         <option value="boutons">Boutons Visibles</option>
@@ -424,8 +492,22 @@
                     </select>
                 </div>
                  <div class="parametre-groupe">
-                    <label for="volumeSonore">Volume des alertes</label>
+                    <label for="volumeSonore">Volume général</label>
                     <input type="range" id="volumeSonore" min="0" max="1" step="0.1">
+                </div>
+                <div class="parametre-groupe">
+                    <label for="sonAlertes">Sons d'alerte (timer)</label>
+                     <select id="sonAlertes">
+                        <option value="true">Activés</option>
+                        <option value="false">Désactivés</option>
+                    </select>
+                </div>
+                <div class="parametre-groupe">
+                    <label for="sonClics">Sons des clics (interface)</label>
+                     <select id="sonClics">
+                        <option value="true">Activés</option>
+                        <option value="false">Désactivés</option>
+                    </select>
                 </div>
                 <div class="parametre-groupe">
                     <label for="vibrationMobile">Vibration mobile</label>
@@ -446,10 +528,10 @@
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="panel-footer">
-            <button class="bouton-menu secondary" id="btnShowHelp">Mode d'emploi</button>
-            <button class="bouton-menu" id="appliquerConfig" disabled>Appliquer</button>
+            
+            <div class="section-panel">
+                 <button class="bouton-menu" id="btnShowHelp">Mode d'emploi</button>
+            </div>
         </div>
     </div>
 
@@ -462,28 +544,32 @@
         </div>
         <div class="help-content">
             <p>Bienvenue sur le Timer de Billard Pro ! Cette application est conçue pour arbitrer vos parties avec précision, simplicité et style.</p>
-            <h3>1. Interface Principale</h3>
+            
+            <h3>Contrôles Principaux</h3>
             <ul>
-                <li><strong>Chronomètre Central :</strong> Affiche le temps restant. Il change de couleur pour indiquer l'urgence (Blanc → Orange → Rouge).</li>
-                <li><strong>Indicateurs Joueurs (P1 / P2) :</strong> Montrent le joueur actif et le statut de son extension (<code>EXT</code>). Vert si disponible, Rouge si utilisée.</li>
+                <li><strong>Clic Simple (Écran) :</strong> Lance ou met en pause le chronomètre.</li>
+                <li><strong>Double Clic (Écran) :</strong> Passe au joueur suivant.</li>
+                <li><strong>Icône Plein Écran ( haut-droite) :</strong> Affiche le timer en plein écran pour une immersion totale.</li>
             </ul>
-            <h3>2. Contrôles et Actions</h3>
-            <h4>Écran Tactile (Toujours Actif)</h4>
+
+            <h3>Accéder aux Paramètres (⚙️)</h3>
+            <p>Cliquez sur l'icône roue crantée en haut à droite pour personnaliser :</p>
             <ul>
-                <li><strong>Simple Clic :</strong> Lance (▶) ou met en pause (⏸) le chronomètre.</li>
-                <li><strong>Double Clic :</strong> Passe au joueur suivant et réinitialise le temps.</li>
+                <li><strong>Les Noms et Couleurs</strong> des joueurs.</li>
+                <li><strong>Les Temps</strong> de base et d'extension.</li>
+                <li><strong>Les Seuils d'Alerte</strong> visuelle (orange et rouge).</li>
+                <li><strong>Le Thème Visuel</strong> (Sombre, Clair, Cyberpunk).</li>
+                <li><strong>Les Sons</strong> (volume, activation des alertes/clics).</li>
+                <li><strong>Le Mode d'Interface</strong> (boutons ou tout tactile).</li>
+                <li>Et plus encore... Vos choix sont sauvegardés automatiquement.</li>
             </ul>
-            <h4>Panneau de Contrôle (en bas)</h4>
-            <ul>
-                <li><strong>Icône 🔄 :</strong> Passe au joueur suivant.</li>
-                <li><strong>Icônes ▶ / ⏸ :</strong> Lance ou met en pause le chronomètre.</li>
-                <li><strong>Bouton NEW :</strong> Réinitialise complètement la partie (extensions incluses).</li>
-            </ul>
-             <h4>Barre d'Extension</h4>
-            <p>La barre <strong>EXTENSION</strong> sous le chronomètre ajoute du temps supplémentaire (1 fois par joueur par partie).</p>
-            <h3>3. Accéder aux Paramètres</h3>
-            <p>Cliquez sur l'icône roue crantée (⚙️) en haut à droite pour personnaliser les temps, les alertes, le son, les vibrations et le mode d'interface. Vos choix sont sauvegardés automatiquement.</p>
+            <p><strong>Note :</strong> Pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre téléphone n'est pas en mode silencieux et que les vibrations sont autorisées pour le navigateur dans les réglages de votre appareil.</p>
         </div>
+    </div>
+
+    <div id="saveToast" class="save-toast">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+        <span>Paramètres sauvegardés !</span>
     </div>
 
     <script>
@@ -500,18 +586,18 @@
                 };
                 this.config = this.loadConfig();
                 this.timerInterval = null;
-                this.finalCountdownInterval = null;
                 this.expectedTime = 0;
                 this.audio = {
                     isInitialized: false,
                     context: null,
-                    synth: null,
+                    bellSynth: null,
                     gong: null,
                     clickSynth: null,
                     countdownSynth: null,
                     volumeNode: null
                 };
                 this.alertsFired = {};
+                this.toastTimeout = null;
 
                 this.icons = {
                     play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>',
@@ -531,42 +617,40 @@
                 const ids = [
                     'container', 'timerDisplay', 'timerScreen', 'p1Status', 'p2Status',
                     'controlPanel', 'btnPlayPause', 'btnNextPlayer', 'btnExtension', 'btnNewGame',
-                    'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel', 'appliquerConfig',
+                    'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel',
                     'btnShowHelp', 'overlayHelp', 'panelHelp', 'fermerHelp', 'p1Name', 'p1Color',
                     'p2Name', 'p2Color', 'tempsBase', 'tempsExtension', 'seuilAlerte',
-                    'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 'autoReset'
+                    'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 'autoReset',
+                    'sonAlertes', 'sonClics', 'saveToast', 'btnFullScreen', 'themeVisuel', 'appBody'
                 ];
                 ids.forEach(id => this.domElements[id] = document.getElementById(id));
+                this.domElements.configInputs = this.domElements.panelArbitre.querySelectorAll('input, select');
             }
 
             initEventListeners() {
-                // Clics avec son
                 this.domElements.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
                 this.domElements.btnNextPlayer.addEventListener('click', () => { this.playSound('click'); this.changePlayer(); });
                 this.domElements.btnExtension.addEventListener('click', () => { this.playSound('click'); this.useExtension(); });
                 this.domElements.btnNewGame.addEventListener('click', () => { this.playSound('click'); this.newGame(); });
                 
-                // Clic sans son (géré dans la méthode)
                 this.domElements.timerScreen.addEventListener('click', (e) => this.handleTimerScreenClick(e));
                 
-                // Menu
                 this.domElements.menuArbitre.addEventListener('click', () => { this.playSound('click'); this.toggleMenu(true); });
                 this.domElements.overlayMenu.addEventListener('click', () => this.toggleMenu(false));
                 this.domElements.fermerPanel.addEventListener('click', () => this.toggleMenu(false));
-                this.domElements.appliquerConfig.addEventListener('click', () => { this.playSound('click'); this.applyAndSaveConfig(); });
                 
-                // Help
                 this.domElements.btnShowHelp.addEventListener('click', () => { this.playSound('click'); this.toggleHelp(true); });
                 this.domElements.overlayHelp.addEventListener('click', () => this.toggleHelp(false));
                 this.domElements.fermerHelp.addEventListener('click', () => this.toggleHelp(false));
 
-                // Config change detection
-                Object.values(this.domElements).forEach(element => {
-                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
-                        element.addEventListener('change', () => this.domElements.appliquerConfig.disabled = false);
-                        element.addEventListener('input', () => this.domElements.appliquerConfig.disabled = false);
-                    }
+                this.domElements.configInputs.forEach(element => {
+                    element.addEventListener('change', () => this.handleConfigChange());
                 });
+
+                this.domElements.btnFullScreen.addEventListener('click', () => this.toggleFullScreen());
+                document.addEventListener('fullscreenchange', () => this.resizeTimerDisplay());
+
+                window.addEventListener('resize', () => this.resizeTimerDisplay());
             }
             
             async initializeAudio() {
@@ -577,21 +661,26 @@
                     
                     this.audio.volumeNode = new Tone.Volume(Tone.dbToGain(this.config.volume)).toDestination();
 
-                    // Son d'alerte simple
-                    this.audio.synth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 } }).connect(this.audio.volumeNode);
+                    this.audio.bellSynth = new Tone.MetalSynth({
+                        frequency: 300,
+                        harmonicity: 5.1,
+                        modulationIndex: 16,
+                        envelope: { attack: 0.001, decay: 1.4, release: 0.2 },
+                        volume: -10
+                    }).connect(this.audio.volumeNode);
                     
-                    // Son de fin de temps
-                    this.audio.gong = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).connect(this.audio.volumeNode);
+                    this.audio.gong = new Tone.FMSynth({
+                        harmonicity: 3.1,
+                        modulationIndex: 20,
+                        envelope: { attack: 0.01, decay: 0.2, release: 0.5 },
+                        modulation: { type: "square" },
+                        modulationEnvelope: { attack: 0.01, decay: 0.5, release: 0.5 }
+                    }).connect(this.audio.volumeNode);
                     
-                    // Son de clic
                     this.audio.clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).connect(this.audio.volumeNode);
-
-                    // Son du compte à rebours final
                     this.audio.countdownSynth = new Tone.Synth({ oscillator: { type: 'sine' }, volume: -5, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).connect(this.audio.volumeNode);
 
                     this.audio.isInitialized = true;
-                    console.log("Audio context started successfully.");
-
                 } catch (e) {
                     console.error("Could not start audio context.", e);
                 }
@@ -603,9 +692,12 @@
             getDefaultConfig() {
                 return {
                     tempsBase: 45, tempsExtension: 15, seuilAlerte: 15, seuilCritique: 5,
-                    volume: -10, // in dB
+                    volume: -10,
+                    sonAlertes: true,
+                    sonClics: true,
                     vibration: true, affichageMs: true, modeInterface: 'boutons', autoReset: false,
-                    p1Name: 'P1', p1Color: '#3498db', p2Name: 'P2', p2Color: '#e74c3c'
+                    p1Name: 'P1', p1Color: '#3498db', p2Name: 'P2', p2Color: '#e74c3c',
+                    theme: 'sombre'
                 };
             }
 
@@ -615,7 +707,6 @@
                     const defaultConfig = this.getDefaultConfig();
                     return savedConfig ? { ...defaultConfig, ...JSON.parse(savedConfig) } : defaultConfig;
                 } catch (e) {
-                    console.error("Failed to load config from localStorage", e);
                     return this.getDefaultConfig();
                 }
             }
@@ -629,30 +720,35 @@
             }
             
             applyConfigToUI() {
-                for (const key in this.config) {
-                    const element = this.domElements[key];
-                    if (element) {
-                        if (key.includes('Color')) {
-                            element.value = this.config[key];
-                        } else if (typeof this.config[key] === 'boolean') {
-                            element.value = String(this.config[key]);
-                        } else if (key === 'volumeSonore') {
-                            element.value = Tone.dbToGain(this.config.volume);
-                        }
-                        else {
-                            element.value = this.config[key];
-                        }
-                    }
-                }
+                this.domElements.themeVisuel.value = this.config.theme;
+                this.domElements.tempsBase.value = this.config.tempsBase;
+                this.domElements.tempsExtension.value = this.config.tempsExtension;
+                this.domElements.seuilAlerte.value = this.config.seuilAlerte;
+                this.domElements.seuilCritique.value = this.config.seuilCritique;
+                this.domElements.volumeSonore.value = Tone.dbToGain(this.config.volume);
+                this.domElements.sonAlertes.value = String(this.config.sonAlertes);
+                this.domElements.sonClics.value = String(this.config.sonClics);
+                this.domElements.vibrationMobile.value = String(this.config.vibration);
+                this.domElements.affichageMs.value = String(this.config.affichageMs);
+                this.domElements.modeInterface.value = this.config.modeInterface;
+                this.domElements.autoReset.value = String(this.config.autoReset);
+                this.domElements.p1Name.value = this.config.p1Name;
+                this.domElements.p1Color.value = this.config.p1Color;
+                this.domElements.p2Name.value = this.config.p2Name;
+                this.domElements.p2Color.value = this.config.p2Color;
+                
+                this.applyTheme();
                 this.updateUI();
             }
 
-            applyAndSaveConfig() {
+            handleConfigChange() {
                 this.config.tempsBase = parseInt(this.domElements.tempsBase.value) || 45;
                 this.config.tempsExtension = parseInt(this.domElements.tempsExtension.value) || 15;
                 this.config.seuilAlerte = parseInt(this.domElements.seuilAlerte.value) || 15;
                 this.config.seuilCritique = parseInt(this.domElements.seuilCritique.value) || 5;
                 this.config.volume = Tone.gainToDb(parseFloat(this.domElements.volumeSonore.value));
+                this.config.sonAlertes = this.domElements.sonAlertes.value === 'true';
+                this.config.sonClics = this.domElements.sonClics.value === 'true';
                 this.config.vibration = this.domElements.vibrationMobile.value === 'true';
                 this.config.affichageMs = this.domElements.affichageMs.value === 'true';
                 this.config.modeInterface = this.domElements.modeInterface.value;
@@ -661,12 +757,12 @@
                 this.config.p1Color = this.domElements.p1Color.value;
                 this.config.p2Name = this.domElements.p2Name.value.substring(0, 5) || 'P2';
                 this.config.p2Color = this.domElements.p2Color.value;
+                this.config.theme = this.domElements.themeVisuel.value;
 
                 this.saveConfig();
                 this.applyConfigToUI();
                 this.setupNewShot();
-                this.toggleMenu(false);
-                this.domElements.appliquerConfig.disabled = true;
+                this.showSaveToast();
             }
 
             // SECTION: Game Logic
@@ -682,7 +778,7 @@
                 this.pause();
                 this.state.remainingTime = this.config.tempsBase * 1000;
                 this.state.isExtensionUsedForShot = false;
-                this.alertsFired = { warning: false, critical: false, final_countdown: false };
+                this.alertsFired = { warning: false, last_tick_second: 999 };
                 this.updateUI();
             }
 
@@ -712,8 +808,6 @@
                 if (!this.state.isRunning) return;
                 this.state.isRunning = false;
                 clearInterval(this.timerInterval);
-                clearInterval(this.finalCountdownInterval);
-                this.finalCountdownInterval = null;
                 this.updateUI();
             }
 
@@ -734,7 +828,7 @@
                 this.state.remainingTime = 0;
                 this.updateDisplay();
                 this.playSound('gong');
-                this.vibrate([200, 100, 200]);
+                this.vibrate([300, 50, 300]);
                 if (this.config.autoReset) {
                     setTimeout(() => this.changePlayer(), 1500);
                 }
@@ -742,9 +836,19 @@
 
             useExtension() {
                 if (!this.state.isRunning || this.state.isExtensionUsedForShot || this.state.extensionsUsedInGame[this.state.currentPlayer]) return;
+                
                 this.expectedTime += this.config.tempsExtension * 1000;
+                const futureRemainingTime = this.expectedTime - Date.now();
+
                 this.state.isExtensionUsedForShot = true;
                 this.state.extensionsUsedInGame[this.state.currentPlayer] = true;
+
+                if (futureRemainingTime > this.config.seuilAlerte * 1000) {
+                    this.alertsFired.warning = false;
+                }
+                if (futureRemainingTime > 5000) {
+                    this.alertsFired.last_tick_second = 999;
+                }
                 this.updateUI();
             }
 
@@ -753,9 +857,9 @@
                 await this.initializeAudio();
                 const now = Date.now();
                 if (now - this.state.lastClickTime < 300) { // Double click
+                    this.playSound('click');
                     this.changePlayer();
                 } else { // Single click
-                    // Pas de son de clic ici, c'est intentionnel
                     if (this.state.isRunning) this.pause();
                     else this.start();
                 }
@@ -771,6 +875,7 @@
                 this.updateExtensionButton();
                 this.updatePlayerIndicators();
                 this.updateInterfaceMode();
+                this.resizeTimerDisplay();
             }
 
             updateDisplay() {
@@ -839,32 +944,61 @@
             updateInterfaceMode() {
                 this.domElements.container.classList.toggle('tactile-mode', this.config.modeInterface === 'tactile');
             }
+            
+            resizeTimerDisplay() {
+                const screen = this.domElements.timerScreen;
+                const timer = this.domElements.timerDisplay;
+                const screenWidth = screen.clientWidth - 32;
+                const screenHeight = screen.clientHeight - 32;
+
+                let fontSize = screenWidth * 0.55;
+                if (fontSize > screenHeight) {
+                    fontSize = screenHeight * 0.9;
+                }
+
+                timer.style.fontSize = `${fontSize}px`;
+            }
+
+            applyTheme() {
+                const body = this.domElements.appBody;
+                body.classList.remove('theme-light', 'theme-cyberpunk');
+                if (this.config.theme === 'light') {
+                    body.classList.add('theme-light');
+                } else if (this.config.theme === 'cyberpunk') {
+                    body.classList.add('theme-cyberpunk');
+                }
+            }
 
             // SECTION: Alerts & Audio
             // =================================================================
             
             handleAlerts() {
-                const timeInSeconds = this.state.remainingTime / 1000;
+                const remainingSec = this.state.remainingTime / 1000;
+                const currentWholeSecond = Math.floor(remainingSec);
 
-                // Compte à rebours final "bombe"
-                if (timeInSeconds <= 5 && !this.alertsFired.final_countdown) {
-                    this.alertsFired.final_countdown = true;
-                    if (this.finalCountdownInterval) clearInterval(this.finalCountdownInterval);
-                    this.finalCountdownInterval = setInterval(() => {
-                        this.playSound('countdown_tick');
-                        this.vibrate(50);
-                    }, 1000);
-                }
-
-                // Alerte simple
-                if (timeInSeconds <= this.config.seuilAlerte && !this.alertsFired.warning) {
+                if (remainingSec <= this.config.seuilAlerte && !this.alertsFired.warning) {
                     this.alertsFired.warning = true;
                     this.playSound('warning');
+                }
+
+                if (remainingSec <= 5 && this.state.isRunning) {
+                    if (currentWholeSecond < this.alertsFired.last_tick_second) {
+                        this.playSound('countdown_tick');
+                        this.vibrate(50);
+                        this.alertsFired.last_tick_second = currentWholeSecond;
+                    }
                 }
             }
 
             playSound(type) {
                 if (!this.audio.isInitialized) return;
+
+                const isAlertType = ['warning', 'countdown_tick', 'gong'].includes(type);
+                const isClickType = type === 'click';
+
+                if ((isAlertType && !this.config.sonAlertes) || (isClickType && !this.config.sonClics)) {
+                    return;
+                }
                 
                 const now = this.audio.context.currentTime;
                 if (this.audio.volumeNode) {
@@ -873,13 +1007,13 @@
 
                 switch(type) {
                     case 'warning':
-                        this.audio.synth?.triggerAttackRelease('C5', '8n', now);
+                        this.audio.bellSynth?.triggerAttack(now);
                         break;
                     case 'countdown_tick':
                         this.audio.countdownSynth?.triggerAttackRelease('G5', '16n', now);
                         break;
                     case 'gong':
-                        this.audio.gong?.triggerAttackRelease('C2', '1n', now);
+                        this.audio.gong?.triggerAttackRelease('A3', '0.5s', now);
                         break;
                     case 'click':
                         this.audio.clickSynth?.triggerAttackRelease("C4", "32n", now, 0.5);
@@ -888,22 +1022,21 @@
             }
 
             vibrate(pattern) {
-                if (this.config.vibration && 'vibrate' in navigator) {
+                if (this.config.vibration && 'vibrate' in navigator && navigator.vibrate) {
                     try {
                         navigator.vibrate(pattern);
                     } catch (e) {
-                        console.warn("Vibration failed", e);
+                        console.warn("Vibration failed. It might be disabled in browser/OS settings.", e);
                     }
                 }
             }
 
-            // SECTION: Panel Management
+            // SECTION: Panel & Fullscreen Management
             // =================================================================
 
             toggleMenu(open) {
                 if (open) {
                     this.applyConfigToUI();
-                    this.domElements.appliquerConfig.disabled = true;
                 }
                 this.domElements.panelArbitre.classList.toggle('active', open);
                 this.domElements.overlayMenu.classList.toggle('active', open);
@@ -914,6 +1047,27 @@
                 this.domElements.panelHelp.classList.toggle('active', open);
                 this.domElements.overlayHelp.classList.toggle('active', open);
             }
+
+            showSaveToast() {
+                if (this.toastTimeout) clearTimeout(this.toastTimeout);
+                
+                const toast = this.domElements.saveToast;
+                toast.classList.add('show');
+                
+                this.toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+
+            toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        alert(`Erreur lors du passage en plein écran: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -922,3 +1076,4 @@
     </script>
 </body>
 </html>
+
