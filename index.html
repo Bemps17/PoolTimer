@@ -18,154 +18,11 @@
 </head>
 <body id="appBody">
     <div class="scoreboard-body" id="container">
-        <div class="top-bar">
-            <div class="top-bar-players">
-                <div class="player-status" id="p1Status" data-player="1">
-                    <span class="player-name">P1</span> <span class="ext-status">EXT</span>
-                </div>
-                <div class="player-status" id="p2Status" data-player="2">
-                    <span class="player-name">P2</span> <span class="ext-status">EXT</span>
-                </div>
-            </div>
-            <div class="top-bar-controls">
-                <div class="icon-button" id="btnFullScreen" aria-label="Plein écran">
-                    <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                    <svg class="compress-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-                </div>
-                <div class="icon-button" id="menuArbitre" aria-label="Ouvrir le menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2-1.55a.39.39 0 0 0 .09-.58l-1.73-3a.38.38 0 0 0-.5-.24l-2.38.96a6.38 6.38 0 0 0-1.64-.94l-.38-2.61a.38.38 0 0 0-.38-.34H8.46a.38.38 0 0 0-.38.34l-.38 2.61a6.38 6.38 0 0 0-1.64.94l-2.38-.96a.38.38 0 0 0-.5.24l-1.73 3a.39.39 0 0 0 .09.58l2 1.55c-.05.3-.07.64-.07.94s.02.64.07.94l-2 1.55a.39.39 0 0 0-.09.58l1.73 3a.38.38 0 0 0 .5.24l2.38-.96a6.38 6.38 0 0 0 1.64.94l.38 2.61a.38.38 0 0 0 .38.34h3.46a.38.38 0 0 0 .38-.34l.38-2.61a6.38 6.38 0 0 0 1.64-.94l2.38.96a.38.38 0 0 0 .5-.24l1.73-3a.39.39 0 0 0-.09-.58l-2-1.55zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
-                </div>
-            </div>
         </div>
-
-        <div class="timer-screen" id="timerScreen">
-            <div class="timer-content">
-                <div class="timer-officiel state-default" id="timerDisplay">45</div>
-            </div>
-            <div class="timer-extension-bar" id="btnExtension">EXTENSION</div>
-        </div>
-
-        <div class="control-panel" id="controlPanel">
-            <button class="bouton-sport" id="btnResetShot" aria-label="Coup Suivant">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>
-            </button>
-            <button class="bouton-sport" id="btnPlayPause" aria-label="Démarrer"></button>
-            <button class="bouton-sport bouton-carré" id="btnNewGame" aria-label="Nouvelle Partie">NEW</button>
-        </div>
-    </div>
 
     <div class="overlay" id="overlayMenu"></div>
     <div class="panel" id="panelArbitre">
-        <div class="header-panel">
-            <h2>Configuration</h2>
-            <button class="fermer-panel" id="fermerPanel" aria-label="Fermer le menu">&times;</button>
         </div>
-        <div class="panel-content" id="panelContent">
-            <div class="section-panel">
-                <h3>Joueurs</h3>
-                <div class="parametre-groupe">
-                    <label for="p1Name">Joueur 1</label>
-                    <div class="player-config">
-                        <input type="text" id="p1Name" maxlength="5" placeholder="P1">
-                        <input type="color" id="p1Color" value="#3498db">
-                    </div>
-                </div>
-                <div class="parametre-groupe">
-                    <label for="p2Name">Joueur 2</label>
-                    <div class="player-config">
-                        <input type="text" id="p2Name" maxlength="5" placeholder="P2">
-                        <input type="color" id="p2Color" value="#e74c3c">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section-panel">
-                <h3>Paramètres de Jeu</h3>
-                <div class="parametre-groupe">
-                    <label for="tempsBase">Temps de base (sec)</label>
-                    <input type="number" id="tempsBase" min="10" max="120">
-                </div>
-                <div class="parametre-groupe">
-                    <label for="tempsExtension">Temps d'extension (sec)</label>
-                    <input type="number" id="tempsExtension" min="5" max="60">
-                </div>
-                <div class="parametre-groupe">
-                    <label for="seuilAlerte">Seuil Alerte Orange (sec)</label>
-                    <input type="number" id="seuilAlerte" min="1" max="119">
-                </div>
-                <div class="parametre-groupe">
-                    <label for="seuilCritique">Seuil Alerte Rouge (sec)</label>
-                    <input type="number" id="seuilCritique" min="1" max="119">
-                </div>
-            </div>
-            
-            <div class="section-panel">
-                <h3>Interface & Audio</h3>
-                <div class="parametre-groupe">
-                    <label for="themeVisuel">Thème visuel</label>
-                     <select id="themeVisuel">
-                        <option value="sombre">Sombre</option>
-                        <option value="light">Clair</option>
-                        <option value="cyberpunk">Cyberpunk</option>
-                    </select>
-                </div>
-                <div class="parametre-groupe">
-                    <label for="modeInterface">Mode d'interface</label>
-                    <select id="modeInterface">
-                        <option value="boutons">Boutons Visibles</option>
-                        <option value="tactile">Mode Tactile Complet</option>
-                    </select>
-                </div>
-                 <div class="parametre-groupe">
-                    <label for="affichageMs">Affichage millisecondes (sous 10s)</label>
-                    <select id="affichageMs">
-                        <option value="true">Oui</option>
-                        <option value="false">Non</option>
-                    </select>
-                </div>
-                 <div class="parametre-groupe">
-                    <label for="volumeSonore">Volume général</label>
-                    <input type="range" id="volumeSonore" min="0" max="1" step="0.1">
-                </div>
-                <div class="parametre-groupe">
-                    <label for="sonAlertes">Sons d'alerte (timer)</label>
-                     <select id="sonAlertes">
-                        <option value="true">Activés</option>
-                        <option value="false">Désactivés</option>
-                    </select>
-                </div>
-                <div class="parametre-groupe">
-                    <label for="sonClics">Sons des clics (interface)</label>
-                     <select id="sonClics">
-                        <option value="true">Activés</option>
-                        <option value="false">Désactivés</option>
-                    </select>
-                </div>
-                <div class="parametre-groupe">
-                    <label for="vibrationMobile">Vibration mobile</label>
-                     <select id="vibrationMobile">
-                        <option value="true">Activée</option>
-                        <option value="false">Désactivée</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="section-panel">
-                <h3>Automatisation</h3>
-                <div class="parametre-groupe">
-                    <label for="autoStartOnReset">Redémarrage auto après reset</label>
-                     <select id="autoStartOnReset">
-                        <option value="true">Oui</option>
-                        <option value="false">Non</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="section-panel">
-                 <button class="bouton-menu" id="btnShowHelp">Mode d'emploi</button>
-            </div>
-        </div>
-    </div>
 
     <div class="overlay" id="overlayHelp"></div>
     <div class="panel-help" id="panelHelp">
@@ -196,13 +53,15 @@
                 <li>Et plus encore... Vos choix sont sauvegardés automatiquement.</li>
             </ul>
             <p><strong>Note :</strong> Pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre téléphone n'est pas en mode silencieux et que les vibrations sont autorisées pour le navigateur dans les réglages de votre appareil.</p>
+        
+            <a href="https://raw.githubusercontent.com/Bemps17/PoolTimer/main/regles-ultimate-pool-2021-2022.pdf" class="bouton-menu" download="Regles-Ultimate-Pool.pdf" target="_blank" rel="noopener noreferrer" style="margin-top: 2rem;">
+                Télécharger les règles (PDF)
+            </a>
         </div>
     </div>
 
     <div id="saveToast" class="save-toast">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
-        <span>Paramètres sauvegardés !</span>
-    </div>
+        </div>
 
     <script src="script.js"></script>
 
