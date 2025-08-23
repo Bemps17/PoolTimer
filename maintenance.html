@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance - Timer de Billard Pro</title>
+
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+
+    <style>
+        /* On s'assure que le contenu prend toute la hauteur */
+        .scoreboard-body {
+            justify-content: center; /* Centre le contenu verticalement */
+            align-items: center;    /* Centre le contenu horizontalement */
+        }
+        
+        .maintenance-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            color: var(--c-text-primary); /* Utilise la couleur du texte principal de ton thème */
+        }
+
+        .maintenance-content .icon {
+            font-size: 5rem; /* Taille de l'icône */
+            margin-bottom: 2rem;
+            animation: spin 4s linear infinite; /* Petite animation discrète */
+        }
+
+        .maintenance-content h1 {
+            font-family: var(--font-body); /* Utilise la police de caractères principale */
+            font-size: 2rem;
+            color: var(--c-primary); /* Utilise la couleur d'accentuation */
+            margin-bottom: 1rem;
+        }
+
+        .maintenance-content p {
+            font-family: var(--font-body);
+            font-size: 1.2rem;
+            max-width: 400px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body id="appBody">
+
+    <div class="scoreboard-body">
+        
+        <div class="maintenance-content">
+            <div class="icon">🛠️</div>
+            <h1>Maintenance en cours</h1>
+            <p>
+                Le Timer de Billard Pro fait une petite pause pour maintenance.
+                Nous serons de retour très prochainement !
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>
