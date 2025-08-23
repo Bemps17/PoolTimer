@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Timer de Billard Pro v15 (Swipe to Close)</title>
+    <title>Timer de Billard Pro v19.1 (Final Stable)</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎱</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,6 @@
         :root {
             --font-body: 'Poppins', sans-serif;
             --font-timer: 'Chakra Petch', sans-serif;
-            
             --c-background: #0a0a0a;
             --c-bezel: #1a1a1a;
             --c-screen: #000000;
@@ -71,7 +70,6 @@
             --c-panel-text-primary: #f0f0f0;
             --c-panel-text-secondary: #a992c1;
         }
-
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; overflow: hidden; background-color: var(--c-background); transition: background-color 0.4s ease; }
@@ -138,9 +136,14 @@
             border: 2px solid transparent;
             opacity: 0.5;
             transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .player-status:not(.active):hover {
+            opacity: 0.75;
+            transform: translateY(-2px);
         }
         body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333; }
-        .player-status.active { opacity: 1; transform: scale(1.05); }
+        .player-status.active { opacity: 1; transform: scale(1.05); cursor: default; }
         .ext-status.ext-available { color: var(--c-ext-available); }
         .ext-status.ext-used { color: var(--c-ext-used); }
 
@@ -276,7 +279,6 @@
         .bouton-sport:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(80%); }
         .bouton-carré { border-radius: 12px; color: var(--c-ext-used); }
 
-        /* --- Menu & Help Panel --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
@@ -386,10 +388,10 @@
     <div class="scoreboard-body" id="container">
         <div class="top-bar">
             <div class="top-bar-players">
-                <div class="player-status" id="p1Status">
+                <div class="player-status" id="p1Status" data-player="1">
                     <span class="player-name">P1</span> <span class="ext-status">EXT</span>
                 </div>
-                <div class="player-status" id="p2Status">
+                <div class="player-status" id="p2Status" data-player="2">
                     <span class="player-name">P2</span> <span class="ext-status">EXT</span>
                 </div>
             </div>
@@ -412,7 +414,7 @@
         </div>
 
         <div class="control-panel" id="controlPanel">
-            <button class="bouton-sport" id="btnNextPlayer" aria-label="Joueur Suivant">
+            <button class="bouton-sport" id="btnResetShot" aria-label="Coup Suivant">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"></path></svg>
             </button>
             <button class="bouton-sport" id="btnPlayPause" aria-label="Démarrer"></button>
@@ -420,7 +422,6 @@
         </div>
     </div>
 
-    <!-- Menu Panel -->
     <div class="overlay" id="overlayMenu"></div>
     <div class="panel" id="panelArbitre">
         <div class="header-panel">
@@ -434,14 +435,14 @@
                     <label for="p1Name">Joueur 1</label>
                     <div class="player-config">
                         <input type="text" id="p1Name" maxlength="5" placeholder="P1">
-                        <input type="color" id="p1Color">
+                        <input type="color" id="p1Color" value="#3498db">
                     </div>
                 </div>
                 <div class="parametre-groupe">
                     <label for="p2Name">Joueur 2</label>
                     <div class="player-config">
                         <input type="text" id="p2Name" maxlength="5" placeholder="P2">
-                        <input type="color" id="p2Color">
+                        <input type="color" id="p2Color" value="#e74c3c">
                     </div>
                 </div>
             </div>
@@ -520,10 +521,10 @@
             <div class="section-panel">
                 <h3>Automatisation</h3>
                 <div class="parametre-groupe">
-                    <label for="autoReset">Après temps écoulé</label>
-                     <select id="autoReset">
-                        <option value="false">Ne rien faire</option>
-                        <option value="true">Passer au joueur suivant</option>
+                    <label for="autoStartOnReset">Redémarrage auto après reset</label>
+                     <select id="autoStartOnReset">
+                        <option value="true">Oui</option>
+                        <option value="false">Non</option>
                     </select>
                 </div>
             </div>
@@ -534,7 +535,6 @@
         </div>
     </div>
 
-    <!-- Help Panel -->
     <div class="overlay" id="overlayHelp"></div>
     <div class="panel-help" id="panelHelp">
         <div class="header-panel">
@@ -547,7 +547,8 @@
             <h3>Contrôles Principaux</h3>
             <ul>
                 <li><strong>Clic Simple (Écran) :</strong> Lance ou met en pause le chronomètre.</li>
-                <li><strong>Double Clic (Écran) :</strong> Passe au joueur suivant.</li>
+                <li><strong>Double-clic (Écran) :</strong> Réinitialise le temps pour le joueur actuel.</li>
+                <li><strong>Cliquez sur P1/P2 :</strong> Change de joueur et réinitialise le temps.</li>
                 <li><strong>Icône Plein Écran ( haut-droite) :</strong> Affiche le timer en plein écran pour une immersion totale.</li>
             </ul>
 
@@ -597,6 +598,7 @@
                 };
                 this.alertsFired = {};
                 this.toastTimeout = null;
+                this.clickTimeout = null;
                 this.panelTouch = { startX: 0, startY: 0, moveX: 0, moveY: 0, isDragging: false };
 
                 this.icons = {
@@ -610,29 +612,36 @@
                 this.newGame();
             }
 
-            // SECTION: Initialisation
-            // =================================================================
-
             initDomElements() {
                 const ids = [
                     'container', 'timerDisplay', 'timerScreen', 'p1Status', 'p2Status',
-                    'controlPanel', 'btnPlayPause', 'btnNextPlayer', 'btnExtension', 'btnNewGame',
+                    'controlPanel', 'btnPlayPause', 'btnResetShot', 'btnExtension', 'btnNewGame',
                     'menuArbitre', 'overlayMenu', 'panelArbitre', 'fermerPanel', 'panelContent',
                     'btnShowHelp', 'overlayHelp', 'panelHelp', 'fermerHelp', 'p1Name', 'p1Color',
                     'p2Name', 'p2Color', 'tempsBase', 'tempsExtension', 'seuilAlerte',
-                    'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 'autoReset',
+                    'seuilCritique', 'modeInterface', 'affichageMs', 'volumeSonore', 'vibrationMobile', 
+                    'autoStartOnReset',
                     'sonAlertes', 'sonClics', 'saveToast', 'btnFullScreen', 'themeVisuel', 'appBody'
                 ];
-                ids.forEach(id => this.domElements[id] = document.getElementById(id));
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) this.domElements[id] = el;
+                });
                 this.domElements.configInputs = this.domElements.panelArbitre.querySelectorAll('input, select');
             }
 
             initEventListeners() {
                 this.domElements.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
-                this.domElements.btnNextPlayer.addEventListener('click', () => { this.playSound('click'); this.changePlayer(); });
+                this.domElements.btnResetShot.addEventListener('click', () => { 
+                    this.playSound('click'); 
+                    this.resetShot();
+                });
                 this.domElements.btnExtension.addEventListener('click', () => { this.playSound('click'); this.useExtension(); });
                 this.domElements.btnNewGame.addEventListener('click', () => { this.playSound('click'); this.newGame(); });
                 
+                this.domElements.p1Status.addEventListener('click', () => this.selectPlayer(1));
+                this.domElements.p2Status.addEventListener('click', () => this.selectPlayer(2));
+
                 this.domElements.timerScreen.addEventListener('click', (e) => this.handleTimerScreenClick(e));
                 
                 this.domElements.menuArbitre.addEventListener('click', () => { this.playSound('click'); this.toggleMenu(true); });
@@ -652,7 +661,6 @@
 
                 window.addEventListener('resize', () => this.resizeTimerDisplay());
                 
-                // Swipe to close menu
                 this.domElements.panelArbitre.addEventListener('touchstart', (e) => this.handlePanelTouchStart(e), { passive: false });
                 this.domElements.panelArbitre.addEventListener('touchmove', (e) => this.handlePanelTouchMove(e), { passive: false });
                 this.domElements.panelArbitre.addEventListener('touchend', (e) => this.handlePanelTouchEnd(e));
@@ -663,36 +671,16 @@
                 try {
                     await Tone.start();
                     this.audio.context = Tone.getContext();
-                    
                     this.audio.volumeNode = new Tone.Volume(Tone.dbToGain(this.config.volume)).toDestination();
-
-                    this.audio.bellSynth = new Tone.MetalSynth({
-                        frequency: 300,
-                        harmonicity: 5.1,
-                        modulationIndex: 16,
-                        envelope: { attack: 0.001, decay: 1.4, release: 0.2 },
-                        volume: -10
-                    }).connect(this.audio.volumeNode);
-                    
-                    this.audio.gong = new Tone.FMSynth({
-                        harmonicity: 3.1,
-                        modulationIndex: 20,
-                        envelope: { attack: 0.01, decay: 0.2, release: 0.5 },
-                        modulation: { type: "square" },
-                        modulationEnvelope: { attack: 0.01, decay: 0.5, release: 0.5 }
-                    }).connect(this.audio.volumeNode);
-                    
+                    this.audio.bellSynth = new Tone.MetalSynth({ frequency: 300, harmonicity: 5.1, modulationIndex: 16, envelope: { attack: 0.001, decay: 1.4, release: 0.2 }, volume: -10 }).connect(this.audio.volumeNode);
+                    this.audio.gong = new Tone.FMSynth({ harmonicity: 3.1, modulationIndex: 20, envelope: { attack: 0.01, decay: 0.2, release: 0.5 }, modulation: { type: "square" }, modulationEnvelope: { attack: 0.01, decay: 0.5, release: 0.5 } }).connect(this.audio.volumeNode);
                     this.audio.clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).connect(this.audio.volumeNode);
                     this.audio.countdownSynth = new Tone.Synth({ oscillator: { type: 'sine' }, volume: -5, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).connect(this.audio.volumeNode);
-
                     this.audio.isInitialized = true;
                 } catch (e) {
                     console.error("Could not start audio context.", e);
                 }
             }
-
-            // SECTION: Configuration Management
-            // =================================================================
 
             getDefaultConfig() {
                 return {
@@ -700,7 +688,8 @@
                     volume: -10,
                     sonAlertes: true,
                     sonClics: true,
-                    vibration: true, affichageMs: true, modeInterface: 'boutons', autoReset: false,
+                    vibration: true, affichageMs: true, modeInterface: 'boutons', 
+                    autoStartOnReset: true,
                     p1Name: 'P1', p1Color: '#3498db', p2Name: 'P2', p2Color: '#e74c3c',
                     theme: 'sombre'
                 };
@@ -736,7 +725,9 @@
                 this.domElements.vibrationMobile.value = String(this.config.vibration);
                 this.domElements.affichageMs.value = String(this.config.affichageMs);
                 this.domElements.modeInterface.value = this.config.modeInterface;
-                this.domElements.autoReset.value = String(this.config.autoReset);
+                if (this.domElements.autoStartOnReset) {
+                    this.domElements.autoStartOnReset.value = String(this.config.autoStartOnReset);
+                }
                 this.domElements.p1Name.value = this.config.p1Name;
                 this.domElements.p1Color.value = this.config.p1Color;
                 this.domElements.p2Name.value = this.config.p2Name;
@@ -757,7 +748,9 @@
                 this.config.vibration = this.domElements.vibrationMobile.value === 'true';
                 this.config.affichageMs = this.domElements.affichageMs.value === 'true';
                 this.config.modeInterface = this.domElements.modeInterface.value;
-                this.config.autoReset = this.domElements.autoReset.value === 'true';
+                if (this.domElements.autoStartOnReset) {
+                    this.config.autoStartOnReset = this.domElements.autoStartOnReset.value === 'true';
+                }
                 this.config.p1Name = this.domElements.p1Name.value.substring(0, 5) || 'P1';
                 this.config.p1Color = this.domElements.p1Color.value;
                 this.config.p2Name = this.domElements.p2Name.value.substring(0, 5) || 'P2';
@@ -769,9 +762,6 @@
                 this.setupNewShot();
                 this.showSaveToast();
             }
-
-            // SECTION: Game Logic
-            // =================================================================
 
             newGame() {
                 this.state.extensionsUsedInGame = { 1: false, 2: false };
@@ -787,11 +777,20 @@
                 this.updateUI();
             }
 
-            changePlayer() {
-                this.state.currentPlayer = this.state.currentPlayer === 1 ? 2 : 1;
+            resetShot() {
                 this.setupNewShot();
+                if (this.config.autoStartOnReset) {
+                    setTimeout(() => this.start(), 50);
+                }
             }
 
+            selectPlayer(playerNum) {
+                if (this.state.currentPlayer === playerNum) return;
+                this.playSound('click');
+                this.state.currentPlayer = playerNum;
+                this.setupNewShot();
+            }
+            
             async togglePlayPause() {
                 await this.initializeAudio();
                 this.playSound('click');
@@ -803,9 +802,7 @@
                 if (this.state.isRunning || this.state.remainingTime <= 0) return;
                 this.state.isRunning = true;
                 this.expectedTime = Date.now() + this.state.remainingTime;
-                
                 this.timerInterval = setInterval(() => this.tick(), 50);
-                
                 this.updateUI();
             }
 
@@ -834,20 +831,14 @@
                 this.updateDisplay();
                 this.playSound('gong');
                 this.vibrate([300, 50, 300]);
-                if (this.config.autoReset) {
-                    setTimeout(() => this.changePlayer(), 1500);
-                }
             }
 
             useExtension() {
                 if (!this.state.isRunning || this.state.isExtensionUsedForShot || this.state.extensionsUsedInGame[this.state.currentPlayer]) return;
-                
                 this.expectedTime += this.config.tempsExtension * 1000;
                 const futureRemainingTime = this.expectedTime - Date.now();
-
                 this.state.isExtensionUsedForShot = true;
                 this.state.extensionsUsedInGame[this.state.currentPlayer] = true;
-
                 if (futureRemainingTime > this.config.seuilAlerte * 1000) {
                     this.alertsFired.warning = false;
                 }
@@ -861,18 +852,22 @@
                 if (e.target.id === 'btnExtension') return;
                 await this.initializeAudio();
                 const now = Date.now();
-                if (now - this.state.lastClickTime < 300) { // Double click
+                if (now - this.state.lastClickTime < 300) {
+                    if (this.clickTimeout) {
+                        clearTimeout(this.clickTimeout);
+                        this.clickTimeout = null;
+                    }
                     this.playSound('click');
-                    this.changePlayer();
-                } else { // Single click
-                    if (this.state.isRunning) this.pause();
-                    else this.start();
+                    this.resetShot();
+                    this.state.lastClickTime = 0;
+                } else {
+                    this.clickTimeout = setTimeout(() => {
+                        this.togglePlayPause();
+                        this.clickTimeout = null;
+                    }, 300);
                 }
                 this.state.lastClickTime = now;
             }
-
-            // SECTION: UI Updates
-            // =================================================================
 
             updateUI() {
                 this.updateDisplay();
@@ -955,12 +950,10 @@
                 const timer = this.domElements.timerDisplay;
                 const screenWidth = screen.clientWidth - 32;
                 const screenHeight = screen.clientHeight - 32;
-
                 let fontSize = screenWidth * 0.55;
                 if (fontSize > screenHeight) {
                     fontSize = screenHeight * 0.9;
                 }
-
                 timer.style.fontSize = `${fontSize}px`;
             }
 
@@ -973,9 +966,6 @@
                     body.classList.add('theme-cyberpunk');
                 }
             }
-
-            // SECTION: Alerts & Audio
-            // =================================================================
             
             handleAlerts() {
                 const remainingSec = this.state.remainingTime / 1000;
@@ -997,32 +987,16 @@
 
             playSound(type) {
                 if (!this.audio.isInitialized) return;
-
                 const isAlertType = ['warning', 'countdown_tick', 'gong'].includes(type);
                 const isClickType = type === 'click';
-
-                if ((isAlertType && !this.config.sonAlertes) || (isClickType && !this.config.sonClics)) {
-                    return;
-                }
-                
+                if ((isAlertType && !this.config.sonAlertes) || (isClickType && !this.config.sonClics)) { return; }
                 const now = this.audio.context.currentTime;
-                if (this.audio.volumeNode) {
-                    this.audio.volumeNode.volume.value = this.config.volume;
-                }
-
+                if (this.audio.volumeNode) { this.audio.volumeNode.volume.value = this.config.volume; }
                 switch(type) {
-                    case 'warning':
-                        this.audio.bellSynth?.triggerAttack(now);
-                        break;
-                    case 'countdown_tick':
-                        this.audio.countdownSynth?.triggerAttackRelease('G5', '16n', now);
-                        break;
-                    case 'gong':
-                        this.audio.gong?.triggerAttackRelease('A3', '0.5s', now);
-                        break;
-                    case 'click':
-                        this.audio.clickSynth?.triggerAttackRelease("C4", "32n", now, 0.5);
-                        break;
+                    case 'warning': this.audio.bellSynth?.triggerAttack(now); break;
+                    case 'countdown_tick': this.audio.countdownSynth?.triggerAttackRelease('G5', '16n', now); break;
+                    case 'gong': this.audio.gong?.triggerAttackRelease('A3', '0.5s', now); break;
+                    case 'click': this.audio.clickSynth?.triggerAttackRelease("C4", "32n", now, 0.5); break;
                 }
             }
 
@@ -1031,18 +1005,13 @@
                     try {
                         navigator.vibrate(pattern);
                     } catch (e) {
-                        console.warn("Vibration failed. It might be disabled in browser/OS settings.", e);
+                        console.warn("Vibration failed.", e);
                     }
                 }
             }
 
-            // SECTION: Panel & Fullscreen Management
-            // =================================================================
-
             toggleMenu(open) {
-                if (open) {
-                    this.applyConfigToUI();
-                }
+                if (open) { this.applyConfigToUI(); }
                 this.domElements.panelArbitre.classList.toggle('active', open);
                 this.domElements.overlayMenu.classList.toggle('active', open);
                 this.domElements.menuArbitre.classList.toggle('active', open);
@@ -1055,10 +1024,8 @@
 
             showSaveToast() {
                 if (this.toastTimeout) clearTimeout(this.toastTimeout);
-                
                 const toast = this.domElements.saveToast;
                 toast.classList.add('show');
-                
                 this.toastTimeout = setTimeout(() => {
                     toast.classList.remove('show');
                 }, 2000);
@@ -1067,13 +1034,13 @@
             toggleFullScreen() {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => {
-                        alert(`Erreur lors du passage en plein écran: ${err.message} (${err.name})`);
+                        alert(`Erreur: ${err.message} (${err.name})`);
                     });
                 } else {
                     document.exitFullscreen();
                 }
             }
-
+            
             handlePanelTouchStart(e) {
                 this.panelTouch.startX = e.touches[0].clientX;
                 this.panelTouch.startY = e.touches[0].clientY;
@@ -1082,21 +1049,16 @@
 
             handlePanelTouchMove(e) {
                 if (this.domElements.panelContent.scrollTop > 0 && !this.panelTouch.isDragging) return;
-
                 this.panelTouch.moveX = e.touches[0].clientX;
                 this.panelTouch.moveY = e.touches[0].clientY;
                 const deltaX = this.panelTouch.moveX - this.panelTouch.startX;
                 const deltaY = this.panelTouch.moveY - this.panelTouch.startY;
-
                 if (!this.panelTouch.isDragging) {
                     if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
                         this.panelTouch.isDragging = true;
                         this.domElements.panelArbitre.style.transition = 'none';
-                    } else {
-                        return;
-                    }
+                    } else { return; }
                 }
-                
                 if (this.panelTouch.isDragging) {
                     e.preventDefault();
                     if (deltaX > 0) {
@@ -1107,18 +1069,14 @@
 
             handlePanelTouchEnd(e) {
                 if (!this.panelTouch.isDragging) return;
-
                 const panel = this.domElements.panelArbitre;
                 panel.style.transition = 'right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 panel.style.transform = '';
-
                 const deltaX = this.panelTouch.moveX - this.panelTouch.startX;
                 const panelWidth = panel.offsetWidth;
-
                 if (deltaX > panelWidth * 0.3) {
                     this.toggleMenu(false);
                 }
-                
                 this.panelTouch.isDragging = false;
             }
         }
@@ -1129,4 +1087,3 @@
     </script>
 </body>
 </html>
-
