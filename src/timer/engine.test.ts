@@ -7,7 +7,9 @@ import {
   FBEP_AMBIANCE,
   FFB_AMBIANCE,
   getDefaultConfig,
+  matchesCompetitionPreset,
   mergeConfig,
+  showsApresCasseControl,
   TIMER_DIGIT_WIDTH_RATIO,
 } from './config';
 import {
@@ -43,6 +45,7 @@ describe('formatTime', () => {
 describe('formatSecondsClock', () => {
   it('formats FFB post-break duration', () => {
     expect(formatSecondsClock(90)).toBe('1:30');
+    expect(formatSecondsClock(60)).toBe('1:00');
     expect(formatSecondsClock(45)).toBe('45s');
   });
 });
@@ -86,7 +89,7 @@ describe('mergeConfig', () => {
     expect(merged.minionsUnlocked).toBe(true);
   });
 
-  it('applies FFB Blackball timings and blue ambiance without resetting après casse', () => {
+  it('applies FFB Blackball timings, blue ambiance and FFB après casse 1:30', () => {
     const preset = applyCompetitionPreset(
       { ...getDefaultConfig(), tempsBase: 30, tempsExtension: 45, tempsApresCasse: 60, seuilAlerte: 20, theme: 'sombre' },
       'ffb',
@@ -95,23 +98,78 @@ describe('mergeConfig', () => {
     expect(preset.tempsExtension).toBe(15);
     expect(preset.seuilAlerte).toBe(15);
     expect(preset.seuilCritique).toBe(5);
-    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.tempsApresCasse).toBe(90);
     expect(preset.theme).toBe('ffb');
+    expect(showsApresCasseControl(preset)).toBe(true);
   });
 
-  it('applies Ultimate FBEP with the same timings and teal ambiance', () => {
+  it('applies Ultimate FBEP with teal ambiance and no distinct après casse', () => {
     const preset = applyCompetitionPreset({ ...getDefaultConfig(), tempsApresCasse: 75 }, 'fbep');
     expect(preset.tempsBase).toBe(45);
     expect(preset.tempsExtension).toBe(15);
-    expect(preset.tempsApresCasse).toBe(75);
+    expect(preset.seuilAlerte).toBe(15);
+    expect(preset.seuilCritique).toBe(5);
+    expect(preset.tempsApresCasse).toBe(45);
     expect(preset.theme).toBe('fbep');
+    expect(showsApresCasseControl(preset)).toBe(false);
+  });
+
+  it('applies FFB TD/TN with 45s / 1:30 / +45s and 20s warning', () => {
+    const preset = applyCompetitionPreset(
+      { ...getDefaultConfig(), tempsBase: 30, tempsApresCasse: 60, tempsExtension: 15, seuilAlerte: 15, theme: 'sombre' },
+      'ffbTdTn',
+    );
+    expect(preset.tempsBase).toBe(45);
+    expect(preset.tempsApresCasse).toBe(90);
+    expect(preset.tempsExtension).toBe(45);
+    expect(preset.seuilAlerte).toBe(20);
+    expect(preset.seuilCritique).toBe(5);
+    expect(preset.theme).toBe('ffb');
+    expect(showsApresCasseControl(preset)).toBe(true);
+  });
+
+  it('applies FFB Blackball Master with 30s / 1:00 / +30s and 10s warning', () => {
+    const preset = applyCompetitionPreset(getDefaultConfig(), 'ffbMaster');
+    expect(preset.tempsBase).toBe(30);
+    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.tempsExtension).toBe(30);
+    expect(preset.seuilAlerte).toBe(10);
+    expect(preset.seuilCritique).toBe(5);
+    expect(preset.theme).toBe('ffb');
+    expect(showsApresCasseControl(preset)).toBe(true);
   });
 
   it('keeps applyFfbPreset as the Blackball competition mode', () => {
     const preset = applyFfbPreset({ ...getDefaultConfig(), tempsExtension: 45, tempsApresCasse: 60 });
     expect(preset.tempsExtension).toBe(15);
-    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.tempsApresCasse).toBe(90);
     expect(preset.theme).toBe('ffb');
+  });
+
+  it('highlights only the matching competition preset', () => {
+    const blackball = applyCompetitionPreset(getDefaultConfig(), 'ffb');
+    const tdTn = applyCompetitionPreset(getDefaultConfig(), 'ffbTdTn');
+    const master = applyCompetitionPreset(getDefaultConfig(), 'ffbMaster');
+    const fbep = applyCompetitionPreset(getDefaultConfig(), 'fbep');
+
+    expect(matchesCompetitionPreset(blackball, 'ffb')).toBe(true);
+    expect(matchesCompetitionPreset(blackball, 'ffbTdTn')).toBe(false);
+    expect(matchesCompetitionPreset(blackball, 'fbep')).toBe(false);
+    expect(matchesCompetitionPreset(tdTn, 'ffbTdTn')).toBe(true);
+    expect(matchesCompetitionPreset(tdTn, 'ffb')).toBe(false);
+    expect(matchesCompetitionPreset(master, 'ffbMaster')).toBe(true);
+    expect(matchesCompetitionPreset(master, 'ffb')).toBe(false);
+    expect(matchesCompetitionPreset(fbep, 'fbep')).toBe(true);
+    expect(matchesCompetitionPreset(fbep, 'ffb')).toBe(false);
+  });
+
+  it('hides Après casse on Ultimate even if a leftover post-break duration remains', () => {
+    const leftover = { ...getDefaultConfig(), theme: 'fbep' as const, tempsApresCasse: 90 };
+    expect(showsApresCasseControl(leftover)).toBe(false);
+  });
+
+  it('hides Après casse when post-break time equals shot clock', () => {
+    expect(showsApresCasseControl({ ...getDefaultConfig(), tempsApresCasse: 45, theme: 'ffb' })).toBe(false);
   });
 
   it('maps competition themes to body classes', () => {
@@ -132,6 +190,7 @@ describe('mergeConfig', () => {
     expect(fbepBlock).toContain('--c-ambiance: #007879');
     expect(css).toContain('border-color: #007879');
     expect(css).toContain('border-color: #0066CC');
+    expect(css).toContain('.preset-ffb-master');
   });
 });
 
@@ -172,6 +231,44 @@ describe('shot clock engine', () => {
     expect(state.shotKind).toBe('base');
     expect(state.remainingTime).toBe(45_000);
     expect(state.isRunning).toBe(false);
+  });
+
+  it('loads Master après casse at 60s without auto-start', () => {
+    const master = applyCompetitionPreset(getDefaultConfig(), 'ffbMaster');
+    let state = startTimer(createInitialState(master), 0);
+    state = setupApresCasse(state, master);
+    expect(state.shotKind).toBe('apresCasse');
+    expect(state.remainingTime).toBe(60_000);
+    expect(state.isRunning).toBe(false);
+  });
+
+  it('adds 30s Master extension so a 30s shot can reach 60s, once per player per manche', () => {
+    const master = applyCompetitionPreset(getDefaultConfig(), 'ffbMaster');
+    let state = startTimer(createInitialState(master), 1_000);
+    state = useExtension(state, master, 1_000);
+    expect(state.remainingTime).toBe(60_000);
+    expect(canUseExtension(state)).toBe(false);
+
+    state = setupNewShot(state, master);
+    state = startTimer(state, 2_000);
+    expect(canUseExtension(state)).toBe(false);
+
+    state = selectPlayer(state, 2, master);
+    state = startTimer(state, 3_000);
+    expect(canUseExtension(state)).toBe(true);
+  });
+
+  it('warns at 10s then ticks at 5s on Blackball Master', () => {
+    const master = applyCompetitionPreset(getDefaultConfig(), 'ffbMaster');
+    let state = startTimer(createInitialState(master), 0);
+    const warning = tick(state, master, 20_000);
+    expect(warning.effects).toContainEqual({ type: 'sound', sound: 'warning' });
+    expect(getDigitState(warning.state.remainingTime, master)).toBe('warning');
+
+    state = warning.state;
+    const critical = tick(state, master, 25_000);
+    expect(critical.effects).toContainEqual({ type: 'sound', sound: 'countdown_tick' });
+    expect(getDigitState(critical.state.remainingTime, master)).toBe('critical');
   });
 
   it('returns to base time when the player changes after Après casse', () => {

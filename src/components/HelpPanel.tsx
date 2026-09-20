@@ -34,7 +34,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>
               <strong>Après casse :</strong> charge le temps post-casse (réglable, 1:30 par défaut FFB) pour le
               coup en cours, sans démarrer le chrono (à lancer une fois les billes à l'arrêt). Le coup suivant,
-              un changement de joueur ou une nouvelle manche reviennent au temps de base.
+              un changement de joueur ou une nouvelle manche reviennent au temps de base. Le bouton est masqué
+              en <strong>Ultimate FBEP</strong> (pas de temps supplémentaire après la casse).
             </li>
             <li>
               <strong>Cliquez sur P1/P2 :</strong> change de joueur et réinitialise au temps de base.
@@ -73,8 +74,9 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
             <li>
               <strong>Les temps</strong> de base, après casse et d'extension. Presets de compétition
-              <strong>FFB Blackball</strong> (ambiance bleue) et <strong>Ultimate FBEP</strong>
-              (vert canard) : 45s / +15s, alertes 15s et 5s, sans modifier l'après casse.
+              <strong>FFB Blackball</strong> (45s / 1:30 / +15s), <strong>FFB TD/TN</strong>
+              (45s / 1:30 / +45s), <strong>FFB Blackball Master</strong> (30s / 1:00 / +30s) — ambiance bleue —
+              et <strong>Ultimate FBEP</strong> (45s / +15s, vert canard, sans après casse).
             </li>
             <li>
               <strong>Les seuils d'alerte</strong> visuelle (orange et rouge).

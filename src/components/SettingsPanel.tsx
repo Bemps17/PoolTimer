@@ -1,7 +1,7 @@
 import { useRef, type TouchEvent } from 'react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
-import { applyCompetitionPreset, CONFIG_LIMITS } from '../timer/config';
+import { applyCompetitionPreset, CONFIG_LIMITS, matchesCompetitionPreset } from '../timer/config';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
@@ -48,6 +48,18 @@ const ON_OFF = [
 const VIBRATION = [
   { value: 'true', label: 'Activée' },
   { value: 'false', label: 'Désactivée' },
+];
+
+const COMPETITION_PRESET_CARDS: Array<{
+  mode: CompetitionMode;
+  label: string;
+  detail: string;
+  cardClass: string;
+}> = [
+  { mode: 'ffb', label: 'FFB Blackball', detail: '45s · 1:30 · +15s', cardClass: 'preset-ffb' },
+  { mode: 'ffbTdTn', label: 'FFB TD/TN', detail: '45s · 1:30 · +45s', cardClass: 'preset-ffb' },
+  { mode: 'ffbMaster', label: 'FFB Blackball Master', detail: '30s · 1:00 · +30s', cardClass: 'preset-ffb-master' },
+  { mode: 'fbep', label: 'Ultimate FBEP', detail: '45s · +15s · sans après casse', cardClass: 'preset-fbep' },
 ];
 
 export function SettingsPanel({
@@ -172,27 +184,25 @@ export function SettingsPanel({
           <div className="section-panel">
             <h3>Modes de compétition</h3>
             <div className="preset-row" role="group" aria-label="Presets de compétition">
-              <button
-                type="button"
-                className={`preset-card preset-ffb${config.theme === 'ffb' ? ' active' : ''}`}
-                aria-pressed={config.theme === 'ffb'}
-                onClick={() => applyMode('ffb')}
-              >
-                FFB Blackball
-                <small>45s · +15s · bleu</small>
-              </button>
-              <button
-                type="button"
-                className={`preset-card preset-fbep${config.theme === 'fbep' ? ' active' : ''}`}
-                aria-pressed={config.theme === 'fbep'}
-                onClick={() => applyMode('fbep')}
-              >
-                Ultimate FBEP
-                <small>45s · +15s · vert canard</small>
-              </button>
+              {COMPETITION_PRESET_CARDS.map((preset) => {
+                const active = matchesCompetitionPreset(config, preset.mode);
+                return (
+                  <button
+                    key={preset.mode}
+                    type="button"
+                    className={`preset-card ${preset.cardClass}${active ? ' active' : ''}`}
+                    aria-pressed={active}
+                    onClick={() => applyMode(preset.mode)}
+                  >
+                    {preset.label}
+                    <small>{preset.detail}</small>
+                  </button>
+                );
+              })}
             </div>
             <p className="install-hint">
-              Même chrono (45s, extension +15s, alertes 15s / 5s). L’après casse n’est pas modifié.
+              Les presets s’appliquent tout de suite et sont mémorisés. Ultimate FBEP n’a pas d’après casse.
+              FFB Blackball, TD/TN et Master gardent le bouton quand le temps post-casse est distinct.
             </p>
           </div>
 
@@ -205,17 +215,21 @@ export function SettingsPanel({
               min={CONFIG_LIMITS.tempsBase.min}
               max={CONFIG_LIMITS.tempsBase.max}
               suffix="s"
-              onChange={(tempsBase) => patch({ tempsBase }, true)}
+              onChange={(tempsBase) =>
+                patch(config.theme === 'fbep' ? { tempsBase, tempsApresCasse: tempsBase } : { tempsBase }, true)
+              }
             />
-            <NumberStepper
-              label={`Temps après casse (${formatSecondsClock(config.tempsApresCasse)})`}
-              htmlId="tempsApresCasse"
-              value={config.tempsApresCasse}
-              min={CONFIG_LIMITS.tempsApresCasse.min}
-              max={CONFIG_LIMITS.tempsApresCasse.max}
-              suffix="s"
-              onChange={(tempsApresCasse) => patch({ tempsApresCasse }, true)}
-            />
+            {config.theme === 'fbep' ? null : (
+              <NumberStepper
+                label={`Temps après casse (${formatSecondsClock(config.tempsApresCasse)})`}
+                htmlId="tempsApresCasse"
+                value={config.tempsApresCasse}
+                min={CONFIG_LIMITS.tempsApresCasse.min}
+                max={CONFIG_LIMITS.tempsApresCasse.max}
+                suffix="s"
+                onChange={(tempsApresCasse) => patch({ tempsApresCasse }, true)}
+              />
+            )}
             <NumberStepper
               label="Temps d'extension (sec)"
               htmlId="tempsExtension"

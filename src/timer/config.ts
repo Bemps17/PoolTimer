@@ -13,12 +13,34 @@ export const FFB_AFTER_BREAK_DEFAULT = 90;
 
 export const FFB_BLACKBALL_PRESET = {
   ...COMPETITION_SHOT_TIMING,
+  tempsApresCasse: FFB_AFTER_BREAK_DEFAULT,
   theme: 'ffb' as const,
 };
 
 export const FBEP_ULTIMATE_PRESET = {
   ...COMPETITION_SHOT_TIMING,
+  tempsApresCasse: COMPETITION_SHOT_TIMING.tempsBase,
   theme: 'fbep' as const,
+};
+
+/** Tournois / championnats FFB TD-TN. */
+export const FFB_TD_TN_PRESET = {
+  tempsBase: 45,
+  tempsApresCasse: 90,
+  tempsExtension: 45,
+  seuilAlerte: 20,
+  seuilCritique: 5,
+  theme: 'ffb' as const,
+};
+
+/** Catégorie nationale Master (shot clock 30 s). */
+export const FFB_BLACKBALL_MASTER_PRESET = {
+  tempsBase: 30,
+  tempsApresCasse: 60,
+  tempsExtension: 30,
+  seuilAlerte: 10,
+  seuilCritique: 5,
+  theme: 'ffb' as const,
 };
 
 /** Ambiance FFB : bleu franc. */
@@ -195,11 +217,33 @@ export function applyCompetitionPreset(config: TimerConfig, mode: CompetitionMod
       return { ...config, ...FFB_BLACKBALL_PRESET };
     case 'fbep':
       return { ...config, ...FBEP_ULTIMATE_PRESET };
+    case 'ffbTdTn':
+      return { ...config, ...FFB_TD_TN_PRESET };
+    case 'ffbMaster':
+      return { ...config, ...FFB_BLACKBALL_MASTER_PRESET };
     default: {
       const exhaustive: never = mode;
       return exhaustive;
     }
   }
+}
+
+export function matchesCompetitionPreset(config: TimerConfig, mode: CompetitionMode): boolean {
+  const applied = applyCompetitionPreset(config, mode);
+  return (
+    applied.tempsBase === config.tempsBase &&
+    applied.tempsApresCasse === config.tempsApresCasse &&
+    applied.tempsExtension === config.tempsExtension &&
+    applied.seuilAlerte === config.seuilAlerte &&
+    applied.seuilCritique === config.seuilCritique &&
+    applied.theme === config.theme
+  );
+}
+
+/** Ultimate FBEP has no post-break extra time; other modes keep the control when the duration differs. */
+export function showsApresCasseControl(config: TimerConfig): boolean {
+  if (config.theme === 'fbep') return false;
+  return config.tempsApresCasse !== config.tempsBase;
 }
 
 export function applyFfbPreset(config: TimerConfig): TimerConfig {
