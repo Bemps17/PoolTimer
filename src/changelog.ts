@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.2';
+export const APP_VERSION = '2.7.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.7.0',
+    date: '2026-09-20',
+    title: 'Apparence indépendante des presets',
+    notes: [
+      'Choisir un thème ou une couleur ne change plus les presets de compétition (FFB, TD/TN, Master, Ultimate FBEP).',
+      'Les presets ne règlent que le chronométrage. Ils peuvent suggérer une ambiance (bleu FFB, vert canard Ultimate #007879) une fois, puis l’apparence se personnalise librement.',
+      '⚙️ → Apparence : couleurs par zone (fond, cadre, chrono, chiffres, accent, boutons, pied de page, zones joueurs, menu réglages, ambiance / halo, bordures). Pipette + hex, mémorisées.',
+      'L’écran miroir Visuel reçoit les couleurs du tableau via le snapshot.',
+    ],
+  },
   {
     version: '2.6.2',
     date: '2026-09-20',

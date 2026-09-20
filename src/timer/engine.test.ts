@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyCompetitionPreset,
   applyFfbPreset,
+  applyNamedTheme,
   computeTimerFontSize,
   FBEP_AMBIANCE,
   FFB_AMBIANCE,
@@ -12,6 +13,7 @@ import {
   showsApresCasseControl,
   TIMER_DIGIT_WIDTH_RATIO,
 } from './config';
+import { colorsForTheme } from './theme';
 import {
   canUseExtension,
   createInitialState,
@@ -65,6 +67,23 @@ describe('mergeConfig', () => {
   it('restores FFB and FBEP themes from storage', () => {
     expect(mergeConfig({ theme: 'ffb' }).theme).toBe('ffb');
     expect(mergeConfig({ theme: 'fbep' }).theme).toBe('fbep');
+    expect(mergeConfig({ theme: 'fbep' }).colors.ambiance).toBe(FBEP_AMBIANCE);
+  });
+
+  it('restores custom zone colors from storage without changing timings', () => {
+    const merged = mergeConfig({
+      theme: 'fbep',
+      tempsBase: 45,
+      tempsApresCasse: 45,
+      colors: { ambiance: '#112233', background: '#010203' },
+    });
+    expect(merged.theme).toBe('fbep');
+    expect(merged.colors.ambiance).toBe('#112233');
+    expect(merged.colors.background).toBe('#010203');
+    expect(merged.colors.primary).toBe(colorsForTheme('fbep').primary);
+    expect(merged.tempsBase).toBe(45);
+    expect(merged.tempsApresCasse).toBe(45);
+    expect(matchesCompetitionPreset(merged, 'fbep')).toBe(true);
   });
 
   it('defaults autoStartOnReset to off so reset/double-tap leave the clock frozen', () => {
@@ -196,9 +215,34 @@ describe('mergeConfig', () => {
     expect(matchesCompetitionPreset(fbep, 'ffb')).toBe(false);
   });
 
-  it('hides Après casse on Ultimate even if a leftover post-break duration remains', () => {
+  it('keeps Ultimate timings and hides Après casse after a visual theme change', () => {
+    const ultimate = applyCompetitionPreset(getDefaultConfig(), 'fbep');
+    const recoloured = applyNamedTheme(ultimate, 'sombre');
+    expect(recoloured.theme).toBe('sombre');
+    expect(recoloured.colors.ambiance).toBe(colorsForTheme('sombre').ambiance);
+    expect(recoloured.tempsBase).toBe(45);
+    expect(recoloured.tempsApresCasse).toBe(45);
+    expect(matchesCompetitionPreset(recoloured, 'fbep')).toBe(true);
+    expect(showsApresCasseControl(recoloured)).toBe(false);
+  });
+
+  it('keeps Ultimate highlighted after a custom ambiance color', () => {
+    const ultimate = applyCompetitionPreset(getDefaultConfig(), 'fbep');
+    const custom = {
+      ...ultimate,
+      colors: { ...ultimate.colors, ambiance: '#ff00aa', background: '#120012' },
+    };
+    expect(matchesCompetitionPreset(custom, 'fbep')).toBe(true);
+    expect(showsApresCasseControl(custom)).toBe(false);
+    expect(custom.theme).toBe('fbep');
+    expect(custom.colors.ambiance).toBe('#ff00aa');
+  });
+
+  it('does not treat a leftover FBEP theme as Ultimate if timings stay FFB', () => {
     const leftover = { ...getDefaultConfig(), theme: 'fbep' as const, tempsApresCasse: 90 };
-    expect(showsApresCasseControl(leftover)).toBe(false);
+    expect(matchesCompetitionPreset(leftover, 'fbep')).toBe(false);
+    expect(matchesCompetitionPreset(leftover, 'ffb')).toBe(true);
+    expect(showsApresCasseControl(leftover)).toBe(true);
   });
 
   it('hides Après casse when post-break time equals shot clock', () => {

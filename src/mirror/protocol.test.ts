@@ -50,6 +50,8 @@ describe('mirror protocol', () => {
     expect(snapshot.remainingTime).toBe(45_000);
     expect(snapshot.expectedEnd).toBe(46_000);
     expect(snapshot.config.theme).toBe(config.theme);
+    expect(snapshot.config.colors.ambiance).toBe(config.colors.ambiance);
+    expect(snapshot.config.colors.bezel).toBe(config.colors.bezel);
     expect(remainingAtSend(snapshot)).toBe(45_000);
 
     const receivedAt = 9_000_000;
@@ -126,10 +128,59 @@ describe('mirror protocol', () => {
     );
   });
 
+  it('forwards custom display colors on the snapshot and fills missing tokens', () => {
+    const config = {
+      ...getDefaultConfig(),
+      theme: 'fbep' as const,
+      colors: { ...getDefaultConfig().colors, ambiance: '#007879', background: '#001313' },
+    };
+    const display = toDisplayConfig(config);
+    expect(display.colors.ambiance).toBe('#007879');
+    expect(display.colors.background).toBe('#001313');
+
+    const snapshot = buildSnapshot(createInitialState(config), config, 1_000);
+    const parsed = parseServerMessage({
+      type: 'welcome',
+      room: 'AB3K7Q',
+      role: 'display',
+      displayCount: 1,
+      controllerConnected: true,
+      serverTime: 100,
+      snapshot,
+      seq: 1,
+    });
+    expect(parsed).toEqual(
+      expect.objectContaining({
+        type: 'welcome',
+        snapshot: expect.objectContaining({
+          config: expect.objectContaining({
+            theme: 'fbep',
+            colors: expect.objectContaining({ ambiance: '#007879', background: '#001313' }),
+          }),
+        }),
+      }),
+    );
+  });
+
   it('forwards empty player names to the visual display without injecting P1', () => {
     const config = { ...getDefaultConfig(), p1Name: '', p2Name: 'P' };
     expect(toDisplayConfig(config).p1Name).toBe('');
     expect(toDisplayConfig(config).p2Name).toBe('P');
+  });
+
+  it('accepts a legacy snapshot without colors and fills them from the theme', () => {
+    const config = getDefaultConfig();
+    const snapshot = buildSnapshot(createInitialState(config), config, 1_000);
+    const { colors: _colors, ...legacyConfig } = snapshot.config;
+    const parsed = parseClientMessage({
+      type: 'push',
+      seq: 1,
+      snapshot: { ...snapshot, config: legacyConfig },
+    });
+    expect(parsed?.type).toBe('push');
+    if (parsed?.type !== 'push') return;
+    expect(parsed.snapshot.config.colors.ambiance).toBe(config.colors.ambiance);
+    expect(parsed.snapshot.config.theme).toBe(config.theme);
   });
 
   it('rejects malformed client pushes', () => {

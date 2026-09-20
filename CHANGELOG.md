@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.7.0 — 2026-09-20
+
+- **Apparence indépendante des presets** : changer de thème ou de couleur ne réécrit plus FFB / TD/TN / Master / Ultimate.
+- Les presets ne touchent qu’au chronométrage. Ils peuvent proposer une ambiance (bleu FFB, vert canard Ultimate `#007879`) à l’application, puis les couleurs se règlent librement.
+- ⚙️ → **Apparence** : une couleur par zone (fond, cadre, chrono, chiffres, accent, boutons, pied de page, zones joueurs, chrome des réglages, ambiance / halo, bordures). Pipette + hex, mémorisé.
+- L’écran miroir Visuel reprend les couleurs du snapshot.
+
 ## 2.6.2 — 2026-09-20
 
 - **Réglages plus courts** : sections repliables regroupées (thèmes / apparence, sons & vibration, compétition & temps, etc.) et typographie plus dense.

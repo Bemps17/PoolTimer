@@ -17,6 +17,8 @@ describe('settings layout', () => {
     expect(panel).toContain('title="Application"');
     expect(panel).toContain('<SoundLibrarySettings');
     expect(panel).toContain('htmlId="themeVisuel"');
+    expect(panel).toContain('<ThemeColorEditor');
+    expect(panel).toContain('Réinitialiser les couleurs du thème');
     expect(panel).toContain('htmlId="volumeSonore"');
   });
 

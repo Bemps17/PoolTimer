@@ -12,7 +12,7 @@ import {
   setupNewShot,
   startTimer,
   tick,
-  themeBodyClass,
+  applyThemeToDocument,
   useExtension as useExtensionState,
 } from '../timer/engine';
 import type { Effect, EngineState, PlayerId, TimerConfig } from '../timer/types';
@@ -57,10 +57,8 @@ export function useBilliardTimer() {
   );
 
   useEffect(() => {
-    const className = themeBodyClass(config.theme);
-    document.body.classList.remove('theme-light', 'theme-cyberpunk', 'theme-ffb', 'theme-fbep');
-    if (className) document.body.classList.add(className);
-  }, [config.theme]);
+    applyThemeToDocument(config.theme, config.colors);
+  }, [config.theme, config.colors]);
 
   useEffect(() => {
     setAudioVolume(config.volume);

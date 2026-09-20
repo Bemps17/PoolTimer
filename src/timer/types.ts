@@ -9,6 +9,32 @@ export type AlertPackId = 'classic' | 'cretins' | 'minionsLike';
 export type AlertPickMode = 'fixed' | 'random';
 export type CriticalAlertStyle = 'oneshot' | 'repeat';
 
+export interface ThemeColors {
+  background: string;
+  bezel: string;
+  screen: string;
+  buttonBg: string;
+  textPrimary: string;
+  textSecondary: string;
+  border: string;
+  primary: string;
+  play: string;
+  digitDefault: string;
+  digitWarning: string;
+  digitCritical: string;
+  extAvailable: string;
+  extUsed: string;
+  panelBg: string;
+  panelHeaderBorder: string;
+  panelInputBg: string;
+  panelInputBorder: string;
+  panelTextPrimary: string;
+  panelTextSecondary: string;
+  ambiance: string;
+  playerChipBg: string;
+  controlFooter: string;
+}
+
 export interface TimerConfig {
   tempsBase: number;
   tempsApresCasse: number;
@@ -37,6 +63,8 @@ export interface TimerConfig {
   p2Name: string;
   p2Color: string;
   theme: Theme;
+  colors: ThemeColors;
+  competitionMode: CompetitionMode | null;
 }
 
 export interface AlertsFired {

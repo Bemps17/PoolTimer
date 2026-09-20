@@ -2,7 +2,14 @@ import { useRef, type ReactNode, type TouchEvent } from 'react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
 import { rollbackCopy } from '../pwa/updateChoice';
-import { applyCompetitionPreset, CONFIG_LIMITS, matchesCompetitionPreset } from '../timer/config';
+import {
+  applyCompetitionPreset,
+  applyNamedTheme,
+  CONFIG_LIMITS,
+  matchesCompetitionPreset,
+  showsApresCasseControl,
+  withSyncedCompetitionMode,
+} from '../timer/config';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
@@ -10,6 +17,7 @@ import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './
 import { PlayerNameField } from './PlayerNameField';
 import { SettingsSection } from './SettingsSection';
 import { SoundLibrarySettings } from './SoundLibrarySettings';
+import { ThemeColorEditor } from './ThemeColorEditor';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -103,6 +111,12 @@ export function SettingsPanel({
   const applyMode = (mode: CompetitionMode) => {
     onChange(applyCompetitionPreset(config, mode), { resetShot: true });
   };
+
+  const patchTimings = (partial: Partial<TimerConfig>, resetShot = false) => {
+    onChange(withSyncedCompetitionMode({ ...config, ...partial }), { resetShot });
+  };
+
+  const hideApresCasse = !showsApresCasseControl(config);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
@@ -224,8 +238,8 @@ export function SettingsPanel({
               })}
             </div>
             <p className="install-hint">
-              Presets appliqués tout de suite. Ultimate FBEP : pas d’après casse. Les autres gardent le bouton si le
-              temps post-casse est distinct.
+              Presets de chronométrage uniquement. Changer le thème ou les couleurs ne change pas le preset. Ultimate
+              FBEP : pas d’après casse. Les autres gardent le bouton si le temps post-casse est distinct.
             </p>
             <NumberStepper
               label="Temps de base (sec)"
@@ -235,10 +249,10 @@ export function SettingsPanel({
               max={CONFIG_LIMITS.tempsBase.max}
               suffix="s"
               onChange={(tempsBase) =>
-                patch(config.theme === 'fbep' ? { tempsBase, tempsApresCasse: tempsBase } : { tempsBase }, true)
+                patchTimings(hideApresCasse ? { tempsBase, tempsApresCasse: tempsBase } : { tempsBase }, true)
               }
             />
-            {config.theme === 'fbep' ? null : (
+            {hideApresCasse ? null : (
               <NumberStepper
                 label={`Temps après casse (${formatSecondsClock(config.tempsApresCasse)})`}
                 htmlId="tempsApresCasse"
@@ -246,7 +260,7 @@ export function SettingsPanel({
                 min={CONFIG_LIMITS.tempsApresCasse.min}
                 max={CONFIG_LIMITS.tempsApresCasse.max}
                 suffix="s"
-                onChange={(tempsApresCasse) => patch({ tempsApresCasse }, true)}
+                onChange={(tempsApresCasse) => patchTimings({ tempsApresCasse }, true)}
               />
             )}
             <NumberStepper
@@ -256,7 +270,7 @@ export function SettingsPanel({
               min={CONFIG_LIMITS.tempsExtension.min}
               max={CONFIG_LIMITS.tempsExtension.max}
               suffix="s"
-              onChange={(tempsExtension) => patch({ tempsExtension })}
+              onChange={(tempsExtension) => patchTimings({ tempsExtension })}
             />
             <NumberStepper
               label="Seuil Alerte Orange (sec)"
@@ -265,7 +279,7 @@ export function SettingsPanel({
               min={CONFIG_LIMITS.seuilAlerte.min}
               max={CONFIG_LIMITS.seuilAlerte.max}
               suffix="s"
-              onChange={(seuilAlerte) => patch({ seuilAlerte })}
+              onChange={(seuilAlerte) => patchTimings({ seuilAlerte })}
             />
             <NumberStepper
               label="Seuil Alerte Rouge (sec)"
@@ -274,7 +288,7 @@ export function SettingsPanel({
               min={CONFIG_LIMITS.seuilCritique.min}
               max={CONFIG_LIMITS.seuilCritique.max}
               suffix="s"
-              onChange={(seuilCritique) => patch({ seuilCritique })}
+              onChange={(seuilCritique) => patchTimings({ seuilCritique })}
             />
             <p className="install-hint">+/− ou saisie au clavier (pavé numérique).</p>
           </SettingsSection>
@@ -285,8 +299,20 @@ export function SettingsPanel({
               htmlId="themeVisuel"
               value={config.theme}
               options={THEME_OPTIONS}
-              onChange={(theme) => patch({ theme: theme as Theme })}
+              onChange={(theme) => onChange(applyNamedTheme(config, theme as Theme))}
             />
+            <p className="install-hint">
+              Un thème remplit toutes les couleurs de zone. Vous pouvez ensuite les modifier sans toucher au preset de
+              compétition (FFB, Ultimate, TD/TN, Master).
+            </p>
+            <ThemeColorEditor colors={config.colors} onChange={(colors) => patch({ colors })} />
+            <button
+              type="button"
+              className="bouton-menu bouton-menu-secondary"
+              onClick={() => onChange(applyNamedTheme(config, config.theme))}
+            >
+              Réinitialiser les couleurs du thème
+            </button>
             <SelectField
               label="Mode d'interface"
               htmlId="modeInterface"

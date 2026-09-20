@@ -1,6 +1,15 @@
 import { defaultIdsForPack, isAlertPackId, isAlertPickMode, isCriticalAlertStyle, sanitizeSoundIdList } from '../audio/soundCatalog';
 import { readStoredPlayerName } from './playerName';
-import type { CompetitionMode, TimerConfig } from './types';
+import {
+  colorsForTheme,
+  FBEP_AMBIANCE,
+  FFB_AMBIANCE,
+  parseThemeColors,
+  suggestedThemeForCompetition,
+} from './theme';
+import type { CompetitionMode, Theme, TimerConfig } from './types';
+
+export { FBEP_AMBIANCE, FFB_AMBIANCE };
 
 export const CONFIG_STORAGE_KEY = 'billiardTimerConfig';
 
@@ -13,16 +22,15 @@ export const COMPETITION_SHOT_TIMING = {
 
 export const FFB_AFTER_BREAK_DEFAULT = 90;
 
+/** Timing-only presets. Appearance is applied separately as a one-time suggestion. */
 export const FFB_BLACKBALL_PRESET = {
   ...COMPETITION_SHOT_TIMING,
   tempsApresCasse: FFB_AFTER_BREAK_DEFAULT,
-  theme: 'ffb' as const,
 };
 
 export const FBEP_ULTIMATE_PRESET = {
   ...COMPETITION_SHOT_TIMING,
   tempsApresCasse: COMPETITION_SHOT_TIMING.tempsBase,
-  theme: 'fbep' as const,
 };
 
 /** Tournois / championnats FFB TD-TN. */
@@ -32,7 +40,6 @@ export const FFB_TD_TN_PRESET = {
   tempsExtension: 45,
   seuilAlerte: 20,
   seuilCritique: 5,
-  theme: 'ffb' as const,
 };
 
 /** Catégorie nationale Master (shot clock 30 s). */
@@ -42,13 +49,19 @@ export const FFB_BLACKBALL_MASTER_PRESET = {
   tempsExtension: 30,
   seuilAlerte: 10,
   seuilCritique: 5,
-  theme: 'ffb' as const,
 };
 
-/** Ambiance FFB : bleu franc. */
-export const FFB_AMBIANCE = '#0066CC';
-/** Ambiance Ultimate FBEP : vert canard. */
-export const FBEP_AMBIANCE = '#007879';
+export const COMPETITION_PRESET_TIMINGS: Record<
+  CompetitionMode,
+  Pick<TimerConfig, 'tempsBase' | 'tempsApresCasse' | 'tempsExtension' | 'seuilAlerte' | 'seuilCritique'>
+> = {
+  ffb: FFB_BLACKBALL_PRESET,
+  fbep: FBEP_ULTIMATE_PRESET,
+  ffbTdTn: FFB_TD_TN_PRESET,
+  ffbMaster: FFB_BLACKBALL_MASTER_PRESET,
+};
+
+export const COMPETITION_MODES: CompetitionMode[] = ['ffb', 'fbep', 'ffbTdTn', 'ffbMaster'];
 
 export const CONFIG_LIMITS = {
   tempsBase: { min: 10, max: 180 },
@@ -109,6 +122,8 @@ export function getDefaultConfig(): TimerConfig {
     p2Name: 'P2',
     p2Color: '#e74c3c',
     theme: 'sombre',
+    colors: colorsForTheme('sombre'),
+    competitionMode: 'ffb',
   };
 }
 
@@ -125,7 +140,7 @@ function asBoolean(value: unknown, fallback: boolean): boolean {
   return fallback;
 }
 
-function asTheme(value: unknown): TimerConfig['theme'] {
+function asTheme(value: unknown): Theme {
   switch (value) {
     case 'sombre':
     case 'light':
@@ -136,6 +151,44 @@ function asTheme(value: unknown): TimerConfig['theme'] {
     default:
       return 'sombre';
   }
+}
+
+function asCompetitionMode(value: unknown): CompetitionMode | null {
+  switch (value) {
+    case 'ffb':
+    case 'fbep':
+    case 'ffbTdTn':
+    case 'ffbMaster':
+      return value;
+    default:
+      return null;
+  }
+}
+
+function timingsEqual(
+  config: Pick<TimerConfig, 'tempsBase' | 'tempsApresCasse' | 'tempsExtension' | 'seuilAlerte' | 'seuilCritique'>,
+  timings: Pick<TimerConfig, 'tempsBase' | 'tempsApresCasse' | 'tempsExtension' | 'seuilAlerte' | 'seuilCritique'>,
+): boolean {
+  return (
+    timings.tempsBase === config.tempsBase &&
+    timings.tempsApresCasse === config.tempsApresCasse &&
+    timings.tempsExtension === config.tempsExtension &&
+    timings.seuilAlerte === config.seuilAlerte &&
+    timings.seuilCritique === config.seuilCritique
+  );
+}
+
+export function detectCompetitionMode(
+  config: Pick<TimerConfig, 'tempsBase' | 'tempsApresCasse' | 'tempsExtension' | 'seuilAlerte' | 'seuilCritique'>,
+): CompetitionMode | null {
+  for (const mode of COMPETITION_MODES) {
+    if (timingsEqual(config, COMPETITION_PRESET_TIMINGS[mode])) return mode;
+  }
+  return null;
+}
+
+export function withSyncedCompetitionMode(config: TimerConfig): TimerConfig {
+  return { ...config, competitionMode: detectCompetitionMode(config) };
 }
 
 function asInterfaceMode(value: unknown): TimerConfig['modeInterface'] {
@@ -161,7 +214,7 @@ export function mergeConfig(saved: unknown): TimerConfig {
     : defaults.criticalAlertStyle;
   const packDefaults = defaultIdsForPack(alertPack, criticalAlertStyle);
 
-  return {
+  const merged: TimerConfig = {
     tempsBase: clampInt(s.tempsBase, defaults.tempsBase, CONFIG_LIMITS.tempsBase.min, CONFIG_LIMITS.tempsBase.max),
     tempsApresCasse: clampInt(
       s.tempsApresCasse,
@@ -210,7 +263,10 @@ export function mergeConfig(saved: unknown): TimerConfig {
     p2Name,
     p2Color: typeof s.p2Color === 'string' ? s.p2Color : defaults.p2Color,
     theme: asTheme(s.theme),
+    colors: parseThemeColors(s.colors, colorsForTheme(asTheme(s.theme))),
+    competitionMode: asCompetitionMode(s.competitionMode),
   };
+  return withSyncedCompetitionMode(merged);
 }
 
 export function loadConfig(): TimerConfig {
@@ -230,38 +286,32 @@ export function saveConfig(config: TimerConfig): void {
   }
 }
 
-export function applyCompetitionPreset(config: TimerConfig, mode: CompetitionMode): TimerConfig {
-  switch (mode) {
-    case 'ffb':
-      return { ...config, ...FFB_BLACKBALL_PRESET };
-    case 'fbep':
-      return { ...config, ...FBEP_ULTIMATE_PRESET };
-    case 'ffbTdTn':
-      return { ...config, ...FFB_TD_TN_PRESET };
-    case 'ffbMaster':
-      return { ...config, ...FFB_BLACKBALL_MASTER_PRESET };
-    default: {
-      const exhaustive: never = mode;
-      return exhaustive;
-    }
-  }
+export function applyNamedTheme(config: TimerConfig, theme: Theme): TimerConfig {
+  return { ...config, theme, colors: colorsForTheme(theme) };
+}
+
+export function applyCompetitionPreset(
+  config: TimerConfig,
+  mode: CompetitionMode,
+  options?: { suggestTheme?: boolean },
+): TimerConfig {
+  const timings = COMPETITION_PRESET_TIMINGS[mode];
+  const next: TimerConfig = {
+    ...config,
+    ...timings,
+    competitionMode: mode,
+  };
+  if (options?.suggestTheme === false) return next;
+  return applyNamedTheme(next, suggestedThemeForCompetition(mode));
 }
 
 export function matchesCompetitionPreset(config: TimerConfig, mode: CompetitionMode): boolean {
-  const applied = applyCompetitionPreset(config, mode);
-  return (
-    applied.tempsBase === config.tempsBase &&
-    applied.tempsApresCasse === config.tempsApresCasse &&
-    applied.tempsExtension === config.tempsExtension &&
-    applied.seuilAlerte === config.seuilAlerte &&
-    applied.seuilCritique === config.seuilCritique &&
-    applied.theme === config.theme
-  );
+  return timingsEqual(config, COMPETITION_PRESET_TIMINGS[mode]);
 }
 
 /** Ultimate FBEP has no post-break extra time; other modes keep the control when the duration differs. */
 export function showsApresCasseControl(config: TimerConfig): boolean {
-  if (config.theme === 'fbep') return false;
+  if (config.competitionMode === 'fbep' || matchesCompetitionPreset(config, 'fbep')) return false;
   return config.tempsApresCasse !== config.tempsBase;
 }
 
