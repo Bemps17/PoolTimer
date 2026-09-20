@@ -41,3 +41,13 @@ describe('PWA tutorial assets', () => {
     expect(vite).toMatch(/tutorial/);
   });
 });
+
+describe('PWA update banner layout', () => {
+  it('wraps Plus tard under Mettre à jour on a phone-sized viewport', () => {
+    const css = source('index.css');
+    expect(css).toMatch(/\.update-banner[\s\S]*flex-wrap:\s*wrap/);
+    expect(css).toMatch(/\.update-banner-actions[\s\S]*flex-wrap:\s*wrap/);
+    expect(css).toMatch(/@media \(max-width: 430px\)[\s\S]*\.update-banner-actions[\s\S]*flex-direction:\s*column/);
+    expect(css).toMatch(/@media \(max-width: 430px\)[\s\S]*\.update-banner-later[\s\S]*width:\s*100%/);
+  });
+});
