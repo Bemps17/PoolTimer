@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { parseBooleanSelect, SelectField } from './NumberStepper';
 import { QrCodeSvg } from '../mirror/QrCodeSvg';
+import { formatMirrorDiagnostics } from '../mirror/diagnostics';
 import { formatRoomCode } from '../mirror/protocol';
 import type { ControllerSyncView } from '../mirror/syncStatus';
-import { isMirrorRelayConfigured } from '../mirror/wsUrl';
-import type { MirrorConnectionStatus } from '../hooks/useMirror';
+import { getMirrorRelayHost, isMirrorRelayConfigured } from '../mirror/wsUrl';
+import { useMirrorDiagnostics, type MirrorConnectionStatus } from '../hooks/useMirror';
 
 interface MirrorSettingsProps {
   betaEnabled: boolean;
@@ -17,6 +19,7 @@ interface MirrorSettingsProps {
   onCreateRoom: () => void;
   onCloseRoom: () => void;
   onCopyLink: () => void;
+  onCopyLogs: (text: string) => void;
 }
 
 const YES_NO = [
@@ -36,9 +39,13 @@ export function MirrorSettings({
   onCreateRoom,
   onCloseRoom,
   onCopyLink,
+  onCopyLogs,
 }: MirrorSettingsProps) {
   const configured = isMirrorRelayConfigured();
   const live = Boolean(room) && status !== 'idle';
+  const diagnostics = useMirrorDiagnostics();
+  const copyText = formatMirrorDiagnostics(diagnostics);
+  const relayHost = getMirrorRelayHost();
 
   const statusText = (() => {
     if (!configured) return 'Relais non configuré.';
@@ -102,8 +109,50 @@ export function MirrorSettings({
               Ouvrir une salle
             </button>
           )}
+          <div className="mirror-diag">
+            <h4>Diagnostic miroir</h4>
+            <p className="install-hint">
+              Relais : <code>{relayHost ?? 'non configuré'}</code>. Copiez ces logs (codes{' '}
+              <code>bad_push</code>, <code>unauthorized</code>, <code>stale_seq</code>, <code>room_busy</code>,{' '}
+              <code>ws_close</code>…) pour un diagnostic précis.
+            </p>
+            <pre className="mirror-diag-log" aria-label="Journaux miroir">
+              {copyText}
+            </pre>
+            <button type="button" className="bouton-menu" onClick={() => onCopyLogs(copyText)}>
+              Copier les logs
+            </button>
+          </div>
         </>
       ) : null}
     </div>
+  );
+}
+
+export function MirrorLogCopyButton({ onCopied }: { onCopied?: () => void }) {
+  const diagnostics = useMirrorDiagnostics();
+  const [copied, setCopied] = useState(false);
+  const copyText = formatMirrorDiagnostics(diagnostics);
+
+  return (
+    <button
+      type="button"
+      className="bouton-menu bouton-menu-secondary"
+      onClick={(event) => {
+        event.stopPropagation();
+        void navigator.clipboard.writeText(copyText).then(
+          () => {
+            setCopied(true);
+            onCopied?.();
+            window.setTimeout(() => setCopied(false), 2000);
+          },
+          () => {
+            setCopied(false);
+          },
+        );
+      }}
+    >
+      {copied ? 'Logs copiés' : 'Copier les logs'}
+    </button>
   );
 }

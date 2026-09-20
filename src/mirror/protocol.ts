@@ -33,6 +33,9 @@ export interface MirrorSnapshot {
   config: MirrorDisplayConfig;
 }
 
+/** Extra camelCase alias for a production Worker that reads `isextensionUsedForShot`. */
+export type MirrorWireSnapshot = MirrorSnapshot & { isextensionUsedForShot: boolean };
+
 export type ClientMessage =
   | { type: 'push'; seq: number; snapshot: MirrorSnapshot }
   | { type: 'ping' };
@@ -156,6 +159,13 @@ export function buildSnapshot(state: EngineState, config: TimerConfig, now: numb
   };
 }
 
+export function toWireSnapshot(snapshot: MirrorSnapshot): MirrorWireSnapshot {
+  return {
+    ...snapshot,
+    isextensionUsedForShot: snapshot.isExtensionUsedForShot,
+  };
+}
+
 export function remainingAtSend(snapshot: MirrorSnapshot): number {
   if (snapshot.isRunning && snapshot.expectedEnd > 0) {
     return Math.max(0, snapshot.expectedEnd - snapshot.controllerNow);
@@ -194,6 +204,14 @@ export function parseClientMessage(raw: unknown): ClientMessage | undefined {
   }
 }
 
+function readExtensionUsedForShot(
+  value: Partial<MirrorSnapshot> & { isextensionUsedForShot?: unknown },
+): boolean | undefined {
+  if (typeof value.isExtensionUsedForShot === 'boolean') return value.isExtensionUsedForShot;
+  if (typeof value.isextensionUsedForShot === 'boolean') return value.isextensionUsedForShot;
+  return undefined;
+}
+
 export function parseSnapshot(raw: unknown): MirrorSnapshot | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const value = raw as Partial<MirrorSnapshot>;
@@ -203,7 +221,8 @@ export function parseSnapshot(raw: unknown): MirrorSnapshot | undefined {
   if (typeof value.controllerNow !== 'number' || !Number.isFinite(value.controllerNow)) return undefined;
   if (value.currentPlayer !== 1 && value.currentPlayer !== 2) return undefined;
   if (value.shotKind !== 'base' && value.shotKind !== 'apresCasse') return undefined;
-  if (typeof value.isExtensionUsedForShot !== 'boolean') return undefined;
+  const extensionUsed = readExtensionUsedForShot(value);
+  if (typeof extensionUsed !== 'boolean') return undefined;
   const extensions = value.extensionsUsedInGame;
   if (!extensions || typeof extensions !== 'object') return undefined;
   if (typeof extensions[1] !== 'boolean' || typeof extensions[2] !== 'boolean') return undefined;
@@ -216,7 +235,7 @@ export function parseSnapshot(raw: unknown): MirrorSnapshot | undefined {
     controllerNow: value.controllerNow,
     currentPlayer: value.currentPlayer,
     extensionsUsedInGame: { 1: extensions[1], 2: extensions[2] },
-    isExtensionUsedForShot: value.isExtensionUsedForShot,
+    isExtensionUsedForShot: extensionUsed,
     shotKind: value.shotKind,
     config,
   };
@@ -329,4 +348,34 @@ function asErrorCode(value: unknown): MirrorErrorCode {
     default:
       return 'unknown';
   }
+}
+
+export type InspectedServerPayload =
+  | { parsed: ServerMessage }
+  | { parsed: undefined; code: 'invalid_json' | 'unparsed'; preview: string };
+
+export function inspectServerPayload(rawText: string): InspectedServerPayload {
+  let value: unknown;
+  try {
+    value = JSON.parse(rawText);
+  } catch {
+    return { parsed: undefined, code: 'invalid_json', preview: rawText.slice(0, 180) };
+  }
+  const parsed = parseServerMessage(value);
+  if (parsed) return { parsed };
+  const type =
+    value && typeof value === 'object' && 'type' in value
+      ? String((value as { type?: unknown }).type ?? '?')
+      : '?';
+  return {
+    parsed: undefined,
+    code: 'unparsed',
+    preview: `${type} ${JSON.stringify(value).slice(0, 160)}`,
+  };
+}
+
+export function welcomeDroppedSnapshot(raw: unknown, parsed: ServerMessage): boolean {
+  if (parsed.type !== 'welcome' || parsed.snapshot != null) return false;
+  if (!raw || typeof raw !== 'object') return false;
+  return (raw as { snapshot?: unknown }).snapshot != null;
 }

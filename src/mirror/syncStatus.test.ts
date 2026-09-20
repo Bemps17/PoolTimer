@@ -34,6 +34,16 @@ describe('controller sync status', () => {
         now: 4_000,
       }).chip,
     ).toBe('Écran lié · sync OK');
+    expect(
+      controllerSyncStatus({
+        ...base,
+        displayCount: 1,
+        lastPushOkAt: null,
+        lastErrorCode: 'bad_push',
+        error: 'Snapshot invalide.',
+        now: 1_000 + CONTROLLER_SYNC_WAIT_MS,
+      }).chip,
+    ).toBe('Écran lié · pas de sync · bad_push');
   });
 });
 
@@ -52,6 +62,17 @@ describe('display sync status', () => {
       label: 'En attente de la télécommande…',
       waitingForSnapshot: true,
     });
+    expect(
+      displaySyncStatus({
+        status: 'live',
+        error: 'Snapshot invalide.',
+        lastErrorCode: 'unparsed',
+        hasSnapshot: false,
+        lastSnapshotAt: null,
+        liveSince: 10,
+        now: 10 + DISPLAY_SNAPSHOT_WAIT_MS,
+      }).label,
+    ).toBe('En attente de la télécommande… · unparsed');
     expect(
       displaySyncStatus({
         status: 'live',

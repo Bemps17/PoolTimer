@@ -24,6 +24,7 @@ export function controllerSyncStatus(input: {
   liveSince: number | null;
   now: number;
   room?: string | null;
+  lastErrorCode?: string | null;
 }): ControllerSyncView {
   switch (input.status) {
     case 'error':
@@ -61,6 +62,17 @@ export function controllerSyncStatus(input: {
     };
   }
 
+  if (input.lastErrorCode) {
+    const detail = input.error
+      ? `${input.lastErrorCode} : ${input.error}`
+      : `Écran lié · pas de sync · ${input.lastErrorCode}`;
+    return {
+      chip: `Écran lié · pas de sync · ${input.lastErrorCode}`,
+      detail,
+      health: 'waiting_sync',
+    };
+  }
+
   const waited = input.liveSince != null && input.now - input.liveSince >= CONTROLLER_SYNC_WAIT_MS;
   if (waited) {
     return {
@@ -84,14 +96,18 @@ export function displaySyncStatus(input: {
   lastSnapshotAt: number | null;
   liveSince: number | null;
   now: number;
+  lastErrorCode?: string | null;
 }): DisplaySyncView {
+  const withCode = (label: string): string =>
+    input.lastErrorCode ? `${label} · ${input.lastErrorCode}` : label;
+
   switch (input.status) {
     case 'error':
-      return { label: input.error ?? 'Erreur de connexion', waitingForSnapshot: true };
+      return { label: withCode(input.error ?? 'Erreur de connexion'), waitingForSnapshot: true };
     case 'connecting':
-      return { label: 'Connexion…', waitingForSnapshot: true };
+      return { label: withCode('Connexion…'), waitingForSnapshot: true };
     case 'idle':
-      return { label: 'Inactif', waitingForSnapshot: true };
+      return { label: withCode('Inactif'), waitingForSnapshot: true };
     case 'live':
       break;
     default: {
@@ -103,7 +119,7 @@ export function displaySyncStatus(input: {
   if (!input.hasSnapshot) {
     const waited = input.liveSince != null && input.now - input.liveSince >= DISPLAY_SNAPSHOT_WAIT_MS;
     return {
-      label: waited ? 'En attente de la télécommande…' : 'Synchronisation…',
+      label: withCode(waited ? 'En attente de la télécommande…' : 'Synchronisation…'),
       waitingForSnapshot: true,
     };
   }

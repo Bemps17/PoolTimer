@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.4';
+export const APP_VERSION = '2.5.5';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.5',
+    date: '2026-09-20',
+    title: 'Miroir : logs diagnostic + push compatible Worker prod',
+    notes: [
+      'Section Diagnostic miroir dans les réglages : événements récents avec codes (bad_push, unauthorized, stale_seq, room_busy, ws_close, connect_fail…) et bouton Copier les logs.',
+      'L’écran d’attente n’affiche plus un chrono à 00:00 ; message « En attente de la télécommande » + logs copiables.',
+      'Indicateur « Écran lié · pas de sync · code » si le relais refuse un push.',
+      'Les pushes envoient aussi isextensionUsedForShot : contourne le Worker de production qui rejetait tous les snapshots (typo camelCase → bad_push).',
+    ],
+  },
   {
     version: '2.5.4',
     date: '2026-09-20',

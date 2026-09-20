@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.5 — 2026-09-20
+
+- **Diagnostic miroir** dans Configuration : journal copiable (codes `bad_push`, `unauthorized`, `stale_seq`, `room_busy`, `ws_close`, hôte du relais, seq, snapshot reçu ou non).
+- L’écran `/d/CODE` n’affiche plus `00:00` en attente ; message clair + bouton **Copier les logs**.
+- Indicateur « Écran lié · pas de sync · *code* » quand le relais refuse un push.
+- Contournement client : le snapshot wire inclut `isextensionUsedForShot` (Worker prod corrompu qui lisait ce nom et renvoyait `bad_push` / Snapshot invalide).
+
 ## 2.5.4 — 2026-09-20
 
 - **Simple vs double appui** : la pause (ou le départ) n’est confirmée que si aucun second tap n’arrive dans la fenêtre — le double appui n’est plus volé par la pause.
