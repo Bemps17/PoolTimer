@@ -3,10 +3,9 @@ import { MirrorGuide } from './MirrorGuide';
 interface HelpPanelProps {
   open: boolean;
   onClose: () => void;
-  onShowTutorial: () => void;
 }
 
-export function HelpPanel({ open, onClose, onShowTutorial }: HelpPanelProps) {
+export function HelpPanel({ open, onClose }: HelpPanelProps) {
   return (
     <>
       <div className={`overlay${open ? ' active' : ''}`} onClick={onClose} />
@@ -22,10 +21,10 @@ export function HelpPanel({ open, onClose, onShowTutorial }: HelpPanelProps) {
             Bienvenue sur H8timer ! Cette application est conçue pour arbitrer vos parties
             avec précision, simplicité et style.
           </p>
-          <button type="button" className="bouton-menu" onClick={onShowTutorial}>
-            Tutoriel
-          </button>
-          <p className="install-hint">Diaporama illustré : écran de jeu, commandes, saisie des temps, miroir télécommande ↔ Visuel.</p>
+          <p className="install-hint">
+            Diaporama illustré (écran de jeu, commandes, saisie des temps, miroir) : bouton <strong>Tutoriel</strong>{' '}
+            en haut du menu ⚙️.
+          </p>
 
           <h3>Contrôles Principaux</h3>
           <ul>
@@ -128,7 +127,7 @@ export function HelpPanel({ open, onClose, onShowTutorial }: HelpPanelProps) {
             </li>
             <li>
               <strong>Miroir télécommande :</strong> pairing code + QR. Ouvrez le <strong>Tutoriel</strong>
-              (diaporama) ou lisez la section ci-dessous.
+              en haut du menu ⚙️, ou lisez la section ci-dessous.
             </li>
           </ul>
 

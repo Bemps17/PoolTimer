@@ -8,6 +8,7 @@ import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../time
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
 import { PlayerNameField } from './PlayerNameField';
+import { SettingsSection } from './SettingsSection';
 import { SoundLibrarySettings } from './SoundLibrarySettings';
 
 interface SettingsPanelProps {
@@ -170,13 +171,17 @@ export function SettingsPanel({
       >
         <div className="header-panel">
           <h2 id="settings-title">Configuration</h2>
-          <button className="fermer-panel" onClick={onClose} aria-label="Fermer le menu">
-            &times;
-          </button>
+          <div className="header-panel-actions">
+            <button type="button" className="header-tutorial-btn" onClick={onShowTutorial}>
+              Tutoriel
+            </button>
+            <button className="fermer-panel" onClick={onClose} aria-label="Fermer le menu">
+              &times;
+            </button>
+          </div>
         </div>
         <div ref={contentRef} className="panel-content">
-          <div className="section-panel">
-            <h3>Joueurs</h3>
+          <SettingsSection title="Joueurs" defaultOpen>
             <PlayerNameField
               label="Joueur 1"
               nameId="p1Name"
@@ -197,14 +202,10 @@ export function SettingsPanel({
               onNameChange={(p2Name) => patch({ p2Name })}
               onColorChange={(p2Color) => patch({ p2Color })}
             />
-            <p className="install-hint">
-              Un nom vide est autorisé (affichage « Joueur 1 / 2 » uniquement à l’écran, sans réécrire P1 dans
-              le réglage).
-            </p>
-          </div>
+            <p className="install-hint">Nom vide autorisé (affichage « Joueur 1 / 2 » à l’écran, sans réécrire P1).</p>
+          </SettingsSection>
 
-          <div className="section-panel">
-            <h3>Modes de compétition</h3>
+          <SettingsSection title="Compétition & temps" defaultOpen>
             <div className="preset-row" role="group" aria-label="Presets de compétition">
               {COMPETITION_PRESET_CARDS.map((preset) => {
                 const active = matchesCompetitionPreset(config, preset.mode);
@@ -223,13 +224,9 @@ export function SettingsPanel({
               })}
             </div>
             <p className="install-hint">
-              Les presets s’appliquent tout de suite et sont mémorisés. Ultimate FBEP n’a pas d’après casse.
-              FFB Blackball, TD/TN et Master gardent le bouton quand le temps post-casse est distinct.
+              Presets appliqués tout de suite. Ultimate FBEP : pas d’après casse. Les autres gardent le bouton si le
+              temps post-casse est distinct.
             </p>
-          </div>
-
-          <div className="section-panel">
-            <h3>Paramètres de Jeu</h3>
             <NumberStepper
               label="Temps de base (sec)"
               htmlId="tempsBase"
@@ -279,13 +276,10 @@ export function SettingsPanel({
               suffix="s"
               onChange={(seuilCritique) => patch({ seuilCritique })}
             />
-            <p className="install-hint">
-              En plus de +/−, touchez le champ pour saisir le nombre au clavier (pavé numérique).
-            </p>
-          </div>
+            <p className="install-hint">+/− ou saisie au clavier (pavé numérique).</p>
+          </SettingsSection>
 
-          <div className="section-panel">
-            <h3>Interface & Audio</h3>
+          <SettingsSection title="Apparence">
             <SelectField
               label="Thème visuel"
               htmlId="themeVisuel"
@@ -317,6 +311,19 @@ export function SettingsPanel({
               options={YES_NO}
               onChange={(value) => patch({ affichageMs: parseBooleanSelect(value) })}
             />
+            <button
+              type="button"
+              className="bouton-menu"
+              id="btnFullScreen"
+              aria-pressed={isFullscreen}
+              onClick={onToggleFullscreen}
+            >
+              {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
+            </button>
+            <p className="install-hint">Utile dans le navigateur. En app installée, c’est déjà plein écran.</p>
+          </SettingsSection>
+
+          <SettingsSection title="Sons & vibration">
             <VolumeSlider
               label="Volume général"
               htmlId="volumeSonore"
@@ -344,22 +351,10 @@ export function SettingsPanel({
               options={VIBRATION}
               onChange={(value) => patch({ vibration: parseBooleanSelect(value) })}
             />
-            <button
-              type="button"
-              className="bouton-menu"
-              id="btnFullScreen"
-              aria-pressed={isFullscreen}
-              onClick={onToggleFullscreen}
-            >
-              {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
-            </button>
-            <p className="install-hint">
-              Utile dans le navigateur. En application installée, l’affichage est déjà plein écran.
-            </p>
-          </div>
+            <SoundLibrarySettings config={config} onChange={(next) => onChange(next)} />
+          </SettingsSection>
 
-          <div className="section-panel">
-            <h3>Automatisation</h3>
+          <SettingsSection title="Automatisation">
             <SelectField
               label="Redémarrage auto après nouveau coup"
               htmlId="autoStartOnReset"
@@ -368,8 +363,7 @@ export function SettingsPanel({
               onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
             />
             <p className="install-hint">
-              Après un nouveau coup (double appui sur l’écran, ou bouton reset). Désactivé par défaut : le
-              chrono reste figé. Passez sur Oui pour le relancer automatiquement.
+              Après un nouveau coup (double appui ou reset). Désactivé : le chrono reste figé.
             </p>
             <SelectField
               label="Relancer le chrono au clic joueur"
@@ -388,19 +382,15 @@ export function SettingsPanel({
                   onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
                 />
                 <p className="install-hint">
-                  Cri Arghh historique (fichier du dépôt) à la première alerte orange. Même raccourci : appui long sur
-                  NEW.
+                  Cri Arghh historique à la première alerte orange. Même raccourci : appui long sur NEW.
                 </p>
               </>
             ) : null}
-          </div>
+          </SettingsSection>
 
-          <SoundLibrarySettings config={config} onChange={(next) => onChange(next)} />
+          {extraSections ? <SettingsSection title="Miroir télécommande">{extraSections}</SettingsSection> : null}
 
-          {extraSections}
-
-          <div className="section-panel">
-            <h3>Application</h3>
+          <SettingsSection title="Application">
             <p className="app-version">H8timer v{APP_VERSION}</p>
             <button
               type="button"
@@ -411,15 +401,10 @@ export function SettingsPanel({
               {installCopy.label}
             </button>
             <p className="install-hint">{installCopy.hint}</p>
-            <button type="button" className="bouton-menu" onClick={onShowTutorial}>
-              Tutoriel
-            </button>
             <button type="button" className="bouton-menu" onClick={onCheckUpdates}>
               Vérifier les mises à jour
             </button>
-            <p className="install-hint">
-              Compare la version installée avec le serveur. Utile si le bandeau de mise à jour n’apparaît pas.
-            </p>
+            <p className="install-hint">Compare la version installée avec le serveur.</p>
             {updateAvailable && onApplyUpdate && onSnoozeUpdate ? (
               <div className="update-settings">
                 <p className="install-hint">
@@ -444,7 +429,7 @@ export function SettingsPanel({
             <button type="button" className="bouton-menu" onClick={onShowHelp}>
               Mode d'emploi
             </button>
-          </div>
+          </SettingsSection>
         </div>
       </div>
     </>

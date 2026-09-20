@@ -73,6 +73,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3,wav,webmanifest}'],
         globIgnores: ['**/version.json'],
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/tutorial\//, /\.(?:svg|png|jpg|jpeg|gif|webp|mp3|wav|ico)$/i],
         cleanupOutdatedCaches: true,
         skipWaiting: false,
         clientsClaim: true,
@@ -109,5 +110,10 @@ export default defineConfig({
   ],
   test: {
     environment: 'node',
+  },
+  build: {
+    assetsInlineLimit(filePath) {
+      return filePath.endsWith('.svg') ? false : undefined;
+    },
   },
 });
