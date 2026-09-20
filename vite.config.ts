@@ -16,10 +16,13 @@ export default defineConfig({
         'icon-512.png',
         'icon-512-maskable.png',
         'apple-touch-icon.png',
+        'sound/minions-arghh.mp3',
+        'sound/clic.mp3',
+        'sound/alert-time.mp3',
       ],
       manifest: {
-        name: 'Timer de Billard Pro',
-        short_name: 'Billard Pro',
+        name: 'H8timer',
+        short_name: 'H8timer',
         description:
           'Chronomètre de tir Blackball / billard, configurable et installable.',
         lang: 'fr',
@@ -49,7 +52,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3,webmanifest}'],
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

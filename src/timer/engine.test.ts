@@ -43,6 +43,24 @@ describe('mergeConfig', () => {
     expect(merged.tempsExtension).toBe(15);
     expect(merged.tempsApresCasse).toBe(90);
     expect(merged.theme).toBe('cyberpunk');
+    expect(merged.autoStartOnPlayerSelect).toBe(false);
+  });
+
+  it('persists autoStartOnPlayerSelect when present', () => {
+    const merged = mergeConfig({ autoStartOnPlayerSelect: true });
+    expect(merged.autoStartOnPlayerSelect).toBe(true);
+  });
+
+  it('keeps Minions mode hidden until unlocked', () => {
+    const merged = mergeConfig({ tempsBase: 45 });
+    expect(merged.minionsUnlocked).toBe(false);
+    expect(merged.minionsMode).toBe(false);
+  });
+
+  it('restores an unlocked Minions preference from storage', () => {
+    const merged = mergeConfig({ minionsMode: true });
+    expect(merged.minionsMode).toBe(true);
+    expect(merged.minionsUnlocked).toBe(true);
   });
 
   it('applies the FFB Blackball preset', () => {
@@ -84,6 +102,39 @@ describe('shot clock engine', () => {
     expect(state.currentPlayer).toBe(2);
     expect(state.shotKind).toBe('base');
     expect(state.remainingTime).toBe(45_000);
+    expect(state.isRunning).toBe(false);
+  });
+
+  it('does not restart when clicking the already active player if autoStartOnPlayerSelect is off', () => {
+    let state = startTimer(createInitialState(config), 1_000);
+    state = { ...state, remainingTime: 12_000 };
+    const next = selectPlayer(state, 1, config, 2_000);
+    expect(next).toBe(state);
+    expect(next.remainingTime).toBe(12_000);
+    expect(next.isRunning).toBe(true);
+  });
+
+  it('resets to base time and starts when autoStartOnPlayerSelect is on', () => {
+    const enabled = { ...config, autoStartOnPlayerSelect: true };
+    let state = setupApresCasse(createInitialState(enabled), enabled);
+    state = selectPlayer(state, 2, enabled, 5_000);
+    expect(state.currentPlayer).toBe(2);
+    expect(state.shotKind).toBe('base');
+    expect(state.remainingTime).toBe(45_000);
+    expect(state.isRunning).toBe(true);
+    expect(state.expectedTime).toBe(5_000 + 45_000);
+  });
+
+  it('relances the shot clock when clicking the already active player if autoStartOnPlayerSelect is on', () => {
+    const enabled = { ...config, autoStartOnPlayerSelect: true };
+    let state = startTimer(createInitialState(enabled), 1_000);
+    state = { ...state, remainingTime: 8_000, shotKind: 'apresCasse' };
+    state = selectPlayer(state, 1, enabled, 9_000);
+    expect(state.currentPlayer).toBe(1);
+    expect(state.shotKind).toBe('base');
+    expect(state.remainingTime).toBe(45_000);
+    expect(state.isRunning).toBe(true);
+    expect(state.expectedTime).toBe(9_000 + 45_000);
   });
 
   it('allows one extension per player per game', () => {

@@ -17,6 +17,7 @@ interface ScoreboardProps {
   onSelectPlayer: (player: PlayerId) => void;
   onToggleMenu: () => void;
   onToggleFullscreen: () => void;
+  onUnlockMinions: () => void;
 }
 
 export function Scoreboard({
@@ -32,11 +33,16 @@ export function Scoreboard({
   onSelectPlayer,
   onToggleMenu,
   onToggleFullscreen,
+  onUnlockMinions,
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const lastClickRef = useRef(0);
   const clickTimeoutRef = useRef<number | null>(null);
+  const newGameHoldRef = useRef<{ timer: number | null; unlockedThisPress: boolean }>({
+    timer: null,
+    unlockedThisPress: false,
+  });
 
   const resizeTimer = useCallback(() => {
     const screen = screenRef.current;
@@ -62,8 +68,38 @@ export function Scoreboard({
       observer.disconnect();
       window.removeEventListener('resize', resizeTimer);
       document.removeEventListener('fullscreenchange', resizeTimer);
+      if (clickTimeoutRef.current) window.clearTimeout(clickTimeoutRef.current);
+      if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
     };
   }, [resizeTimer, state.remainingTime, config.affichageMs]);
+
+  const clearNewGameHold = () => {
+    if (newGameHoldRef.current.timer !== null) {
+      window.clearTimeout(newGameHoldRef.current.timer);
+      newGameHoldRef.current.timer = null;
+    }
+  };
+
+  const handleNewGamePointerDown = () => {
+    newGameHoldRef.current.unlockedThisPress = false;
+    if (config.minionsUnlocked) return;
+    newGameHoldRef.current.timer = window.setTimeout(() => {
+      newGameHoldRef.current.unlockedThisPress = true;
+      newGameHoldRef.current.timer = null;
+      onUnlockMinions();
+    }, 1200);
+  };
+
+  const handleNewGamePointerUp = () => {
+    const unlockedThisPress = newGameHoldRef.current.unlockedThisPress;
+    clearNewGameHold();
+    if (!unlockedThisPress) onNewGame();
+  };
+
+  const handleNewGamePointerCancel = () => {
+    clearNewGameHold();
+    newGameHoldRef.current.unlockedThisPress = false;
+  };
 
   const handleTimerScreenClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
@@ -211,7 +247,19 @@ export function Scoreboard({
         >
           {state.isRunning ? <PauseIcon /> : <PlayIcon />}
         </button>
-        <button className="bouton-sport bouton-carré" id="btnNewGame" aria-label="Nouvelle manche" onClick={onNewGame}>
+        <button
+          className="bouton-sport bouton-carré"
+          id="btnNewGame"
+          aria-label="Nouvelle manche"
+          onPointerDown={handleNewGamePointerDown}
+          onPointerUp={handleNewGamePointerUp}
+          onPointerCancel={handleNewGamePointerCancel}
+          onClick={(event) => {
+            if (event.detail > 0) return;
+            onNewGame();
+          }}
+          onContextMenu={(event) => event.preventDefault()}
+        >
           NEW
         </button>
       </div>

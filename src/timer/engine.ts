@@ -51,9 +51,22 @@ export function newGame(state: EngineState, config: TimerConfig): EngineState {
   );
 }
 
-export function selectPlayer(state: EngineState, player: PlayerId, config: TimerConfig): EngineState {
-  if (state.currentPlayer === player) return state;
-  return setupNewShot({ ...state, currentPlayer: player }, config);
+export function selectPlayer(
+  state: EngineState,
+  player: PlayerId,
+  config: TimerConfig,
+  now = 0,
+): EngineState {
+  const samePlayer = state.currentPlayer === player;
+  if (samePlayer && !config.autoStartOnPlayerSelect) {
+    return state;
+  }
+
+  const reset = setupNewShot({ ...state, currentPlayer: player }, config);
+  if (config.autoStartOnPlayerSelect) {
+    return startTimer(reset, now);
+  }
+  return reset;
 }
 
 export function startTimer(state: EngineState, now: number): EngineState {

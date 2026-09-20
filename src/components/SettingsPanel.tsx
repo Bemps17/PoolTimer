@@ -1,4 +1,6 @@
 import { useRef, type TouchEvent } from 'react';
+import { APP_VERSION } from '../changelog';
+import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
 import { applyFfbPreset, CONFIG_LIMITS } from '../timer/config';
 import { formatSecondsClock } from '../timer/format';
 import type { InterfaceMode, Theme, TimerConfig } from '../timer/types';
@@ -12,6 +14,9 @@ interface SettingsPanelProps {
   onClose: () => void;
   onChange: (next: TimerConfig, options?: { resetShot?: boolean }) => void;
   onShowHelp: () => void;
+  onShowChangelog: () => void;
+  installStatus: PwaInstallStatus;
+  onInstall: () => void;
 }
 
 const THEME_OPTIONS = [
@@ -40,7 +45,16 @@ const VIBRATION = [
   { value: 'false', label: 'Désactivée' },
 ];
 
-export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: SettingsPanelProps) {
+export function SettingsPanel({
+  open,
+  config,
+  onClose,
+  onChange,
+  onShowHelp,
+  onShowChangelog,
+  installStatus,
+  onInstall,
+}: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef({ startX: 0, startY: 0, moveX: 0, moveY: 0, isDragging: false });
@@ -97,6 +111,8 @@ export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: S
     if (deltaX > panel.offsetWidth * 0.3) onClose();
     touchRef.current.isDragging = false;
   };
+
+  const installCopy = installButtonCopy(installStatus);
 
   return (
     <>
@@ -258,9 +274,39 @@ export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: S
               options={YES_NO}
               onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
             />
+            <SelectField
+              label="Relancer le chrono au clic joueur"
+              htmlId="autoStartOnPlayerSelect"
+              value={String(config.autoStartOnPlayerSelect)}
+              options={YES_NO}
+              onChange={(value) => patch({ autoStartOnPlayerSelect: parseBooleanSelect(value) })}
+            />
+            {config.minionsUnlocked ? (
+              <SelectField
+                label="Mode Minions"
+                htmlId="minionsMode"
+                value={String(config.minionsMode)}
+                options={YES_NO}
+                onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
+              />
+            ) : null}
           </div>
 
           <div className="section-panel">
+            <h3>Application</h3>
+            <p className="app-version">H8timer v{APP_VERSION}</p>
+            <button
+              type="button"
+              className="bouton-menu"
+              onClick={onInstall}
+              disabled={installCopy.disabled}
+            >
+              {installCopy.label}
+            </button>
+            <p className="install-hint">{installCopy.hint}</p>
+            <button type="button" className="bouton-menu" onClick={onShowChangelog}>
+              Historique des versions
+            </button>
             <button type="button" className="bouton-menu" onClick={onShowHelp}>
               Mode d'emploi
             </button>

@@ -1,5 +1,6 @@
 import * as Tone from 'tone';
 import type { SoundType, TimerConfig } from '../timer/types';
+import { playMinionsArghh, shouldPlayMinionsArghh } from './minions';
 
 interface AudioGraph {
   volumeNode: Tone.Volume;
@@ -61,13 +62,18 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
 }
 
 export function playSound(type: SoundType, config: TimerConfig): void {
-  if (!graph) return;
-
   const isAlertType = type === 'warning' || type === 'countdown_tick' || type === 'gong';
   const isClickType = type === 'click';
   if ((isAlertType && !config.sonAlertes) || (isClickType && !config.sonClics)) {
     return;
   }
+
+  if (shouldPlayMinionsArghh(type, config)) {
+    playMinionsArghh(config.volume);
+    return;
+  }
+
+  if (!graph) return;
 
   graph.volumeNode.volume.value = config.volume;
   const now = Tone.now();

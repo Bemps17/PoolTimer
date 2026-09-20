@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { preloadMinionsArghh } from '../audio/minions';
 import { initializeAudio, playSound, setAudioVolume, vibrate } from '../audio/toneAudio';
 import { loadConfig, saveConfig } from '../timer/config';
 import {
@@ -66,6 +67,10 @@ export function useBilliardTimer() {
   }, [config.volume]);
 
   useEffect(() => {
+    if (config.minionsMode) preloadMinionsArghh();
+  }, [config.minionsMode]);
+
+  useEffect(() => {
     if (!state.isRunning) return undefined;
     const id = window.setInterval(() => {
       const { state: next, effects } = tick(stateRef.current, configRef.current, Date.now());
@@ -111,9 +116,10 @@ export function useBilliardTimer() {
 
   const selectPlayer = useCallback(
     (player: PlayerId) => {
-      if (stateRef.current.currentPlayer === player) return;
+      const samePlayer = stateRef.current.currentPlayer === player;
+      if (samePlayer && !configRef.current.autoStartOnPlayerSelect) return;
       playClick();
-      apply((current) => selectPlayerState(current, player, configRef.current));
+      apply((current) => selectPlayerState(current, player, configRef.current, Date.now()));
     },
     [apply, playClick],
   );
