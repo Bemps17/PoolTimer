@@ -21,6 +21,11 @@ export const FBEP_ULTIMATE_PRESET = {
   theme: 'fbep' as const,
 };
 
+/** Ambiance FFB : bleu franc. */
+export const FFB_AMBIANCE = '#0066CC';
+/** Ambiance Ultimate FBEP : vert canard. */
+export const FBEP_AMBIANCE = '#007879';
+
 export const CONFIG_LIMITS = {
   tempsBase: { min: 10, max: 180 },
   tempsApresCasse: { min: 10, max: 180 },

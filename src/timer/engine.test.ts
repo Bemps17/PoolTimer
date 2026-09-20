@@ -1,8 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   applyCompetitionPreset,
   applyFfbPreset,
   computeTimerFontSize,
+  FBEP_AMBIANCE,
+  FFB_AMBIANCE,
   getDefaultConfig,
   mergeConfig,
   TIMER_DIGIT_WIDTH_RATIO,
@@ -115,6 +118,20 @@ describe('mergeConfig', () => {
     expect(themeBodyClass('ffb')).toBe('theme-ffb');
     expect(themeBodyClass('fbep')).toBe('theme-fbep');
     expect(themeBodyClass('sombre')).toBe('');
+  });
+
+  it('pins FFB blue and FBEP vert canard accents in CSS', () => {
+    expect(FFB_AMBIANCE).toBe('#0066CC');
+    expect(FBEP_AMBIANCE).toBe('#007879');
+    const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8');
+    const ffbBlock = css.slice(css.indexOf('body.theme-ffb'), css.indexOf('body.theme-fbep'));
+    const fbepBlock = css.slice(css.indexOf('body.theme-fbep'), css.indexOf('* {'));
+    expect(ffbBlock).toContain('--c-primary: #0066CC');
+    expect(ffbBlock).toContain('--c-ambiance: #0066CC');
+    expect(fbepBlock).toContain('--c-primary: #007879');
+    expect(fbepBlock).toContain('--c-ambiance: #007879');
+    expect(css).toContain('border-color: #007879');
+    expect(css).toContain('border-color: #0066CC');
   });
 });
 

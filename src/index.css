@@ -60,39 +60,41 @@ body.theme-cyberpunk {
 }
 
 body.theme-ffb {
-    --c-background: #061018;
-    --c-bezel: #0d2f52;
+    --c-ambiance: #0066CC;
+    --c-background: color-mix(in srgb, #0066CC 16%, #000);
+    --c-bezel: color-mix(in srgb, #0066CC 42%, #000);
     --c-screen: #000810;
-    --c-button-bg: #123a66;
+    --c-button-bg: color-mix(in srgb, #0066CC 38%, #111);
     --c-text-primary: #e8f3ff;
     --c-text-secondary: #7ea8cc;
-    --c-border: #1d6fb8;
-    --c-primary: #2e9bff;
-    --c-play: #4db2ff;
+    --c-border: #0066CC;
+    --c-primary: #0066CC;
+    --c-play: #0066CC;
     --c-digit-default: #d6ecff;
-    --c-panel-bg: #0a223d;
-    --c-panel-header-border: #1a4f80;
+    --c-panel-bg: color-mix(in srgb, #0066CC 28%, #071018);
+    --c-panel-header-border: #0066CC;
     --c-panel-input-bg: #07182c;
-    --c-panel-input-border: #1a4f80;
+    --c-panel-input-border: #0066CC;
     --c-panel-text-primary: #e8f3ff;
     --c-panel-text-secondary: #8fb4d4;
 }
 
 body.theme-fbep {
-    --c-background: #041412;
-    --c-bezel: #0b3d38;
+    --c-ambiance: #007879;
+    --c-background: color-mix(in srgb, #007879 16%, #000);
+    --c-bezel: color-mix(in srgb, #007879 42%, #000);
     --c-screen: #000d0b;
-    --c-button-bg: #0f4f48;
+    --c-button-bg: color-mix(in srgb, #007879 38%, #111);
     --c-text-primary: #e5faf6;
     --c-text-secondary: #7db8ad;
-    --c-border: #1a8f80;
-    --c-primary: #1fb8a5;
-    --c-play: #2ad4be;
+    --c-border: #007879;
+    --c-primary: #007879;
+    --c-play: #007879;
     --c-digit-default: #d6fff6;
-    --c-panel-bg: #08332e;
-    --c-panel-header-border: #15786c;
+    --c-panel-bg: color-mix(in srgb, #007879 28%, #071410);
+    --c-panel-header-border: #007879;
     --c-panel-input-bg: #05241f;
-    --c-panel-input-border: #15786c;
+    --c-panel-input-border: #007879;
     --c-panel-text-primary: #e5faf6;
     --c-panel-text-secondary: #8fc9bf;
 }
@@ -132,8 +134,8 @@ body {
     transition: box-shadow 0.5s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
 body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px #7b2cbf80; }
-body.theme-ffb .scoreboard-body { box-shadow: inset 0 0 24px rgba(14, 80, 150, 0.55), 0 0 18px #2e9bff80; }
-body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px rgba(10, 90, 80, 0.55), 0 0 18px #1fb8a580; }
+body.theme-ffb .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #0066CC 55%, transparent), 0 0 18px #0066CC; }
+body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #007879 55%, transparent), 0 0 18px #007879; }
 
 .scoreboard-body.is-flashing-warning { animation: flash-warning 1.5s infinite; }
 .scoreboard-body.is-flashing-critical { animation: flash-critical 0.5s infinite; }
@@ -446,12 +448,12 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     opacity: 0.9;
 }
 .preset-ffb {
-    background: linear-gradient(165deg, #1d5fa3, #0b2d52);
-    border-color: #4aa3e8;
+    background: linear-gradient(165deg, #0066CC, color-mix(in srgb, #0066CC 40%, #000));
+    border-color: #0066CC;
 }
 .preset-fbep {
-    background: linear-gradient(165deg, #178575, #063830);
-    border-color: #2ec4b0;
+    background: linear-gradient(165deg, #007879, color-mix(in srgb, #007879 40%, #000));
+    border-color: #007879;
 }
 .preset-card:hover { filter: brightness(1.08); }
 .preset-card.active {
