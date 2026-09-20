@@ -30,8 +30,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
             <li>
               <strong>Après casse :</strong> charge le temps post-casse (réglable, 1:30 par défaut FFB) pour le
-              coup en cours. Le coup suivant, un changement de joueur ou une nouvelle manche reviennent au
-              temps de base.
+              coup en cours, sans démarrer le chrono (à lancer une fois les billes à l'arrêt). Le coup suivant,
+              un changement de joueur ou une nouvelle manche reviennent au temps de base.
             </li>
             <li>
               <strong>Cliquez sur P1/P2 :</strong> change de joueur et réinitialise au temps de base.

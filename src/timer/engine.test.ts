@@ -63,10 +63,11 @@ describe('shot clock engine', () => {
   });
 
   it('loads configurable post-break time on Après casse, then returns to base on new shot', () => {
-    let state = createInitialState(config);
+    let state = startTimer(createInitialState(config), 0);
     state = setupApresCasse(state, config);
     expect(state.shotKind).toBe('apresCasse');
     expect(state.remainingTime).toBe(90_000);
+    expect(state.isRunning).toBe(false);
 
     state = startTimer(state, 0);
     expect(state.isRunning).toBe(true);

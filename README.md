@@ -60,7 +60,7 @@ Projet Vite : build `npm run build`, sortie `dist/`. Aucune variable d'environne
 | --- | --- |
 | Clic simple sur l'écran | Démarrer / Pause |
 | Double-clic ou bouton reset | Nouveau coup (temps de base) |
-| APRÈS CASSE | Charge `tempsApresCasse` pour ce coup |
+| APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
 | P1 / P2 | Change de joueur, temps de base |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
 | NEW | Nouvelle manche, extensions réinitialisées |

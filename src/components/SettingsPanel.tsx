@@ -252,7 +252,7 @@ export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: S
           <div className="section-panel">
             <h3>Automatisation</h3>
             <SelectField
-              label="Redémarrage auto après reset / après casse"
+              label="Redémarrage auto après nouveau coup"
               htmlId="autoStartOnReset"
               value={String(config.autoStartOnReset)}
               options={YES_NO}

@@ -101,14 +101,8 @@ export function useBilliardTimer() {
 
   const triggerApresCasse = useCallback(async () => {
     await playClick();
-    setState((current) => {
-      const next = setupApresCasse(current, configRef.current);
-      if (configRef.current.autoStartOnReset) {
-        window.setTimeout(() => startNow(), 50);
-      }
-      return next;
-    });
-  }, [playClick, startNow]);
+    setState((current) => setupApresCasse(current, configRef.current));
+  }, [playClick]);
 
   const selectPlayer = useCallback(
     async (player: PlayerId) => {
