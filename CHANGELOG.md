@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.4.0 — 2026-09-20
+
+- Preset **FFB TD/TN** : 45s / 1:30 / +45s, alertes 20s / 5s, ambiance bleue FFB.
+- Preset **FFB Blackball Master** : 30s / 1:00 / +30s, alertes 10s / 5s, ambiance bleue FFB.
+- **Ultimate FBEP** : pas d’après casse (bouton masqué, temps post-casse aligné sur le temps de base).
+
 ## 2.3.2 — 2026-09-20
 
 - **Pause** immédiate au premier appui sur l’écran (plus de conflit avec le double-tap / auto-start).

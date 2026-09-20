@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { computeTimerFontSize } from '../timer/config';
+import { computeTimerFontSize, showsApresCasseControl } from '../timer/config';
 import { canUseExtension, getDigitState, getFlashClass } from '../timer/engine';
 import { formatSecondsClock, formatTime } from '../timer/format';
 import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcceptControlActivation } from '../timer/screenTap';
@@ -155,6 +155,7 @@ export function Scoreboard({
   const extensionEnabled = canUseExtension(state);
   const extUsedCurrent = state.extensionsUsedInGame[state.currentPlayer];
   const displayText = formatTime(state.remainingTime, config.affichageMs);
+  const showApresCasse = showsApresCasseControl(config);
 
   const digitClass = (() => {
     switch (digitState) {
@@ -214,18 +215,20 @@ export function Scoreboard({
           </div>
         </div>
         <div className="timer-action-row">
-          <button
-            type="button"
-            className={`timer-action-bar timer-casse-bar${state.shotKind === 'apresCasse' ? ' active-shot' : ''}`}
-            onPointerUp={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation();
-              onApresCasse();
-            }}
-            aria-label={`Après casse ${formatSecondsClock(config.tempsApresCasse)}`}
-          >
-            APRÈS CASSE
-          </button>
+          {showApresCasse ? (
+            <button
+              type="button"
+              className={`timer-action-bar timer-casse-bar${state.shotKind === 'apresCasse' ? ' active-shot' : ''}`}
+              onPointerUp={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation();
+                onApresCasse();
+              }}
+              aria-label={`Après casse ${formatSecondsClock(config.tempsApresCasse)}`}
+            >
+              APRÈS CASSE
+            </button>
+          ) : null}
           <button
             type="button"
             className={`timer-action-bar timer-extension-bar${extensionEnabled ? '' : ' disabled'}${

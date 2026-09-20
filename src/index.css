@@ -452,6 +452,10 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     background: linear-gradient(165deg, #0066CC, color-mix(in srgb, #0066CC 40%, #000));
     border-color: #0066CC;
 }
+.preset-ffb-master {
+    background: linear-gradient(165deg, #004C99, color-mix(in srgb, #0066CC 28%, #000));
+    border-color: #0066CC;
+}
 .preset-fbep {
     background: linear-gradient(165deg, #007879, color-mix(in srgb, #007879 40%, #000));
     border-color: #007879;

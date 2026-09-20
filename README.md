@@ -2,14 +2,14 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.3.2** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.4.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
 - Temps de base configurable (`tempsBase`, 45 s par défaut)
-- **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche
+- **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche. Masqué en **Ultimate FBEP** (pas de temps supplémentaire après la casse).
 - Extension configurable (`tempsExtension`, +15 s par défaut FFB / FBEP) : **une fois par joueur et par manche**
-- Presets **FFB Blackball** (ambiance bleue) et **Ultimate FBEP** (vert canard)
+- Presets **FFB Blackball** (45s / 1:30 / +15s), **FFB TD/TN** (45s / 1:30 / +45s), **FFB Blackball Master** (30s / 1:00 / +30s) et **Ultimate FBEP** (45s / +15s, sans après casse)
 - Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable

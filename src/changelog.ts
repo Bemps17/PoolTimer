@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.3.2';
+export const APP_VERSION = '2.4.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.4.0',
+    date: '2026-09-20',
+    title: 'Presets FFB TD/TN et Master',
+    notes: [
+      'Preset FFB TD/TN : 45s / 1:30 / +45s, alertes 20s et 5s, ambiance bleue FFB.',
+      'Preset FFB Blackball Master : 30s / 1:00 / +30s, alertes 10s et 5s, ambiance bleue FFB.',
+      'Ultimate FBEP : plus d’après casse (bouton masqué, temps post-casse = temps de base).',
+    ],
+  },
   {
     version: '2.3.2',
     date: '2026-09-20',
