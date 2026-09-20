@@ -16,39 +16,44 @@ import {
 } from '../timer/engine';
 import type { Effect, EngineState, PlayerId, TimerConfig } from '../timer/types';
 
-function applyEffects(effects: Effect[], config: TimerConfig, startNow: () => void): void {
-  for (const effect of effects) {
-    switch (effect.type) {
-      case 'sound':
-        playSound(effect.sound, config);
-        break;
-      case 'vibrate':
-        vibrate(effect.pattern, config.vibration);
-        break;
-      case 'scheduleStart':
-        window.setTimeout(startNow, effect.delayMs);
-        break;
-      default: {
-        const exhaustive: never = effect;
-        return exhaustive;
-      }
-    }
-  }
-}
-
 export function useBilliardTimer() {
   const [config, setConfigState] = useState<TimerConfig>(() => loadConfig());
   const [state, setState] = useState<EngineState>(() => createInitialState(loadConfig()));
   const stateRef = useRef(state);
   const configRef = useRef(config);
-  stateRef.current = state;
   configRef.current = config;
 
-  const runEffects = useCallback((effects: Effect[]) => {
-    applyEffects(effects, configRef.current, () => {
-      setState((current) => startTimer(current, Date.now()));
-    });
+  const apply = useCallback((updater: (current: EngineState) => EngineState) => {
+    const next = updater(stateRef.current);
+    stateRef.current = next;
+    setState(next);
+    return next;
   }, []);
+
+  const runEffects = useCallback(
+    (effects: Effect[]) => {
+      for (const effect of effects) {
+        switch (effect.type) {
+          case 'sound':
+            playSound(effect.sound, configRef.current);
+            break;
+          case 'vibrate':
+            vibrate(effect.pattern, configRef.current.vibration);
+            break;
+          case 'scheduleStart':
+            window.setTimeout(() => {
+              apply((current) => startTimer(current, Date.now()));
+            }, effect.delayMs);
+            break;
+          default: {
+            const exhaustive: never = effect;
+            return exhaustive;
+          }
+        }
+      }
+    },
+    [apply],
+  );
 
   useEffect(() => {
     const className = themeBodyClass(config.theme);
@@ -75,61 +80,64 @@ export function useBilliardTimer() {
     await initializeAudio(configRef.current.volume);
   }, []);
 
-  const playClick = useCallback(async () => {
-    await ensureAudio();
-    playSound('click', configRef.current);
+  const playClick = useCallback(() => {
+    void ensureAudio().then(() => playSound('click', configRef.current));
   }, [ensureAudio]);
 
   const startNow = useCallback(() => {
-    setState((current) => startTimer(current, Date.now()));
-  }, []);
+    apply((current) => startTimer(current, Date.now()));
+  }, [apply]);
 
-  const togglePlayPause = useCallback(async () => {
-    await playClick();
-    setState((current) => (current.isRunning ? pauseTimer(current) : startTimer(current, Date.now())));
-  }, [playClick]);
+  const togglePlayPause = useCallback(() => {
+    playClick();
+    apply((current) => (current.isRunning ? pauseTimer(current) : startTimer(current, Date.now())));
+  }, [apply, playClick]);
 
-  const resetShot = useCallback(async () => {
-    await playClick();
-    setState((current) => {
+  const resetShot = useCallback(() => {
+    playClick();
+    apply((current) => {
       const reset = setupNewShot(current, configRef.current);
-      if (!configRef.current.autoStartOnReset) return reset;
-      window.setTimeout(() => startNow(), 50);
+      if (configRef.current.autoStartOnReset) {
+        window.setTimeout(() => startNow(), 50);
+      }
       return reset;
     });
-  }, [playClick, startNow]);
+  }, [apply, playClick, startNow]);
 
-  const triggerApresCasse = useCallback(async () => {
-    await playClick();
-    setState((current) => setupApresCasse(current, configRef.current));
-  }, [playClick]);
+  const triggerApresCasse = useCallback(() => {
+    playClick();
+    apply((current) => setupApresCasse(current, configRef.current));
+  }, [apply, playClick]);
 
   const selectPlayer = useCallback(
-    async (player: PlayerId) => {
+    (player: PlayerId) => {
       if (stateRef.current.currentPlayer === player) return;
-      await playClick();
-      setState((current) => selectPlayerState(current, player, configRef.current));
+      playClick();
+      apply((current) => selectPlayerState(current, player, configRef.current));
     },
-    [playClick],
+    [apply, playClick],
   );
 
-  const newGame = useCallback(async () => {
-    await playClick();
-    setState((current) => newGameState(current, configRef.current));
-  }, [playClick]);
+  const newGame = useCallback(() => {
+    playClick();
+    apply((current) => newGameState(current, configRef.current));
+  }, [apply, playClick]);
 
-  const useExtension = useCallback(async () => {
-    await playClick();
-    setState((current) => useExtensionState(current, configRef.current, Date.now()));
-  }, [playClick]);
+  const useExtension = useCallback(() => {
+    playClick();
+    apply((current) => useExtensionState(current, configRef.current, Date.now()));
+  }, [apply, playClick]);
 
-  const updateConfig = useCallback((next: TimerConfig, options?: { resetShot?: boolean }) => {
-    setConfigState(next);
-    saveConfig(next);
-    if (options?.resetShot) {
-      setState((current) => setupNewShot(current, next));
-    }
-  }, []);
+  const updateConfig = useCallback(
+    (next: TimerConfig, options?: { resetShot?: boolean }) => {
+      setConfigState(next);
+      saveConfig(next);
+      if (options?.resetShot) {
+        apply((current) => setupNewShot(current, next));
+      }
+    },
+    [apply],
+  );
 
   return {
     config,
