@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+
+# Build
+dist
+dev-dist
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea
+*.swp
+
+# Env & deploy
+.env
+.env.local
+.env.*.local
+.vercel
+
+# TypeScript
+*.tsbuildinfo
