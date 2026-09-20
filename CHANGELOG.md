@@ -7,6 +7,7 @@ Toutes les dates sont en UTC.
 - **Noms de joueurs** : prénom + nom jusqu’à 32 caractères (plus de limite à 5 lettres).
 - Sur le tableau et l’écran miroir, la **taille de police s’adapte** à la longueur pour éviter la coupure.
 - Les noms courts restent grands et lisibles.
+- **Tutoriel miroir** (télécommande ↔ écran Visuel) dans le Mode d’emploi et ⚙️ → Bêta : pairing code/QR, Sync OK, Internet (pas le même Wi‑Fi), URL de production, nouvelle salle si ça bloque.
 
 ## 2.5.4 — 2026-09-20
 

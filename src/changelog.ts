@@ -11,11 +11,12 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: '2.5.5',
     date: '2026-09-20',
-    title: 'Noms de joueurs plus longs',
+    title: 'Noms longs et tutoriel miroir',
     notes: [
       'Les noms acceptent prénom et nom (jusqu’à 32 caractères), plus seulement 5 lettres.',
       'Sur le tableau et l’écran miroir, la taille de police se réduit pour que le nom tienne dans le bandeau P1/P2.',
       'Les noms courts (P1, Alex…) restent à la taille habituelle.',
+      'Mode d’emploi du miroir (télécommande ↔ écran Visuel) : étapes de pairing, Sync OK et pannes courantes, dans l’aide et ⚙️ → Bêta.',
     ],
   },
   {

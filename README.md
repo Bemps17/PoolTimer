@@ -16,7 +16,7 @@ Version actuelle : **2.5.5** (voir [CHANGELOG.md](CHANGELOG.md)).
 - Alertes visuelles, sonores (Tone.js) et vibration
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
 - **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; durées via +/− dans les réglages ; noms éditables uniquement après un appui explicite « modifier »
-- **Miroir télécommande (bêta)** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet
+- **Miroir télécommande (bêta)** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet. Tutoriel dans l’app : ⚙️ → Mode d’emploi, ou ⚙️ → Bêta / Work in progress.
 
 ## Lancer en local
 
@@ -104,6 +104,16 @@ Puis copier l’URL `https://h8timer-mirror.<compte>.workers.dev` dans `VITE_MIR
 Salles éphémères : une télécommande par code, écrans en lecture seule, snapshot renvoyé aux retards / reconnexions, expiration ~2 h d’inactivité.
 
 Après un correctif du Worker (ex. 2.5.3, relais `push`), **redéployer** est obligatoire : l’app Vercel ne suffit pas, le Durable Object tourne sur Cloudflare.
+
+## Utiliser le miroir (arbitre)
+
+Le tutoriel pas à pas est dans l’app : **⚙️ → Mode d’emploi** et **⚙️ → Bêta / Work in progress**.
+
+1. **Télécommande** (téléphone) : Miroir télécommande **Oui** → **Ouvrir une salle** (code + QR).
+2. **Écran Visuel** : ouvrir [https://pooltimer.vercel.app](https://pooltimer.vercel.app), scanner le QR ou aller sur `/d/CODE`.
+3. Attendre **Écran lié · sync OK** / **Sync OK**, puis lancer le match sur le téléphone.
+
+Pas besoin du même Wi‑Fi (sync Internet). Une seule télécommande par salle. Si ça bloque : fermer la salle, en ouvrir une nouvelle.
 
 ## Contrôles
 

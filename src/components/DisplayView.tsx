@@ -110,7 +110,11 @@ export function DisplayView({ room }: DisplayViewProps) {
         )}
       </div>
       <p className="display-hint">
-        {isFullscreen ? 'Affichage miroir — lecture seule' : 'Appui : plein écran — lecture seule'}
+        {waiting
+          ? 'Écran Visuel — lecture seule. Attendez Sync OK (les commandes sont sur la télécommande).'
+          : isFullscreen
+            ? 'Affichage miroir — lecture seule'
+            : 'Appui : plein écran — lecture seule'}
       </p>
     </div>
   );

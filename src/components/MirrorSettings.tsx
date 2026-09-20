@@ -1,4 +1,5 @@
 import { parseBooleanSelect, SelectField } from './NumberStepper';
+import { MirrorGuide } from './MirrorGuide';
 import { QrCodeSvg } from '../mirror/QrCodeSvg';
 import { formatRoomCode } from '../mirror/protocol';
 import type { ControllerSyncView } from '../mirror/syncStatus';
@@ -66,8 +67,9 @@ export function MirrorSettings({
       </h3>
       <p className="install-hint">
         Miroir télécommande : le téléphone reste la commande, une tablette ou un PC affiche le chrono via
-        Internet (code court + QR).
+        Internet (code court + QR). Même Wi‑Fi non obligatoire.
       </p>
+      <MirrorGuide variant="settings" />
       <SelectField
         label="Miroir télécommande"
         htmlId="betaMirror"
