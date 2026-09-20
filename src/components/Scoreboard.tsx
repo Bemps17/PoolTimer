@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { computeTimerFontSize } from '../timer/config';
 import { canUseExtension, getDigitState, getFlashClass } from '../timer/engine';
 import { formatSecondsClock, formatTime } from '../timer/format';
+import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcceptControlActivation } from '../timer/screenTap';
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
 
@@ -34,8 +35,11 @@ export function Scoreboard({
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
-  const lastClickRef = useRef(0);
-  const clickTimeoutRef = useRef<number | null>(null);
+  const tapSessionRef = useRef(createScreenTapSession());
+  const playTimeoutRef = useRef<number | null>(null);
+  const playButtonPointerAtRef = useRef(0);
+  const isRunningRef = useRef(state.isRunning);
+  isRunningRef.current = state.isRunning;
   const newGameHoldRef = useRef<{ timer: number | null; unlockedThisPress: boolean }>({
     timer: null,
     unlockedThisPress: false,
@@ -61,7 +65,7 @@ export function Scoreboard({
       observer.disconnect();
       window.removeEventListener('resize', resizeTimer);
       document.removeEventListener('fullscreenchange', resizeTimer);
-      if (clickTimeoutRef.current) window.clearTimeout(clickTimeoutRef.current);
+      if (playTimeoutRef.current) window.clearTimeout(playTimeoutRef.current);
       if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
     };
   }, [resizeTimer, state.remainingTime, config.affichageMs]);
@@ -93,25 +97,57 @@ export function Scoreboard({
     newGameHoldRef.current.unlockedThisPress = false;
   };
 
-  const handleTimerScreenClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('.timer-action-bar')) return;
+  const handleTimerScreenTap = (kind: 'pointer' | 'click', event: { target: EventTarget | null; button?: number }) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.timer-action-bar')) return;
+    if (typeof event.button === 'number' && event.button !== 0) return;
 
-    const now = Date.now();
-    if (now - lastClickRef.current < 300) {
-      if (clickTimeoutRef.current) {
-        window.clearTimeout(clickTimeoutRef.current);
-        clickTimeoutRef.current = null;
+    const result = resolveTimerScreenTap({
+      isRunning: isRunningRef.current,
+      now: Date.now(),
+      kind,
+      session: tapSessionRef.current,
+    });
+    tapSessionRef.current = result.session;
+
+    const clearPendingPlay = () => {
+      if (playTimeoutRef.current !== null) {
+        window.clearTimeout(playTimeoutRef.current);
+        playTimeoutRef.current = null;
       }
-      onResetShot();
-      lastClickRef.current = 0;
-    } else {
-      clickTimeoutRef.current = window.setTimeout(() => {
+    };
+
+    switch (result.action) {
+      case 'ignore':
+        return;
+      case 'pause':
+        clearPendingPlay();
+        isRunningRef.current = false;
         onTogglePlayPause();
-        clickTimeoutRef.current = null;
-      }, 300);
+        return;
+      case 'arm-play':
+        clearPendingPlay();
+        playTimeoutRef.current = window.setTimeout(() => {
+          playTimeoutRef.current = null;
+          onTogglePlayPause();
+        }, DOUBLE_TAP_MS);
+        return;
+      case 'reset':
+        clearPendingPlay();
+        onResetShot();
+        return;
+      default: {
+        const exhaustive: never = result.action;
+        return exhaustive;
+      }
     }
-    lastClickRef.current = now;
+  };
+
+  const handlePlayPauseControl = (kind: 'pointer' | 'click', event: { button?: number }) => {
+    if (typeof event.button === 'number' && event.button !== 0) return;
+    const next = shouldAcceptControlActivation(kind, Date.now(), playButtonPointerAtRef.current);
+    playButtonPointerAtRef.current = next.lastPointerAt;
+    if (next.accept) onTogglePlayPause();
   };
 
   const digitState = getDigitState(state.remainingTime, config);
@@ -162,7 +198,16 @@ export function Scoreboard({
         </div>
       </div>
 
-      <div className="timer-screen" id="timerScreen" ref={screenRef} onClick={handleTimerScreenClick}>
+      <div
+        className="timer-screen"
+        id="timerScreen"
+        ref={screenRef}
+        onPointerUp={(event) => {
+          if (event.pointerType !== 'mouse') event.preventDefault();
+          handleTimerScreenTap('pointer', event);
+        }}
+        onClick={(event) => handleTimerScreenTap('click', event)}
+      >
         <div className="timer-content">
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>
             {displayText}
@@ -172,6 +217,7 @@ export function Scoreboard({
           <button
             type="button"
             className={`timer-action-bar timer-casse-bar${state.shotKind === 'apresCasse' ? ' active-shot' : ''}`}
+            onPointerUp={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
               onApresCasse();
@@ -185,6 +231,7 @@ export function Scoreboard({
             className={`timer-action-bar timer-extension-bar${extensionEnabled ? '' : ' disabled'}${
               extUsedCurrent ? ' game-used' : ''
             }`}
+            onPointerUp={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
               if (extensionEnabled) onExtension();
@@ -207,10 +254,19 @@ export function Scoreboard({
           <ResetIcon />
         </button>
         <button
+          type="button"
           className={`bouton-sport control-game-btn${state.isRunning ? ' playing' : ''}`}
           id="btnPlayPause"
           aria-label={state.isRunning ? 'Pause' : 'Démarrer'}
-          onClick={onTogglePlayPause}
+          onPointerUp={(event) => {
+            event.stopPropagation();
+            if (event.pointerType !== 'mouse') event.preventDefault();
+            handlePlayPauseControl('pointer', event);
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            handlePlayPauseControl('click', event);
+          }}
         >
           {state.isRunning ? <PauseIcon /> : <PlayIcon />}
         </button>
