@@ -103,6 +103,20 @@ describe('mirror protocol', () => {
     expect(parseClientMessage({ type: 'push', seq: 1 })).toBeUndefined();
     expect(parseClientMessage({ type: 'nope' })).toBeUndefined();
   });
+
+  it('parses push_ok and protocol error codes', () => {
+    expect(parseServerMessage({ type: 'push_ok', seq: 4 })).toEqual({ type: 'push_ok', seq: 4 });
+    expect(parseServerMessage({ type: 'error', code: 'bad_push', message: 'Snapshot invalide.' })).toEqual({
+      type: 'error',
+      code: 'bad_push',
+      message: 'Snapshot invalide.',
+    });
+    expect(parseServerMessage({ type: 'error', code: 'stale_seq', message: 'too old' })).toEqual({
+      type: 'error',
+      code: 'stale_seq',
+      message: 'too old',
+    });
+  });
 });
 
 describe('ephemeral room', () => {

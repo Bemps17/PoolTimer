@@ -668,6 +668,21 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.mirror-live-chip.mirror-live-chip-ok {
+    background: color-mix(in srgb, var(--c-play) 80%, #000);
+}
+.mirror-live-chip.mirror-live-chip-waiting_sync,
+.mirror-live-chip.mirror-live-chip-error {
+    background: color-mix(in srgb, var(--c-digit-critical) 75%, #000);
+}
+.display-waiting {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    text-align: center;
+    color: var(--c-text-secondary);
+    padding: 1rem;
+    max-width: 16ch;
 }
 
 #root.display-mode {
@@ -700,6 +715,7 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 }
 .display-status { font-size: 0.9rem; color: var(--c-text-secondary); }
 .display-status-live { color: var(--c-play); }
+.display-status-wait { color: var(--c-text-secondary); }
 .display-status-error { color: var(--c-digit-critical); }
 .display-players {
     display: flex;

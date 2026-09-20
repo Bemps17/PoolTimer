@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { themeBodyClass } from '../timer/engine';
 import type { EngineState, TimerConfig } from '../timer/types';
 import {
@@ -9,12 +9,20 @@ import {
   parseServerMessage,
   remainingFromSnapshot,
   seqFromWelcome,
+  WS_CLOSE_ROOM_BUSY,
   type MirrorSnapshot,
 } from '../mirror/protocol';
 import { clearMirrorSession, loadMirrorSession, saveMirrorSession } from '../mirror/storage';
+import {
+  controllerSyncStatus,
+  displaySyncStatus,
+  type ControllerSyncView,
+  type DisplaySyncView,
+  type MirrorConnectionStatus,
+} from '../mirror/syncStatus';
 import { buildMirrorWsUrl } from '../mirror/wsUrl';
 
-export type MirrorConnectionStatus = 'idle' | 'connecting' | 'live' | 'error';
+export type { MirrorConnectionStatus };
 
 interface UseControllerMirrorOptions {
   enabled: boolean;
@@ -27,6 +35,9 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
   const [status, setStatus] = useState<MirrorConnectionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(0);
+  const [lastPushOkAt, setLastPushOkAt] = useState<number | null>(null);
+  const [liveSince, setLiveSince] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const seqRef = useRef(0);
   const pushReadyRef = useRef(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -71,11 +82,22 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
       setRoom(nextRoom);
       setStatus('connecting');
       setError(null);
+      setLastPushOkAt(null);
+      setLiveSince(null);
       saveMirrorSession(nextRoom, secret);
 
       let cancelled = false;
+      let fatal = false;
       let retryMs = 500;
       let retryTimer: number | null = null;
+
+      const markFatal = (message: string) => {
+        fatal = true;
+        cancelled = true;
+        pushReadyRef.current = false;
+        setStatus('error');
+        setError(message);
+      };
 
       const open = () => {
         const ws = new WebSocket(url);
@@ -84,6 +106,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
           retryMs = 500;
           setStatus('live');
           setError(null);
+          setLiveSince(Date.now());
         };
         ws.onmessage = (event) => {
           let parsed: unknown;
@@ -104,9 +127,14 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
             case 'peers':
               setDisplayCount(message.displayCount);
               break;
+            case 'push_ok':
+              setLastPushOkAt(Date.now());
+              break;
             case 'error':
-              setStatus('error');
-              setError(message.message);
+              if (message.code === 'room_busy' || message.code === 'unauthorized') {
+                markFatal(message.message);
+                wsSafeClose(ws);
+              }
               break;
             case 'snapshot':
             case 'pong':
@@ -117,10 +145,15 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
             }
           }
         };
-        ws.onclose = () => {
+        ws.onclose = (event) => {
           pushReadyRef.current = false;
-          if (cancelled) return;
+          if (cancelled || fatal) return;
+          if (event.code === WS_CLOSE_ROOM_BUSY) {
+            markFatal('Cette salle a déjà une télécommande.');
+            return;
+          }
           setStatus('connecting');
+          setLastPushOkAt(null);
           retryTimer = window.setTimeout(open, retryMs);
           retryMs = Math.min(retryMs * 2, 8000);
         };
@@ -143,6 +176,8 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
     clearMirrorSession();
     setRoom(null);
     setDisplayCount(0);
+    setLastPushOkAt(null);
+    setLiveSince(null);
     setStatus('idle');
     setError(null);
   }, [stop]);
@@ -180,11 +215,33 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
     config,
   ]);
 
+  useEffect(() => {
+    if (status !== 'live') return undefined;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [status]);
+
+  const sync: ControllerSyncView = useMemo(
+    () =>
+      controllerSyncStatus({
+        status,
+        error,
+        displayCount,
+        lastPushOkAt,
+        liveSince,
+        now,
+        room,
+      }),
+    [status, error, displayCount, lastPushOkAt, liveSince, now, room],
+  );
+
   return {
     room,
     status,
     error,
     displayCount,
+    lastPushOkAt,
+    sync,
     createRoom,
     closeRoom,
   };
@@ -196,6 +253,9 @@ export function useDisplayMirror(room: string) {
   const [snapshot, setSnapshot] = useState<MirrorSnapshot | null>(null);
   const [remainingTime, setRemainingTime] = useState(0);
   const [controllerConnected, setControllerConnected] = useState(false);
+  const [lastSnapshotAt, setLastSnapshotAt] = useState<number | null>(null);
+  const [liveSince, setLiveSince] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const snapshotRef = useRef<{ snapshot: MirrorSnapshot; receivedAt: number } | null>(null);
 
   useEffect(() => {
@@ -210,12 +270,14 @@ export function useDisplayMirror(room: string) {
       const receivedAt = Date.now();
       snapshotRef.current = { snapshot: next, receivedAt };
       setSnapshot(next);
+      setLastSnapshotAt(receivedAt);
       setRemainingTime(remainingFromSnapshot(next, receivedAt, receivedAt));
     };
 
     let cancelled = false;
     let retryMs = 500;
     let retryTimer: number | null = null;
+    let pingTimer: number | null = null;
     let ws: WebSocket | null = null;
 
     const open = () => {
@@ -224,6 +286,13 @@ export function useDisplayMirror(room: string) {
         retryMs = 500;
         setStatus('live');
         setError(null);
+        setLiveSince(Date.now());
+        setNow(Date.now());
+        pingTimer = window.setInterval(() => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping' }));
+          }
+        }, 10_000);
       };
       ws.onmessage = (event) => {
         let parsed: unknown;
@@ -249,6 +318,7 @@ export function useDisplayMirror(room: string) {
             setStatus('error');
             setError(message.message);
             break;
+          case 'push_ok':
           case 'pong':
             break;
           default: {
@@ -258,8 +328,13 @@ export function useDisplayMirror(room: string) {
         }
       };
       ws.onclose = () => {
+        if (pingTimer !== null) {
+          window.clearInterval(pingTimer);
+          pingTimer = null;
+        }
         if (cancelled) return;
         setStatus('connecting');
+        setLiveSince(null);
         retryTimer = window.setTimeout(open, retryMs);
         retryMs = Math.min(retryMs * 2, 8000);
       };
@@ -269,6 +344,7 @@ export function useDisplayMirror(room: string) {
     return () => {
       cancelled = true;
       if (retryTimer !== null) window.clearTimeout(retryTimer);
+      if (pingTimer !== null) window.clearInterval(pingTimer);
       wsSafeClose(ws);
     };
   }, [room]);
@@ -276,8 +352,10 @@ export function useDisplayMirror(room: string) {
   useEffect(() => {
     const id = window.setInterval(() => {
       const current = snapshotRef.current;
+      const tick = Date.now();
+      setNow(tick);
       if (!current) return;
-      setRemainingTime(remainingFromSnapshot(current.snapshot, Date.now(), current.receivedAt));
+      setRemainingTime(remainingFromSnapshot(current.snapshot, tick, current.receivedAt));
     }, 50);
     return () => window.clearInterval(id);
   }, []);
@@ -289,7 +367,28 @@ export function useDisplayMirror(room: string) {
     if (className) document.body.classList.add(className);
   }, [snapshot]);
 
-  return { status, error, snapshot, remainingTime, controllerConnected };
+  const sync: DisplaySyncView = useMemo(
+    () =>
+      displaySyncStatus({
+        status,
+        error,
+        hasSnapshot: snapshot != null,
+        lastSnapshotAt,
+        liveSince,
+        now,
+      }),
+    [status, error, snapshot, lastSnapshotAt, liveSince, now],
+  );
+
+  return {
+    status,
+    error,
+    snapshot,
+    remainingTime,
+    controllerConnected,
+    lastSnapshotAt,
+    sync,
+  };
 }
 
 function wsSafeClose(ws: WebSocket | null): void {
