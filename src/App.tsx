@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ChangelogPanel } from './components/ChangelogPanel';
 import { HelpPanel } from './components/HelpPanel';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Toast } from './components/Toast';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
+import { usePwaInstall } from './hooks/usePwaInstall';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
   const timer = useBilliardTimer();
   const { isFullscreen, toggle } = useFullscreen();
+  const pwaInstall = usePwaInstall();
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('Paramètres sauvegardés !');
 
@@ -63,8 +67,14 @@ export default function App() {
         onClose={() => setMenuOpen(false)}
         onChange={handleConfigChange}
         onShowHelp={() => setHelpOpen(true)}
+        onShowChangelog={() => setChangelogOpen(true)}
+        installStatus={pwaInstall.status}
+        onInstall={() => {
+          void pwaInstall.install();
+        }}
       />
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <Toast visible={toastVisible} message={toastMessage} />
     </>
   );

@@ -17,6 +17,8 @@ export default defineConfig({
         'icon-512-maskable.png',
         'apple-touch-icon.png',
         'sound/minions-arghh.mp3',
+        'sound/clic.mp3',
+        'sound/alert-time.mp3',
       ],
       manifest: {
         name: 'H8timer',
@@ -50,7 +52,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3,webmanifest}'],
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

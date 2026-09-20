@@ -80,6 +80,13 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               <strong>L'automatisation</strong> : redémarrage après nouveau coup, et relance du chrono
               au clic sur un joueur.
             </li>
+            <li>
+              <strong>Installer l'application</strong> pour un usage hors ligne (Chrome / Edge), ou via
+              Partager → Sur l'écran d'accueil sur iPhone.
+            </li>
+            <li>
+              <strong>Historique des versions</strong> pour voir les nouveautés.
+            </li>
           </ul>
           <p>
             <strong>Note :</strong> pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre

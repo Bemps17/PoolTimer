@@ -357,6 +357,27 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 .bouton-menu:hover:not(:disabled) { filter: brightness(1.1); }
 .bouton-menu:disabled { background-color: #555; cursor: not-allowed; }
 
+.app-version {
+    margin: 0 0 0.75rem;
+    color: var(--c-panel-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.install-hint {
+    margin: 0.5rem 0 1rem;
+    color: var(--c-panel-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.changelog-entry {
+    margin-bottom: 1.5rem;
+}
+.changelog-entry-meta {
+    margin: 0.25rem 0 0.5rem;
+    color: var(--c-panel-text-secondary);
+    font-size: 0.85rem;
+}
+
 .stepper {
     display: flex;
     align-items: center;
