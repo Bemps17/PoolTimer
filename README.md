@@ -8,7 +8,8 @@ Version actuelle : **2.3.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 - Temps de base configurable (`tempsBase`, 45 s par défaut)
 - **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche
-- Extension configurable (`tempsExtension`, +45 s par défaut, preset FFB) : **une fois par joueur et par manche**
+- Extension configurable (`tempsExtension`, +15 s par défaut FFB / FBEP) : **une fois par joueur et par manche**
+- Presets **FFB Blackball** (ambiance bleue) et **Ultimate FBEP** (vert canard)
 - Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable

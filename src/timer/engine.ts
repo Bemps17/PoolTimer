@@ -195,6 +195,10 @@ export function themeBodyClass(theme: TimerConfig['theme']): string {
       return 'theme-light';
     case 'cyberpunk':
       return 'theme-cyberpunk';
+    case 'ffb':
+      return 'theme-ffb';
+    case 'fbep':
+      return 'theme-fbep';
     default: {
       const exhaustive: never = theme;
       return exhaustive;

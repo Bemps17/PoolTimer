@@ -1,4 +1,5 @@
-export type Theme = 'sombre' | 'light' | 'cyberpunk';
+export type Theme = 'sombre' | 'light' | 'cyberpunk' | 'ffb' | 'fbep';
+export type CompetitionMode = 'ffb' | 'fbep';
 export type InterfaceMode = 'boutons' | 'tactile';
 export type ShotKind = 'base' | 'apresCasse';
 export type PlayerId = 1 | 2;

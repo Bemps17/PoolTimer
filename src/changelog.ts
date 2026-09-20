@@ -18,6 +18,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       'Plein écran déplacé dans la configuration (l’app installée est déjà plein écran).',
       'Chiffres du chrono plus grands, taille réglable et mémorisée.',
       'Appui long sur NEW : active ou désactive le mode Minions.',
+      'Presets FFB Blackball (bleu) et Ultimate FBEP (vert canard) : 45s / +15s.',
     ],
   },
   {

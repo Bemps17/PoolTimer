@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyCompetitionPreset,
   applyFfbPreset,
   computeTimerFontSize,
   getDefaultConfig,
@@ -16,6 +17,7 @@ import {
   setupApresCasse,
   setupNewShot,
   startTimer,
+  themeBodyClass,
   tick,
   useExtension,
 } from './engine';
@@ -53,6 +55,11 @@ describe('mergeConfig', () => {
     expect(merged.tailleChiffres).toBe(100);
   });
 
+  it('restores FFB and FBEP themes from storage', () => {
+    expect(mergeConfig({ theme: 'ffb' }).theme).toBe('ffb');
+    expect(mergeConfig({ theme: 'fbep' }).theme).toBe('fbep');
+  });
+
   it('persists autoStartOnPlayerSelect when present', () => {
     const merged = mergeConfig({ autoStartOnPlayerSelect: true });
     expect(merged.autoStartOnPlayerSelect).toBe(true);
@@ -76,11 +83,38 @@ describe('mergeConfig', () => {
     expect(merged.minionsUnlocked).toBe(true);
   });
 
-  it('applies the FFB Blackball preset', () => {
-    const preset = applyFfbPreset({ ...getDefaultConfig(), tempsBase: 30, tempsExtension: 15, tempsApresCasse: 60 });
+  it('applies FFB Blackball timings and blue ambiance without resetting après casse', () => {
+    const preset = applyCompetitionPreset(
+      { ...getDefaultConfig(), tempsBase: 30, tempsExtension: 45, tempsApresCasse: 60, seuilAlerte: 20, theme: 'sombre' },
+      'ffb',
+    );
     expect(preset.tempsBase).toBe(45);
-    expect(preset.tempsApresCasse).toBe(90);
-    expect(preset.tempsExtension).toBe(45);
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.seuilAlerte).toBe(15);
+    expect(preset.seuilCritique).toBe(5);
+    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.theme).toBe('ffb');
+  });
+
+  it('applies Ultimate FBEP with the same timings and teal ambiance', () => {
+    const preset = applyCompetitionPreset({ ...getDefaultConfig(), tempsApresCasse: 75 }, 'fbep');
+    expect(preset.tempsBase).toBe(45);
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.tempsApresCasse).toBe(75);
+    expect(preset.theme).toBe('fbep');
+  });
+
+  it('keeps applyFfbPreset as the Blackball competition mode', () => {
+    const preset = applyFfbPreset({ ...getDefaultConfig(), tempsExtension: 45, tempsApresCasse: 60 });
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.theme).toBe('ffb');
+  });
+
+  it('maps competition themes to body classes', () => {
+    expect(themeBodyClass('ffb')).toBe('theme-ffb');
+    expect(themeBodyClass('fbep')).toBe('theme-fbep');
+    expect(themeBodyClass('sombre')).toBe('');
   });
 });
 
@@ -171,7 +205,7 @@ describe('shot clock engine', () => {
     state = useExtension(state, config, 1_000);
     expect(state.isExtensionUsedForShot).toBe(true);
     expect(state.extensionsUsedInGame[1]).toBe(true);
-    expect(state.remainingTime).toBe(45_000 + 45_000);
+    expect(state.remainingTime).toBe(45_000 + 15_000);
     expect(canUseExtension(state)).toBe(false);
 
     state = setupNewShot(state, config);

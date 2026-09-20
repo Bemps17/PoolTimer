@@ -69,14 +69,15 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               <strong>Les noms et couleurs</strong> des joueurs.
             </li>
             <li>
-              <strong>Les temps</strong> de base, après casse et d'extension (preset FFB Blackball : 45s / 1:30 /
-              +45s).
+              <strong>Les temps</strong> de base, après casse et d'extension. Presets de compétition
+              <strong>FFB Blackball</strong> (ambiance bleue) et <strong>Ultimate FBEP</strong>
+              (vert canard) : 45s / +15s, alertes 15s et 5s, sans modifier l'après casse.
             </li>
             <li>
               <strong>Les seuils d'alerte</strong> visuelle (orange et rouge).
             </li>
             <li>
-              <strong>Le thème visuel</strong> (Sombre, Clair, Cyberpunk).
+              <strong>Le thème visuel</strong> (Sombre, Clair, Cyberpunk, FFB, FBEP).
             </li>
             <li>
               <strong>La taille des chiffres</strong> du chronomètre.
