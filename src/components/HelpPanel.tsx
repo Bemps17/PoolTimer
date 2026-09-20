@@ -1,3 +1,5 @@
+import { MirrorGuide } from './MirrorGuide';
+
 interface HelpPanelProps {
   open: boolean;
   onClose: () => void;
@@ -70,7 +72,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           </p>
           <ul>
             <li>
-              <strong>Les noms et couleurs</strong> des joueurs.
+              <strong>Les noms et couleurs</strong> des joueurs (prénom / nom, jusqu’à 32 caractères ;
+              la taille de police s’adapte sur le tableau).
             </li>
             <li>
               <strong>Les temps</strong> de base, après casse et d'extension. Presets de compétition
@@ -116,11 +119,13 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               <strong>Vérifier les mises à jour</strong> dans l’application force la même vérification.
             </li>
             <li>
-              <strong>Miroir télécommande (bêta) :</strong> dans « Bêta / Work in progress », ouvrez une
-              salle, scannez le QR avec une tablette / un autre téléphone. L’écran suit le chrono via
-              Internet (code à 6 caractères). Une seule télécommande par salle.
+              <strong>Miroir télécommande (bêta) :</strong> pairing code + QR, tutoriel dans la section
+              ci-dessous et dans ⚙️ → Bêta / Work in progress.
             </li>
           </ul>
+
+          <MirrorGuide variant="help" />
+
           <p>
             <strong>Note :</strong> pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre
             téléphone n'est pas en mode silencieux et que les vibrations sont autorisées pour le navigateur.

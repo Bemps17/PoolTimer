@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { PLAYER_NAME_MAX_LENGTH, clampPlayerNameInput, sanitizePlayerName } from '../timer/playerName';
 
 interface PlayerNameFieldProps {
   label: string;
@@ -35,18 +36,22 @@ export function PlayerNameField({
             ref={inputRef}
             id={nameId}
             type="text"
-            maxLength={5}
+            maxLength={PLAYER_NAME_MAX_LENGTH}
             value={name}
             autoComplete="off"
             autoCorrect="off"
-            autoCapitalize="characters"
+            autoCapitalize="words"
             spellCheck={false}
             enterKeyHint="done"
-            onChange={(event) => onNameChange(event.target.value.substring(0, 5))}
-            onBlur={() => setEditing(false)}
+            onChange={(event) => onNameChange(clampPlayerNameInput(event.target.value))}
+            onBlur={() => {
+              onNameChange(sanitizePlayerName(name, ''));
+              setEditing(false);
+            }}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
+                onNameChange(sanitizePlayerName(name, ''));
                 setEditing(false);
               }
             }}

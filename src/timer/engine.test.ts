@@ -88,6 +88,13 @@ describe('mergeConfig', () => {
     expect(mergeConfig({ tailleChiffres: 200 }).tailleChiffres).toBe(140);
   });
 
+  it('keeps a full first and last name and caps overly long ones', () => {
+    const merged = mergeConfig({ p1Name: 'Jean-Baptiste Moreau', p2Name: '  Anne   Dupont  ' });
+    expect(merged.p1Name).toBe('Jean-Baptiste Moreau');
+    expect(merged.p2Name).toBe('Anne Dupont');
+    expect(mergeConfig({ p1Name: 'Jean-Baptiste Alexandre Moreau-Dupont' }).p1Name).toHaveLength(32);
+  });
+
   it('keeps Minions mode hidden until unlocked', () => {
     const merged = mergeConfig({ tempsBase: 45 });
     expect(merged.minionsUnlocked).toBe(false);

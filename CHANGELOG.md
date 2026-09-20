@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.5 — 2026-09-20
+
+- **Noms de joueurs** : prénom + nom jusqu’à 32 caractères (plus de limite à 5 lettres).
+- Sur le tableau et l’écran miroir, la **taille de police s’adapte** à la longueur pour éviter la coupure.
+- Les noms courts restent grands et lisibles.
+- **Tutoriel miroir** (télécommande ↔ écran Visuel) dans le Mode d’emploi et ⚙️ → Bêta : pairing code/QR, Sync OK, Internet (pas le même Wi‑Fi), URL de production, nouvelle salle si ça bloque.
+
 ## 2.5.4 — 2026-09-20
 
 - **Simple vs double appui** : la pause (ou le départ) n’est confirmée que si aucun second tap n’arrive dans la fenêtre — le double appui n’est plus volé par la pause.

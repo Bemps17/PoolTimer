@@ -5,6 +5,7 @@ import { formatSecondsClock, formatTime } from '../timer/format';
 import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcceptControlActivation } from '../timer/screenTap';
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
+import { PlayerStatus } from './PlayerStatus';
 
 interface ScoreboardProps {
   config: TimerConfig;
@@ -195,21 +196,19 @@ export function Scoreboard({
     >
       <div className="top-bar">
         <div className="top-bar-players">
-          <PlayerChip
-            player={1}
+          <PlayerStatus
             name={config.p1Name}
             color={config.p1Color}
             active={state.currentPlayer === 1}
             extensionUsed={state.extensionsUsedInGame[1]}
-            onSelect={onSelectPlayer}
+            onSelect={() => onSelectPlayer(1)}
           />
-          <PlayerChip
-            player={2}
+          <PlayerStatus
             name={config.p2Name}
             color={config.p2Color}
             active={state.currentPlayer === 2}
             extensionUsed={state.extensionsUsedInGame[2]}
-            onSelect={onSelectPlayer}
+            onSelect={() => onSelectPlayer(2)}
           />
         </div>
       </div>
@@ -318,33 +317,3 @@ export function Scoreboard({
   );
 }
 
-interface PlayerChipProps {
-  player: PlayerId;
-  name: string;
-  color: string;
-  active: boolean;
-  extensionUsed: boolean;
-  onSelect: (player: PlayerId) => void;
-}
-
-function PlayerChip({ player, name, color, active, extensionUsed, onSelect }: PlayerChipProps) {
-  return (
-    <div
-      className={`player-status${active ? ' active' : ''}`}
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(player)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') onSelect(player);
-      }}
-      style={
-        active
-          ? { borderColor: color, boxShadow: `0 0 10px ${color}80` }
-          : { borderColor: 'transparent', boxShadow: 'none' }
-      }
-    >
-      <span className="player-name">{name}</span>
-      <span className={`ext-status ${extensionUsed ? 'ext-used' : 'ext-available'}`}>EXT</span>
-    </div>
-  );
-}

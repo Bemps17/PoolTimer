@@ -5,6 +5,7 @@ import { formatTime } from '../timer/format';
 import { useDisplayMirror } from '../hooks/useMirror';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { formatRoomCode } from '../mirror/protocol';
+import { PlayerStatus } from './PlayerStatus';
 
 interface DisplayViewProps {
   room: string;
@@ -83,32 +84,18 @@ export function DisplayView({ room }: DisplayViewProps) {
       </div>
       {config ? (
         <div className="display-players">
-          <div
-            className={`player-status${snapshot?.currentPlayer === 1 ? ' active' : ''}`}
-            style={
-              snapshot?.currentPlayer === 1
-                ? { borderColor: config.p1Color, boxShadow: `0 0 10px ${config.p1Color}80` }
-                : undefined
-            }
-          >
-            <span className="player-name">{config.p1Name}</span>
-            <span className={`ext-status ${snapshot?.extensionsUsedInGame[1] ? 'ext-used' : 'ext-available'}`}>
-              EXT
-            </span>
-          </div>
-          <div
-            className={`player-status${snapshot?.currentPlayer === 2 ? ' active' : ''}`}
-            style={
-              snapshot?.currentPlayer === 2
-                ? { borderColor: config.p2Color, boxShadow: `0 0 10px ${config.p2Color}80` }
-                : undefined
-            }
-          >
-            <span className="player-name">{config.p2Name}</span>
-            <span className={`ext-status ${snapshot?.extensionsUsedInGame[2] ? 'ext-used' : 'ext-available'}`}>
-              EXT
-            </span>
-          </div>
+          <PlayerStatus
+            name={config.p1Name}
+            color={config.p1Color}
+            active={snapshot?.currentPlayer === 1}
+            extensionUsed={Boolean(snapshot?.extensionsUsedInGame[1])}
+          />
+          <PlayerStatus
+            name={config.p2Name}
+            color={config.p2Color}
+            active={snapshot?.currentPlayer === 2}
+            extensionUsed={Boolean(snapshot?.extensionsUsedInGame[2])}
+          />
         </div>
       ) : null}
       <div className="display-screen" ref={screenRef}>
@@ -123,7 +110,11 @@ export function DisplayView({ room }: DisplayViewProps) {
         )}
       </div>
       <p className="display-hint">
-        {isFullscreen ? 'Affichage miroir — lecture seule' : 'Appui : plein écran — lecture seule'}
+        {waiting
+          ? 'Écran Visuel — lecture seule. Attendez Sync OK (les commandes sont sur la télécommande).'
+          : isFullscreen
+            ? 'Affichage miroir — lecture seule'
+            : 'Appui : plein écran — lecture seule'}
       </p>
     </div>
   );
