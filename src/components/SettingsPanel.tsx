@@ -345,8 +345,8 @@ export function SettingsPanel({
               onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
             />
             <p className="install-hint">
-              Après un nouveau coup (double appui sur l’écran à l’arrêt, ou bouton reset). N’empêche jamais la
-              pause : un appui pendant que le chrono tourne met toujours en pause.
+              Après un nouveau coup (double appui sur l’écran, ou bouton reset). Désactivé par défaut : le
+              chrono reste figé. Passez sur Oui pour le relancer automatiquement.
             </p>
             <SelectField
               label="Relancer le chrono au clic joueur"

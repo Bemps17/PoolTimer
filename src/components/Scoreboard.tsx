@@ -36,7 +36,7 @@ export function Scoreboard({
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const tapSessionRef = useRef(createScreenTapSession());
-  const playTimeoutRef = useRef<number | null>(null);
+  const pendingTapTimeoutRef = useRef<number | null>(null);
   const playButtonPointerAtRef = useRef(0);
   const isRunningRef = useRef(state.isRunning);
   isRunningRef.current = state.isRunning;
@@ -65,10 +65,16 @@ export function Scoreboard({
       observer.disconnect();
       window.removeEventListener('resize', resizeTimer);
       document.removeEventListener('fullscreenchange', resizeTimer);
-      if (playTimeoutRef.current) window.clearTimeout(playTimeoutRef.current);
-      if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
     };
   }, [resizeTimer, state.remainingTime, config.affichageMs]);
+
+  // Pending single-tap confirmation must survive remainingTime ticks (every 50ms while running).
+  useEffect(() => {
+    return () => {
+      if (pendingTapTimeoutRef.current) window.clearTimeout(pendingTapTimeoutRef.current);
+      if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
+    };
+  }, []);
 
   const clearNewGameHold = () => {
     if (newGameHoldRef.current.timer !== null) {
@@ -110,30 +116,39 @@ export function Scoreboard({
     });
     tapSessionRef.current = result.session;
 
-    const clearPendingPlay = () => {
-      if (playTimeoutRef.current !== null) {
-        window.clearTimeout(playTimeoutRef.current);
-        playTimeoutRef.current = null;
+    const clearPendingTap = () => {
+      if (pendingTapTimeoutRef.current !== null) {
+        window.clearTimeout(pendingTapTimeoutRef.current);
+        pendingTapTimeoutRef.current = null;
       }
     };
 
     switch (result.action) {
       case 'ignore':
         return;
-      case 'pause':
-        clearPendingPlay();
-        isRunningRef.current = false;
-        onTogglePlayPause();
+      case 'arm-pause':
+        clearPendingTap();
+        pendingTapTimeoutRef.current = window.setTimeout(() => {
+          pendingTapTimeoutRef.current = null;
+          if (isRunningRef.current) {
+            isRunningRef.current = false;
+            onTogglePlayPause();
+          }
+        }, DOUBLE_TAP_MS);
         return;
       case 'arm-play':
-        clearPendingPlay();
-        playTimeoutRef.current = window.setTimeout(() => {
-          playTimeoutRef.current = null;
-          onTogglePlayPause();
+        clearPendingTap();
+        pendingTapTimeoutRef.current = window.setTimeout(() => {
+          pendingTapTimeoutRef.current = null;
+          if (!isRunningRef.current) {
+            isRunningRef.current = true;
+            onTogglePlayPause();
+          }
         }, DOUBLE_TAP_MS);
         return;
       case 'reset':
-        clearPendingPlay();
+        clearPendingTap();
+        isRunningRef.current = false;
         onResetShot();
         return;
       default: {

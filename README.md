@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.5.3** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.5.4** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -109,9 +109,9 @@ Après un correctif du Worker (ex. 2.5.3, relais `push`), **redéployer** est ob
 
 | Action | Effet |
 | --- | --- |
-| Clic simple sur l'écran (chrono en cours) | Pause immédiate |
-| Clic simple sur l'écran (à l'arrêt) | Démarrer |
-| Double-clic à l'arrêt, ou bouton reset | Nouveau coup (temps de base ; option auto-start) |
+| Clic simple sur l'écran (chrono en cours) | Pause (après un court délai, pour distinguer le double appui) |
+| Clic simple sur l'écran (à l'arrêt) | Démarrer (même délai) |
+| Double-clic, ou bouton reset | Nouveau coup (temps de base ; chrono figé par défaut, option auto-start) |
 | APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
 | P1 / P2 | Change de joueur, temps de base (option : relance aussi le chrono) |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |

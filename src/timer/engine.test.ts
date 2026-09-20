@@ -21,6 +21,7 @@ import {
   selectPlayer,
   setupApresCasse,
   setupNewShot,
+  maybeAutoStart,
   startTimer,
   themeBodyClass,
   tick,
@@ -64,6 +65,16 @@ describe('mergeConfig', () => {
   it('restores FFB and FBEP themes from storage', () => {
     expect(mergeConfig({ theme: 'ffb' }).theme).toBe('ffb');
     expect(mergeConfig({ theme: 'fbep' }).theme).toBe('fbep');
+  });
+
+  it('defaults autoStartOnReset to off so reset/double-tap leave the clock frozen', () => {
+    expect(getDefaultConfig().autoStartOnReset).toBe(false);
+    expect(mergeConfig({ tempsBase: 45 }).autoStartOnReset).toBe(false);
+  });
+
+  it('keeps autoStartOnReset when the user explicitly enabled it', () => {
+    expect(mergeConfig({ autoStartOnReset: true }).autoStartOnReset).toBe(true);
+    expect(mergeConfig({ autoStartOnReset: false }).autoStartOnReset).toBe(false);
   });
 
   it('persists autoStartOnPlayerSelect when present', () => {
@@ -378,5 +389,18 @@ describe('shot clock engine', () => {
     const expired = { ...createInitialState(config), remainingTime: 0 };
     expect(startTimer(expired, 10).isRunning).toBe(false);
     expect(pauseTimer(createInitialState(config)).isRunning).toBe(false);
+  });
+
+  it('leaves the clock frozen after reset when autoStartOnReset is off', () => {
+    const reset = setupNewShot(startTimer(createInitialState(config), 0), config);
+    expect(maybeAutoStart(reset, config, 1_000).isRunning).toBe(false);
+  });
+
+  it('restarts after reset only when autoStartOnReset is enabled', () => {
+    const enabled = { ...config, autoStartOnReset: true };
+    const reset = setupNewShot(startTimer(createInitialState(enabled), 0), enabled);
+    const started = maybeAutoStart(reset, enabled, 1_000);
+    expect(started.isRunning).toBe(true);
+    expect(started.expectedTime).toBe(1_000 + enabled.tempsBase * 1000);
   });
 });

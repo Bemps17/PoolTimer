@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.3';
+export const APP_VERSION = '2.5.4';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.4',
+    date: '2026-09-20',
+    title: 'Double appui et reset figé',
+    notes: [
+      'Simple appui vs double appui : le tap unique (pause ou départ) n’est confirmé que si aucun second tap n’arrive dans la fenêtre.',
+      'Le délai de confirmation n’est plus annulé par le décompte (tick 50 ms), ce qui empêchait la pause au tap tant que le chrono tournait.',
+      'Double appui sur l’écran (chrono en cours ou à l’arrêt) : nouveau coup.',
+      'Après reset / double appui, le chrono reste figé par défaut. Option « Redémarrage auto après nouveau coup » pour relancer (désactivée par défaut).',
+    ],
+  },
   {
     version: '2.5.3',
     date: '2026-09-20',
