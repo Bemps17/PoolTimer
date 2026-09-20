@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 2.4.0 — 2026-09-20
+
+- **Miroir télécommande (bêta)** : code salle + QR, écran lecture seule (`/d/CODE`).
+- Sync Internet (Cloudflare Durable Object), thème / ambiance FFB et FBEP repris sur l’écran.
+
 ## 2.3.1 — 2026-09-20
 
 - Détection d’une **nouvelle version** via `version.json` (même si le service worker ne prévient pas).

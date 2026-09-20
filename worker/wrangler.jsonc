@@ -1,0 +1,9 @@
+{
+  "name": "h8timer-mirror",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-20",
+  "durable_objects": {
+    "bindings": [{ "name": "ROOMS", "class_name": "TimerRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TimerRoom"] }]
+}

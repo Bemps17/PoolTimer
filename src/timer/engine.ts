@@ -159,13 +159,17 @@ function collectAlerts(state: EngineState, config: TimerConfig): { alertsFired: 
   return { alertsFired: { warning, lastTickSecond }, effects };
 }
 
-export function getDigitState(remainingTime: number, config: TimerConfig): DigitState {
+export function getDigitState(remainingTime: number, config: Pick<TimerConfig, 'seuilAlerte' | 'seuilCritique'>): DigitState {
   if (remainingTime <= config.seuilCritique * 1000 && remainingTime > 0) return 'critical';
   if (remainingTime <= config.seuilAlerte * 1000 && remainingTime > 0) return 'warning';
   return 'default';
 }
 
-export function getFlashClass(remainingTime: number, isRunning: boolean, config: TimerConfig): string {
+export function getFlashClass(
+  remainingTime: number,
+  isRunning: boolean,
+  config: Pick<TimerConfig, 'seuilAlerte' | 'seuilCritique'>,
+): string {
   if (!isRunning || remainingTime <= 0) return '';
   const digit = getDigitState(remainingTime, config);
   switch (digit) {
