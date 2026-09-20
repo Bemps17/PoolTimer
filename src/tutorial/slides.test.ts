@@ -14,11 +14,13 @@ describe('tutorial slides', () => {
       expect(slide.title.length).toBeGreaterThan(3);
       expect(slide.caption.length).toBeGreaterThan(20);
       expect(slide.fileName).toMatch(/^slide-[\w-]+\.svg$/);
+      expect(slide.image).toBe(`/tutorial/${slide.fileName}`);
       expect(
-        slide.image.startsWith('data:image/svg+xml') || slide.image.includes(slide.fileName),
+        slide.imageFallback.startsWith('data:image/svg+xml') ||
+          slide.imageFallback.includes(slide.fileName) ||
+          slide.imageFallback.includes('/assets/'),
         slide.id,
       ).toBe(true);
-      expect(slide.imageFallback).toBe(`/tutorial/${slide.fileName}`);
     }
   });
 
@@ -30,6 +32,10 @@ describe('tutorial slides', () => {
       expect(existsSync(fileURLToPath(published)), `public/${slide.fileName}`).toBe(true);
       expect(readFileSync(bundled, 'utf8')).toMatch(/<svg[\s>]/);
       expect(readFileSync(published, 'utf8')).toMatch(/<svg[\s>]/);
+      const bytes = readFileSync(published);
+      expect(bytes.toString('utf8')).toMatch(/^<\?xml version="1.0" encoding="UTF-8"\?>/);
+      const forbidden = [...bytes].filter((code) => code < 32 && code !== 9 && code !== 10 && code !== 13);
+      expect(forbidden, slide.fileName).toEqual([]);
     }
   });
 });

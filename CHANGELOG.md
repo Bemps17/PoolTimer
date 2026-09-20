@@ -6,7 +6,7 @@ Toutes les dates sont en UTC.
 
 - **Réglages plus courts** : sections repliables regroupées (thèmes / apparence, sons & vibration, compétition & temps, etc.) et typographie plus dense.
 - **Un seul bouton Tutoriel** en haut du menu ⚙️ (plus de doublon dans Miroir).
-- **Images du tutoriel** : chemins Vite (`import.meta.url` + `public/tutorial` via `BASE_URL`) pour les diapositives en PWA de production.
+- **Images du tutoriel** : chemins Vite (`public/tutorial` + `BASE_URL`, import hashed en repli). SVG réécrits en UTF-8 XML valide (les fichiers Latin-1 / caractères de contrôle cassaient l’affichage dans Chrome).
 
 ## 2.6.1 — 2026-09-20
 

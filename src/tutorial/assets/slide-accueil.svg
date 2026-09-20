@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="t">
-  <title id="t">Écran de jeu H8timer</title>
+  <title id="t">Ã‰cran de jeu H8timer</title>
   <rect width="360" height="240" rx="16" fill="#0a0a0a"/>
   <rect x="24" y="12" width="312" height="216" rx="22" fill="#1a1a1a" stroke="#111" stroke-width="4"/>
   <rect x="40" y="28" width="140" height="36" rx="8" fill="#0d1a24" stroke="#3498db" stroke-width="2"/>

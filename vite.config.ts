@@ -111,4 +111,9 @@ export default defineConfig({
   test: {
     environment: 'node',
   },
+  build: {
+    assetsInlineLimit(filePath) {
+      return filePath.endsWith('.svg') ? false : undefined;
+    },
+  },
 });

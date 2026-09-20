@@ -22,31 +22,31 @@ export interface TutorialSlide {
   id: TutorialSlideId;
   title: string;
   caption: string;
-  /** Vite import URL (hashed in production). */
+  /** Public Vite path (`BASE_URL` + `public/tutorial/…`). */
   image: string;
-  /** `public/tutorial/…` via BASE_URL — repli PWA / ancien cache. */
+  /** Hashed `/assets/…svg` from `?url` (not inlined — UTF-8 file). */
   imageFallback: string;
   fileName: string;
   alt: string;
 }
 
-const SLIDE_ASSETS: Record<TutorialSlideId, { fileName: string; image: string }> = {
-  accueil: { fileName: 'slide-accueil.svg', image: slideAccueil },
-  tap: { fileName: 'slide-tap.svg', image: slideTap },
-  double: { fileName: 'slide-double.svg', image: slideDouble },
-  joueurs: { fileName: 'slide-joueurs.svg', image: slideJoueurs },
-  temps: { fileName: 'slide-temps.svg', image: slideTemps },
-  reglages: { fileName: 'slide-reglages.svg', image: slideReglages },
-  'miroir-remote': { fileName: 'slide-miroir-remote.svg', image: slideMiroirRemote },
-  'miroir-visuel': { fileName: 'slide-miroir-visuel.svg', image: slideMiroirVisuel },
+const SLIDE_ASSETS: Record<TutorialSlideId, { fileName: string; bundled: string }> = {
+  accueil: { fileName: 'slide-accueil.svg', bundled: slideAccueil },
+  tap: { fileName: 'slide-tap.svg', bundled: slideTap },
+  double: { fileName: 'slide-double.svg', bundled: slideDouble },
+  joueurs: { fileName: 'slide-joueurs.svg', bundled: slideJoueurs },
+  temps: { fileName: 'slide-temps.svg', bundled: slideTemps },
+  reglages: { fileName: 'slide-reglages.svg', bundled: slideReglages },
+  'miroir-remote': { fileName: 'slide-miroir-remote.svg', bundled: slideMiroirRemote },
+  'miroir-visuel': { fileName: 'slide-miroir-visuel.svg', bundled: slideMiroirVisuel },
 };
 
 function slideImages(id: TutorialSlideId): Pick<TutorialSlide, 'image' | 'imageFallback' | 'fileName'> {
   const asset = SLIDE_ASSETS[id];
   return {
     fileName: asset.fileName,
-    image: asset.image,
-    imageFallback: publicAssetUrl(`tutorial/${asset.fileName}`),
+    image: publicAssetUrl(`tutorial/${asset.fileName}`),
+    imageFallback: asset.bundled,
   };
 }
 

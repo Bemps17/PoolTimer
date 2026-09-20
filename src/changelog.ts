@@ -15,7 +15,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     notes: [
       'Menu ⚙️ regroupé en sections repliables (joueurs, compétition & temps, apparence, sons & vibration, automatisation, miroir, application) avec une mise en page plus dense.',
       'Un seul bouton « Tutoriel », toujours visible en haut du menu Configuration.',
-      'Illustrations du diaporama : URLs Vite (import hashed + public/tutorial via BASE_URL) pour que les images s’affichent en PWA de production.',
+      'Illustrations du diaporama : chemins public/tutorial via BASE_URL, fichiers SVG UTF-8 valides (plus de Latin-1 / caractères de contrôle), import Vite hashed en repli, sans data-URL cassée.',
     ],
   },
   {

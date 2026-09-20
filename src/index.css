@@ -1075,6 +1075,7 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--c-panel-input-border);
+    min-height: 140px;
 }
 .tutorial-figure img {
     display: block;
