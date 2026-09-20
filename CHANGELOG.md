@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.3.1 — 2026-09-20
+
+- Détection d’une **nouvelle version** via `version.json` (même si le service worker ne prévient pas).
+- **Mettre à jour** active le SW en attente, vide le cache de l’origine, puis recharge.
+- Bouton **Vérifier les mises à jour** dans la configuration.
+
 ## 2.3.0 — 2026-09-20
 
 - Indicateurs **P1** et **P2** sur toute la largeur.

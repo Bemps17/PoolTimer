@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { minionsToggleMessage, toggleMinionsMode } from './audio/minions';
+import { APP_VERSION } from './changelog';
 import { ChangelogPanel } from './components/ChangelogPanel';
 import { HelpPanel } from './components/HelpPanel';
 import { Scoreboard } from './components/Scoreboard';
@@ -45,6 +46,26 @@ export default function App() {
     setToastVisible(true);
   }, [timer.config, timer.updateConfig]);
 
+  const handleCheckUpdates = useCallback(async () => {
+    const result = await pwaUpdate.checkForUpdate();
+    switch (result.status) {
+      case 'update':
+        setToastMessage(`Nouvelle version disponible (v${result.version})`);
+        break;
+      case 'current':
+        setToastMessage(`H8timer est à jour (v${APP_VERSION})`);
+        break;
+      case 'unknown':
+        setToastMessage('Impossible de vérifier les mises à jour');
+        break;
+      default: {
+        const exhaustive: never = result;
+        return exhaustive;
+      }
+    }
+    setToastVisible(true);
+  }, [pwaUpdate.checkForUpdate]);
+
   return (
     <>
       <Scoreboard
@@ -76,12 +97,15 @@ export default function App() {
         onInstall={() => {
           void pwaInstall.install();
         }}
+        onCheckUpdates={() => {
+          void handleCheckUpdates();
+        }}
       />
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <Toast visible={toastVisible} message={toastMessage} />
       <UpdateBanner
-        visible={pwaUpdate.needRefresh}
+        visible={pwaUpdate.updateAvailable}
         incomingVersion={pwaUpdate.incomingVersion}
         onUpdate={pwaUpdate.applyUpdate}
       />
