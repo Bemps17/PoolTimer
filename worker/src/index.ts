@@ -56,6 +56,7 @@ export class TimerRoom extends DurableObject<Env> {
         );
       }
       await this.ctx.storage.put('secret', secret);
+      await this.ctx.storage.put('seq', this.room.seq);
     }
 
     const pair = new WebSocketPair();

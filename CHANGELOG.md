@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.2 — 2026-09-20
+
+- **Miroir** : l’écran `/d/CODE` recompte bien quand la télécommande lance le chrono, même après une reconnexion.
+- Interpolation locale à l’heure de réception (plus de mélange d’horloges télécommande / écran).
+- **Worker Cloudflare à redéployer** (`worker/`) : le Durable Object réinitialise `seq` au claim de la télécommande.
+
 ## 2.5.1 — 2026-09-20
 
 - URL du **relais miroir** configurée pour la production (`VITE_MIRROR_WS_URL` dans `.env.production`).
