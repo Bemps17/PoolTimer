@@ -43,6 +43,10 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               tourne.
             </li>
             <li>
+              <strong>NEW :</strong> nouvelle manche. Un appui long active ou désactive le mode Minions
+              (cri Arghh à la première alerte).
+            </li>
+            <li>
               <strong>Plein écran :</strong> à activer depuis la configuration (dans le navigateur).
               En application installée, l'affichage est déjà plein écran.
             </li>

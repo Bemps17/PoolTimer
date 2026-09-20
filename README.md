@@ -70,5 +70,5 @@ Projet Vite : build `npm run build`, sortie `dist/`. Aucune variable d'environne
 | APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
 | P1 / P2 | Change de joueur, temps de base (option : relance aussi le chrono) |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
-| NEW | Nouvelle manche, extensions réinitialisées |
+| NEW | Nouvelle manche ; appui long : active / désactive Minions |
 | ⚙️ (pied de page) | Ouvre la configuration (reste visible en boutons invisibles) |

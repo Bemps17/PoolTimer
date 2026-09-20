@@ -8,6 +8,7 @@ Toutes les dates sont en UTC.
 - Bouton **réglages** dans le pied de page, toujours visible en mode boutons invisibles.
 - **Plein écran** déplacé dans la configuration (l’application installée est déjà plein écran).
 - Chiffres du chrono plus grands, **taille réglable** et mémorisée.
+- Appui long sur **NEW** : active ou désactive le mode Minions.
 
 ## 2.2.0 — 2026-09-20
 

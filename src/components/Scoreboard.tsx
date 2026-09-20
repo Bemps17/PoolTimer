@@ -16,7 +16,7 @@ interface ScoreboardProps {
   onNewGame: () => void;
   onSelectPlayer: (player: PlayerId) => void;
   onToggleMenu: () => void;
-  onUnlockMinions: () => void;
+  onToggleMinions: () => void;
 }
 
 export function Scoreboard({
@@ -30,7 +30,7 @@ export function Scoreboard({
   onNewGame,
   onSelectPlayer,
   onToggleMenu,
-  onUnlockMinions,
+  onToggleMinions,
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -75,11 +75,10 @@ export function Scoreboard({
 
   const handleNewGamePointerDown = () => {
     newGameHoldRef.current.unlockedThisPress = false;
-    if (config.minionsUnlocked) return;
     newGameHoldRef.current.timer = window.setTimeout(() => {
       newGameHoldRef.current.unlockedThisPress = true;
       newGameHoldRef.current.timer = null;
-      onUnlockMinions();
+      onToggleMinions();
     }, 1200);
   };
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { minionsToggleMessage, toggleMinionsMode } from './audio/minions';
 import { ChangelogPanel } from './components/ChangelogPanel';
 import { HelpPanel } from './components/HelpPanel';
 import { Scoreboard } from './components/Scoreboard';
@@ -37,10 +38,10 @@ export default function App() {
     [timer.updateConfig],
   );
 
-  const handleUnlockMinions = useCallback(() => {
-    if (timer.config.minionsUnlocked) return;
-    timer.updateConfig({ ...timer.config, minionsUnlocked: true, minionsMode: true });
-    setToastMessage('Mode Minions débloqué');
+  const handleToggleMinions = useCallback(() => {
+    const next = toggleMinionsMode(timer.config);
+    timer.updateConfig(next);
+    setToastMessage(minionsToggleMessage(next.minionsMode));
     setToastVisible(true);
   }, [timer.config, timer.updateConfig]);
 
@@ -60,7 +61,7 @@ export default function App() {
           void timer.playClick();
           setMenuOpen(true);
         }}
-        onUnlockMinions={handleUnlockMinions}
+        onToggleMinions={handleToggleMinions}
       />
       <SettingsPanel
         open={menuOpen}
