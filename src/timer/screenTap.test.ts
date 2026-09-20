@@ -1,67 +1,76 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DOUBLE_TAP_MS,
   createScreenTapSession,
   resolveTimerScreenTap,
   shouldAcceptControlActivation,
 } from './screenTap';
 
 describe('resolveTimerScreenTap', () => {
-  it('pauses immediately on the first tap while running', () => {
+  it('arms pause on the first tap while running instead of pausing immediately', () => {
     const first = resolveTimerScreenTap({
       isRunning: true,
       now: 1_000,
       kind: 'pointer',
       session: createScreenTapSession(),
     });
-    expect(first.action).toBe('pause');
+    expect(first.action).toBe('arm-pause');
   });
 
-  it('ignores a synthetic click after a touch pointerup so pause is not undone', () => {
-    const paused = resolveTimerScreenTap({
+  it('cancels the pending pause and resets when a second tap arrives within the double-tap window', () => {
+    const first = resolveTimerScreenTap({
+      isRunning: true,
+      now: 1_000,
+      kind: 'pointer',
+      session: createScreenTapSession(),
+    });
+    const second = resolveTimerScreenTap({
+      isRunning: true,
+      now: 1_000 + DOUBLE_TAP_MS - 40,
+      kind: 'pointer',
+      session: first.session,
+    });
+    expect(second.action).toBe('reset');
+  });
+
+  it('ignores a synthetic click after a touch pointerup so it cannot steal the double-tap window', () => {
+    const armed = resolveTimerScreenTap({
       isRunning: true,
       now: 1_000,
       kind: 'pointer',
       session: createScreenTapSession(),
     });
     const ghost = resolveTimerScreenTap({
-      isRunning: false,
+      isRunning: true,
       now: 1_080,
       kind: 'click',
-      session: paused.session,
+      session: armed.session,
     });
     expect(ghost.action).toBe('ignore');
-  });
 
-  it('does not treat a second event just after pause as double-tap reset', () => {
-    const paused = resolveTimerScreenTap({
-      isRunning: true,
-      now: 1_000,
-      kind: 'pointer',
-      session: createScreenTapSession(),
-    });
     const secondPointer = resolveTimerScreenTap({
-      isRunning: false,
-      now: 1_120,
+      isRunning: true,
+      now: 1_200,
       kind: 'pointer',
-      session: paused.session,
+      session: ghost.session,
     });
-    expect(secondPointer.action).toBe('ignore');
+    expect(secondPointer.action).toBe('reset');
   });
 
-  it('ignores a second tap while isRunning is still true after pause (stale UI state)', () => {
-    const paused = resolveTimerScreenTap({
+  it('treats a later single tap as a new pending pause once the double-tap window has elapsed', () => {
+    const first = resolveTimerScreenTap({
       isRunning: true,
       now: 1_000,
       kind: 'pointer',
       session: createScreenTapSession(),
     });
-    const staleRunning = resolveTimerScreenTap({
+    const later = resolveTimerScreenTap({
       isRunning: true,
-      now: 1_080,
+      now: 1_000 + DOUBLE_TAP_MS + 20,
       kind: 'pointer',
-      session: paused.session,
+      session: first.session,
     });
-    expect(staleRunning.action).toBe('ignore');
+    expect(later.action).toBe('arm-pause');
   });
 
   it('arms play on a single tap when paused, and resets on a true double-tap', () => {
@@ -80,6 +89,22 @@ describe('resolveTimerScreenTap', () => {
       session: first.session,
     });
     expect(second.action).toBe('reset');
+  });
+
+  it('ignores a ghost click after arming play so pause/play is not confirmed early', () => {
+    const first = resolveTimerScreenTap({
+      isRunning: false,
+      now: 5_000,
+      kind: 'pointer',
+      session: createScreenTapSession(),
+    });
+    const ghost = resolveTimerScreenTap({
+      isRunning: false,
+      now: 5_060,
+      kind: 'click',
+      session: first.session,
+    });
+    expect(ghost.action).toBe('ignore');
   });
 });
 

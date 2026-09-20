@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.4 — 2026-09-20
+
+- **Simple vs double appui** : la pause (ou le départ) n’est confirmée que si aucun second tap n’arrive dans la fenêtre — le double appui n’est plus volé par la pause.
+- Double appui sur l’écran (chrono en cours ou à l’arrêt) : **nouveau coup**.
+- Après reset / double appui, le chrono **reste figé par défaut**. Option « Redémarrage auto après nouveau coup » (désactivée par défaut).
+
 ## 2.5.3 — 2026-09-20
 
 - **Miroir** : le relais transmet les `push` de la télécommande vers l’écran (chrono plus bloqué à 00:00).

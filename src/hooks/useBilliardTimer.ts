@@ -5,6 +5,7 @@ import { loadConfig, saveConfig } from '../timer/config';
 import {
   canUseExtension,
   createInitialState,
+  maybeAutoStart,
   newGame as newGameState,
   pauseTimer,
   selectPlayer as selectPlayerState,
@@ -89,10 +90,6 @@ export function useBilliardTimer() {
     void ensureAudio().then(() => playSound('click', configRef.current));
   }, [ensureAudio]);
 
-  const startNow = useCallback(() => {
-    apply((current) => startTimer(current, Date.now()));
-  }, [apply]);
-
   const togglePlayPause = useCallback(() => {
     playClick();
     apply((current) => (current.isRunning ? pauseTimer(current, Date.now()) : startTimer(current, Date.now())));
@@ -102,12 +99,9 @@ export function useBilliardTimer() {
     playClick();
     apply((current) => {
       const reset = setupNewShot(current, configRef.current);
-      if (configRef.current.autoStartOnReset) {
-        window.setTimeout(() => startNow(), 50);
-      }
-      return reset;
+      return maybeAutoStart(reset, configRef.current, Date.now());
     });
-  }, [apply, playClick, startNow]);
+  }, [apply, playClick]);
 
   const triggerApresCasse = useCallback(() => {
     playClick();

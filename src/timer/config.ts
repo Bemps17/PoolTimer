@@ -92,7 +92,7 @@ export function getDefaultConfig(): TimerConfig {
     affichageMs: true,
     modeInterface: 'boutons',
     tailleChiffres: 100,
-    autoStartOnReset: true,
+    autoStartOnReset: false,
     autoStartOnPlayerSelect: false,
     minionsUnlocked: false,
     minionsMode: false,
