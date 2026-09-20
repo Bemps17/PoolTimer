@@ -107,7 +107,7 @@ describe('mergeConfig', () => {
     expect(merged.alertPack).toBe('classic');
     expect(merged.alertPickMode).toBe('fixed');
     expect(merged.criticalAlertStyle).toBe('repeat');
-    expect(merged.alertWarningIds).toContain('classic-warning');
+    expect(merged.alertWarningIds).toContain('classic-alert-time');
   });
 
   it('keeps Minions mode hidden until unlocked', () => {

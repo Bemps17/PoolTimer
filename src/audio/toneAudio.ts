@@ -1,5 +1,6 @@
 import * as Tone from 'tone';
 import type { SoundType, TimerConfig } from '../timer/types';
+import { playMinionsArghh, shouldPlayMinionsArghh } from './minions';
 import { playAlertById, preloadAlertPack, resolveAlertSoundId } from './playAlert';
 
 interface AudioGraph {
@@ -80,6 +81,9 @@ function playClassicTone(id: string, config: TimerConfig): void {
     case 'classic-gong':
       graph.gong.triggerAttackRelease('A3', '0.5s', now);
       return;
+    case 'classic-clic':
+      graph.clickSynth.triggerAttackRelease('C4', '32n', now, 0.5);
+      return;
     default:
       return;
   }
@@ -119,8 +123,8 @@ export function playSound(type: SoundType, config: TimerConfig): void {
     return;
   }
 
-  if (isClickType) {
-    playClassicType('click', config);
+  if (shouldPlayMinionsArghh(type, config)) {
+    playMinionsArghh(config.volume);
     return;
   }
 

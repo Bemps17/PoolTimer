@@ -1,5 +1,5 @@
 export const CUSTOM_SOUND_PREFIX = 'custom:';
-export const MAX_CUSTOM_SOUND_BYTES = 750_000;
+export const MAX_CUSTOM_SOUND_BYTES = 1_500_000;
 export const MAX_CUSTOM_SOUNDS = 12;
 
 export interface CustomSoundRecord {

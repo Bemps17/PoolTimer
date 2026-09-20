@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.0';
+export const APP_VERSION = '2.6.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.1',
+    date: '2026-09-20',
+    title: 'Alertes d’origine et Minions restaurés',
+    notes: [
+      'Restauration des sons déjà présents dans le dépôt : alerte initiale (alert-time.mp3), clic (clic.mp3), et cri Arghh Minions (minions-arghh.mp3).',
+      'L’appui long sur NEW réactive le mode Minions historique (pas le pack Minions-like généré). Packs Crétins / Minions-like originaux toujours disponibles dans ⚙️.',
+      'Par défaut, le pack classique rejoue l’alerte initiale du dépôt. Les extraits Voicemod « funny » ne sont pas embarqués : téléchargez-les vous-même puis Importer (l’app ne va pas les chercher).',
+    ],
+  },
   {
     version: '2.6.0',
     date: '2026-09-20',

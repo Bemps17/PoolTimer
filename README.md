@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.6.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.6.1** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -13,7 +13,7 @@ Version actuelle : **2.6.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 - Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable
-- Alertes visuelles, sonores et vibration. Bibliothèque **originale H8timer** (classique, Pack Crétins, Pack Minions-like), tirage aléatoire, bips 1 s ou alerte ~5 s, import de fichiers
+- Alertes visuelles, sonores et vibration. Pack **classique** (fichiers d’origine du dépôt + cloche Tone.js), Pack Crétins et Pack Minions-like (originaux H8timer), tirage aléatoire, bips 1 s ou alerte ~5 s. Import local de vos fichiers (Voicemod : téléchargement manuel, pas de fetch)
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
 - **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; dans ⚙️, durées via +/− **et** saisie au clavier ; noms éditables uniquement après un appui explicite « modifier » (un nom vide est autorisé)
 - **Miroir télécommande** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet. Tutoriel illustré : bouton **Tutoriel** (⚙️, aide, ou section Miroir).
@@ -125,5 +125,12 @@ Pas besoin du même Wi‑Fi (sync Internet). Une seule télécommande par salle.
 | APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
 | P1 / P2 (bandeau) | Change de joueur, temps de base (option : relance aussi le chrono). Nom vide → affichage « Joueur 1 / 2 » |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
-| NEW | Nouvelle manche ; appui long : active / désactive Minions |
+| NEW | Nouvelle manche ; appui long : active / désactive le mode Minions (cri Arghh historique) |
 | ⚙️ (pied de page) | Ouvre la configuration (reste visible en boutons invisibles) |
+
+## Sons
+
+- **Pack classique (défaut)** : alerte initiale et clics déjà dans le dépôt (`public/sound/alert-time.mp3`, `clic.mp3`), plus la cloche / les bips Tone.js.
+- **Mode Minions** : appui long sur **NEW** (ou ⚙️ → Automatisation une fois déverrouillé). Rejoue `public/sound/minions-arghh.mp3` à la première alerte orange.
+- **Pack Crétins** et **Pack Minions-like (original)** : options supplémentaires dans ⚙️ → Bibliothèque d’alertes.
+- **Import** : ⚙️ → Bibliothèque d’alertes → Importer un fichier audio. Les extraits Voicemod / « funny » doivent être téléchargés par vos soins ; l’app ne les récupère pas (droits d’auteur).
