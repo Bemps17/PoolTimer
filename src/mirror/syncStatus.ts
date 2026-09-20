@@ -46,7 +46,7 @@ export function controllerSyncStatus(input: {
 
   if (input.displayCount <= 0) {
     return {
-      chip: input.room ? `Bêta · ${input.room} · en attente d’un écran` : 'En attente d’un écran',
+      chip: input.room ? `Miroir · ${input.room} · en attente d’un écran` : 'En attente d’un écran',
       detail: 'Salle active · en attente d’un écran',
       health: 'waiting_display',
     };

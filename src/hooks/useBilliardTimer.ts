@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { preloadMinionsArghh } from '../audio/minions';
-import { initializeAudio, playSound, setAudioVolume, vibrate } from '../audio/toneAudio';
+import { initializeAudio, playSound, preloadAlertPack, setAudioVolume, vibrate } from '../audio/toneAudio';
 import { loadConfig, saveConfig } from '../timer/config';
 import {
   canUseExtension,
@@ -68,8 +67,8 @@ export function useBilliardTimer() {
   }, [config.volume]);
 
   useEffect(() => {
-    if (config.minionsMode) preloadMinionsArghh();
-  }, [config.minionsMode]);
+    preloadAlertPack(config);
+  }, [config]);
 
   useEffect(() => {
     if (!state.isRunning) return undefined;

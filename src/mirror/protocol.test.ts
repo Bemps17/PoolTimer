@@ -126,6 +126,12 @@ describe('mirror protocol', () => {
     );
   });
 
+  it('forwards empty player names to the visual display without injecting P1', () => {
+    const config = { ...getDefaultConfig(), p1Name: '', p2Name: 'P' };
+    expect(toDisplayConfig(config).p1Name).toBe('');
+    expect(toDisplayConfig(config).p2Name).toBe('P');
+  });
+
   it('rejects malformed client pushes', () => {
     expect(parseClientMessage({ type: 'ping' })).toEqual({ type: 'ping' });
     expect(parseClientMessage({ type: 'push', seq: 1 })).toBeUndefined();

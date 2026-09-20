@@ -7,8 +7,8 @@ import { isMirrorRelayConfigured } from '../mirror/wsUrl';
 import type { MirrorConnectionStatus } from '../hooks/useMirror';
 
 interface MirrorSettingsProps {
-  betaEnabled: boolean;
-  onBetaChange: (enabled: boolean) => void;
+  enabled: boolean;
+  onEnabledChange: (enabled: boolean) => void;
   room: string | null;
   status: MirrorConnectionStatus;
   error: string | null;
@@ -18,6 +18,7 @@ interface MirrorSettingsProps {
   onCreateRoom: () => void;
   onCloseRoom: () => void;
   onCopyLink: () => void;
+  onShowTutorial: () => void;
 }
 
 const YES_NO = [
@@ -26,8 +27,8 @@ const YES_NO = [
 ];
 
 export function MirrorSettings({
-  betaEnabled,
-  onBetaChange,
+  enabled,
+  onEnabledChange,
   room,
   status,
   error,
@@ -37,6 +38,7 @@ export function MirrorSettings({
   onCreateRoom,
   onCloseRoom,
   onCopyLink,
+  onShowTutorial,
 }: MirrorSettingsProps) {
   const configured = isMirrorRelayConfigured();
   const live = Boolean(room) && status !== 'idle';
@@ -62,22 +64,23 @@ export function MirrorSettings({
 
   return (
     <div className="section-panel">
-      <h3>
-        Bêta / Work in progress <span className="beta-badge">Bêta</span>
-      </h3>
+      <h3>Miroir télécommande</h3>
       <p className="install-hint">
-        Miroir télécommande : le téléphone reste la commande, une tablette ou un PC affiche le chrono via
-        Internet (code court + QR). Même Wi‑Fi non obligatoire.
+        Le téléphone reste la commande ; une tablette, une TV ou un PC affiche le chrono via Internet (code court +
+        QR). Même Wi‑Fi non obligatoire.
       </p>
+      <button type="button" className="bouton-menu" onClick={onShowTutorial}>
+        Tutoriel
+      </button>
       <MirrorGuide variant="settings" />
       <SelectField
         label="Miroir télécommande"
-        htmlId="betaMirror"
-        value={String(betaEnabled)}
+        htmlId="mirrorEnabled"
+        value={String(enabled)}
         options={YES_NO}
-        onChange={(value) => onBetaChange(parseBooleanSelect(value))}
+        onChange={(value) => onEnabledChange(parseBooleanSelect(value))}
       />
-      {betaEnabled ? (
+      {enabled ? (
         <>
           {!configured ? (
             <p className="install-hint">

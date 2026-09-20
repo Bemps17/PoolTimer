@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { commitIntegerField } from '../timer/numberField';
+
 interface NumberStepperProps {
   label: string;
   htmlId: string;
@@ -19,7 +22,20 @@ export function NumberStepper({
   suffix,
   onChange,
 }: NumberStepperProps) {
+  const [draft, setDraft] = useState<string | null>(null);
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
+  const shown = draft ?? String(value);
+
+  const commitDraft = (raw: string) => {
+    onChange(commitIntegerField(raw, value, min, max));
+    setDraft(null);
+  };
+
+  const stepBy = (delta: number) => {
+    const base = draft !== null ? commitIntegerField(draft, value, min, max) : value;
+    setDraft(null);
+    onChange(clamp(base + delta));
+  };
 
   return (
     <div className="parametre-groupe">
@@ -29,23 +45,45 @@ export function NumberStepper({
           type="button"
           className="stepper-btn"
           aria-label={`Diminuer ${label}`}
-          onClick={() => onChange(clamp(value - step))}
+          onClick={() => stepBy(-step)}
         >
           −
         </button>
-        <div id={htmlId} className="stepper-value" aria-live="polite">
-          {value}
-          {suffix ? ` ${suffix}` : ''}
-        </div>
+        <input
+          id={htmlId}
+          className="stepper-value stepper-input"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          enterKeyHint="done"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          value={shown}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-label={`${label}, entre ${min} et ${max}${suffix ? ` ${suffix}` : ''}`}
+          onFocus={() => setDraft(String(value))}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={() => commitDraft(draft ?? String(value))}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              event.currentTarget.blur();
+            }
+          }}
+        />
         <button
           type="button"
           className="stepper-btn"
           aria-label={`Augmenter ${label}`}
-          onClick={() => onChange(clamp(value + step))}
+          onClick={() => stepBy(step)}
         >
           +
         </button>
       </div>
+      {suffix ? <p className="stepper-suffix-hint">{suffix} · {min}–{max}</p> : null}
     </div>
   );
 }

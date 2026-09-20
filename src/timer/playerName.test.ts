@@ -3,27 +3,47 @@ import {
   PLAYER_NAME_MAX_LENGTH,
   clampPlayerNameInput,
   computeFitFontSize,
-  sanitizePlayerName,
+  displayPlayerName,
+  readStoredPlayerName,
+  storedPlayerName,
 } from './playerName';
 
-describe('sanitizePlayerName', () => {
+describe('storedPlayerName', () => {
   it('keeps a full first and last name', () => {
-    expect(sanitizePlayerName('Jean-Baptiste Moreau', 'P1')).toBe('Jean-Baptiste Moreau');
+    expect(storedPlayerName('Jean-Baptiste Moreau')).toBe('Jean-Baptiste Moreau');
   });
 
   it('trims and collapses spaces', () => {
-    expect(sanitizePlayerName('  Anne   Dupont  ', 'P1')).toBe('Anne Dupont');
+    expect(storedPlayerName('  Anne   Dupont  ')).toBe('Anne Dupont');
   });
 
-  it('falls back when empty or not a string', () => {
-    expect(sanitizePlayerName('   ', 'P1')).toBe('P1');
-    expect(sanitizePlayerName(null, 'P2')).toBe('P2');
+  it('allows an empty name instead of injecting P1 or P', () => {
+    expect(storedPlayerName('   ')).toBe('');
+    expect(storedPlayerName('')).toBe('');
+    expect(storedPlayerName('P')).toBe('P');
   });
 
   it(`caps names at ${PLAYER_NAME_MAX_LENGTH} characters`, () => {
     const long = 'Jean-Baptiste Alexandre Moreau-Dupont';
     expect(long.length).toBeGreaterThan(PLAYER_NAME_MAX_LENGTH);
-    expect(sanitizePlayerName(long, 'P1')).toHaveLength(PLAYER_NAME_MAX_LENGTH);
+    expect(storedPlayerName(long)).toHaveLength(PLAYER_NAME_MAX_LENGTH);
+  });
+});
+
+describe('readStoredPlayerName', () => {
+  it('uses the fallback only when the value is missing, not when it is empty', () => {
+    expect(readStoredPlayerName(undefined, 'P1')).toBe('P1');
+    expect(readStoredPlayerName(null, 'P2')).toBe('P2');
+    expect(readStoredPlayerName('', 'P1')).toBe('');
+    expect(readStoredPlayerName('   ', 'P1')).toBe('');
+  });
+});
+
+describe('displayPlayerName', () => {
+  it('shows a UI placeholder without implying it should be stored', () => {
+    expect(displayPlayerName('', 1)).toBe('Joueur 1');
+    expect(displayPlayerName('   ', 2)).toBe('Joueur 2');
+    expect(displayPlayerName('Alex', 1)).toBe('Alex');
   });
 });
 

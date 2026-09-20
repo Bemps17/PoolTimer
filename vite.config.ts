@@ -16,9 +16,24 @@ export default defineConfig({
         'icon-512.png',
         'icon-512-maskable.png',
         'apple-touch-icon.png',
-        'sound/minions-arghh.mp3',
-        'sound/clic.mp3',
-        'sound/alert-time.mp3',
+        'sound/original/cretins-couac.wav',
+        'sound/original/cretins-glousse.wav',
+        'sound/original/cretins-tick.wav',
+        'sound/original/cretins-alerte5s.wav',
+        'sound/original/cretins-fin.wav',
+        'sound/original/minionslike-gazouillis.wav',
+        'sound/original/minionslike-wouah.wav',
+        'sound/original/minionslike-tick.wav',
+        'sound/original/minionslike-alerte5s.wav',
+        'sound/original/minionslike-fin.wav',
+        'tutorial/slide-accueil.svg',
+        'tutorial/slide-tap.svg',
+        'tutorial/slide-double.svg',
+        'tutorial/slide-joueurs.svg',
+        'tutorial/slide-temps.svg',
+        'tutorial/slide-reglages.svg',
+        'tutorial/slide-miroir-remote.svg',
+        'tutorial/slide-miroir-visuel.svg',
       ],
       manifest: {
         name: 'H8timer',
@@ -56,9 +71,7 @@ export default defineConfig({
         globIgnores: ['**/version.json'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
-        // Activate the new SW even if an old install never calls skipWaiting
-        // (2.1.0 autoUpdate → 2.2+ prompt left a waiting worker forever).
-        skipWaiting: true,
+        skipWaiting: false,
         clientsClaim: true,
         runtimeCaching: [
           {

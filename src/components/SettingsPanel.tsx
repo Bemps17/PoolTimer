@@ -1,12 +1,14 @@
 import { useRef, type ReactNode, type TouchEvent } from 'react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
+import { rollbackCopy } from '../pwa/updateChoice';
 import { applyCompetitionPreset, CONFIG_LIMITS, matchesCompetitionPreset } from '../timer/config';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
 import { PlayerNameField } from './PlayerNameField';
+import { SoundLibrarySettings } from './SoundLibrarySettings';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -16,10 +18,16 @@ interface SettingsPanelProps {
   onChange: (next: TimerConfig, options?: { resetShot?: boolean }) => void;
   onShowHelp: () => void;
   onShowChangelog: () => void;
+  onShowTutorial: () => void;
   onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
   onCheckUpdates: () => void;
+  updateAvailable?: boolean;
+  incomingVersion?: string;
+  updateSnoozed?: boolean;
+  onApplyUpdate?: () => void;
+  onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
 }
 
@@ -71,10 +79,16 @@ export function SettingsPanel({
   onChange,
   onShowHelp,
   onShowChangelog,
+  onShowTutorial,
   onToggleFullscreen,
   installStatus,
   onInstall,
   onCheckUpdates,
+  updateAvailable = false,
+  incomingVersion,
+  updateSnoozed = false,
+  onApplyUpdate,
+  onSnoozeUpdate,
   extraSections,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -169,7 +183,8 @@ export function SettingsPanel({
               colorId="p1Color"
               name={config.p1Name}
               color={config.p1Color}
-              onNameChange={(p1Name) => patch({ p1Name: p1Name || 'P1' })}
+              seat={1}
+              onNameChange={(p1Name) => patch({ p1Name })}
               onColorChange={(p1Color) => patch({ p1Color })}
             />
             <PlayerNameField
@@ -178,9 +193,14 @@ export function SettingsPanel({
               colorId="p2Color"
               name={config.p2Name}
               color={config.p2Color}
-              onNameChange={(p2Name) => patch({ p2Name: p2Name || 'P2' })}
+              seat={2}
+              onNameChange={(p2Name) => patch({ p2Name })}
               onColorChange={(p2Color) => patch({ p2Color })}
             />
+            <p className="install-hint">
+              Un nom vide est autorisé (affichage « Joueur 1 / 2 » uniquement à l’écran, sans réécrire P1 dans
+              le réglage).
+            </p>
           </div>
 
           <div className="section-panel">
@@ -259,6 +279,9 @@ export function SettingsPanel({
               suffix="s"
               onChange={(seuilCritique) => patch({ seuilCritique })}
             />
+            <p className="install-hint">
+              En plus de +/−, touchez le champ pour saisir le nombre au clavier (pavé numérique).
+            </p>
           </div>
 
           <div className="section-panel">
@@ -366,6 +389,8 @@ export function SettingsPanel({
             ) : null}
           </div>
 
+          <SoundLibrarySettings config={config} onChange={(next) => onChange(next)} />
+
           {extraSections}
 
           <div className="section-panel">
@@ -380,12 +405,33 @@ export function SettingsPanel({
               {installCopy.label}
             </button>
             <p className="install-hint">{installCopy.hint}</p>
+            <button type="button" className="bouton-menu" onClick={onShowTutorial}>
+              Tutoriel
+            </button>
             <button type="button" className="bouton-menu" onClick={onCheckUpdates}>
               Vérifier les mises à jour
             </button>
             <p className="install-hint">
               Compare la version installée avec le serveur. Utile si le bandeau de mise à jour n’apparaît pas.
             </p>
+            {updateAvailable && onApplyUpdate && onSnoozeUpdate ? (
+              <div className="update-settings">
+                <p className="install-hint">
+                  {incomingVersion
+                    ? `Nouvelle version détectée : v${incomingVersion}.`
+                    : 'Une nouvelle version est prête.'}{' '}
+                  {rollbackCopy({ updateAvailable: true, snoozed: updateSnoozed }).message}
+                </p>
+                <button type="button" className="bouton-menu" onClick={onApplyUpdate}>
+                  Mettre à jour
+                </button>
+                <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onSnoozeUpdate}>
+                  Rester sur cette version
+                </button>
+              </div>
+            ) : (
+              <p className="install-hint">{rollbackCopy({ updateAvailable: false, snoozed: false }).message}</p>
+            )}
             <button type="button" className="bouton-menu" onClick={onShowChangelog}>
               Historique des versions
             </button>

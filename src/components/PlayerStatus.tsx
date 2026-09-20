@@ -1,15 +1,18 @@
 import { FitText } from './FitText';
+import { displayPlayerName } from '../timer/playerName';
 
 interface PlayerStatusProps {
   name: string;
   color: string;
   active: boolean;
   extensionUsed: boolean;
+  seat: 1 | 2;
   onSelect?: () => void;
 }
 
-export function PlayerStatus({ name, color, active, extensionUsed, onSelect }: PlayerStatusProps) {
+export function PlayerStatus({ name, color, active, extensionUsed, seat, onSelect }: PlayerStatusProps) {
   const interactive = Boolean(onSelect);
+  const shown = displayPlayerName(name, seat);
 
   return (
     <div
@@ -33,7 +36,7 @@ export function PlayerStatus({ name, color, active, extensionUsed, onSelect }: P
           : { borderColor: 'transparent', boxShadow: 'none' }
       }
     >
-      <FitText className="player-name">{name}</FitText>
+      <FitText className="player-name">{shown}</FitText>
       <span className={`ext-status ${extensionUsed ? 'ext-used' : 'ext-available'}`}>EXT</span>
     </div>
   );

@@ -4,7 +4,10 @@ export type InterfaceMode = 'boutons' | 'tactile';
 export type ShotKind = 'base' | 'apresCasse';
 export type PlayerId = 1 | 2;
 export type DigitState = 'default' | 'warning' | 'critical';
-export type SoundType = 'warning' | 'countdown_tick' | 'gong' | 'click';
+export type SoundType = 'warning' | 'countdown_tick' | 'gong' | 'click' | 'critical_oneshot';
+export type AlertPackId = 'classic' | 'cretins' | 'minionsLike';
+export type AlertPickMode = 'fixed' | 'random';
+export type CriticalAlertStyle = 'oneshot' | 'repeat';
 
 export interface TimerConfig {
   tempsBase: number;
@@ -23,6 +26,12 @@ export interface TimerConfig {
   autoStartOnPlayerSelect: boolean;
   minionsUnlocked: boolean;
   minionsMode: boolean;
+  alertPack: AlertPackId;
+  alertPickMode: AlertPickMode;
+  alertWarningIds: string[];
+  alertCriticalIds: string[];
+  alertEndIds: string[];
+  criticalAlertStyle: CriticalAlertStyle;
   p1Name: string;
   p1Color: string;
   p2Name: string;
@@ -32,6 +41,7 @@ export interface TimerConfig {
 
 export interface AlertsFired {
   warning: boolean;
+  critical: boolean;
   lastTickSecond: number;
 }
 

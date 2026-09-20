@@ -8,6 +8,7 @@ import { MirrorSettings } from './components/MirrorSettings';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Toast } from './components/Toast';
+import { TutorialSlideshow } from './components/TutorialSlideshow';
 import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
@@ -15,7 +16,7 @@ import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { displayUrl, parseDisplayRoom } from './mirror/protocol';
-import { loadBetaMirrorEnabled, saveBetaMirrorEnabled } from './mirror/storage';
+import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
@@ -34,11 +35,12 @@ function ControllerApp() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('Paramètres sauvegardés !');
-  const [betaMirror, setBetaMirror] = useState(() => loadBetaMirrorEnabled());
+  const [mirrorEnabled, setMirrorEnabled] = useState(() => loadMirrorEnabled());
   const mirror = useControllerMirror({
-    enabled: betaMirror,
+    enabled: mirrorEnabled,
     state: timer.state,
     config: timer.config,
   });
@@ -48,6 +50,13 @@ function ControllerApp() {
     const id = window.setTimeout(() => setToastVisible(false), 2200);
     return () => window.clearTimeout(id);
   }, [toastVisible]);
+
+  const openTutorial = useCallback(() => {
+    setMenuOpen(false);
+    setHelpOpen(false);
+    setChangelogOpen(false);
+    setTutorialOpen(true);
+  }, []);
 
   const handleConfigChange = useCallback(
     (next: TimerConfig, options?: { resetShot?: boolean }) => {
@@ -85,10 +94,16 @@ function ControllerApp() {
     setToastVisible(true);
   }, [pwaUpdate.checkForUpdate]);
 
-  const handleBetaMirror = useCallback((enabled: boolean) => {
-    saveBetaMirrorEnabled(enabled);
-    setBetaMirror(enabled);
+  const handleMirrorEnabled = useCallback((enabled: boolean) => {
+    saveMirrorEnabled(enabled);
+    setMirrorEnabled(enabled);
   }, []);
+
+  const handleSnoozeUpdate = useCallback(() => {
+    pwaUpdate.snoozeUpdate();
+    setToastMessage(`Vous restez sur H8timer v${APP_VERSION}`);
+    setToastVisible(true);
+  }, [pwaUpdate.snoozeUpdate]);
 
   const displayLink = mirror.room ? displayUrl(window.location.origin, mirror.room) : null;
 
@@ -110,7 +125,7 @@ function ControllerApp() {
           className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
           aria-live="polite"
         >
-          {mirror.sync.chip || `Bêta · ${mirror.room}`}
+          {mirror.sync.chip || `Miroir · ${mirror.room}`}
         </div>
       ) : null}
       <Scoreboard
@@ -137,6 +152,7 @@ function ControllerApp() {
         onChange={handleConfigChange}
         onShowHelp={() => setHelpOpen(true)}
         onShowChangelog={() => setChangelogOpen(true)}
+        onShowTutorial={openTutorial}
         onToggleFullscreen={toggle}
         installStatus={pwaInstall.status}
         onInstall={() => {
@@ -145,10 +161,15 @@ function ControllerApp() {
         onCheckUpdates={() => {
           void handleCheckUpdates();
         }}
+        updateAvailable={pwaUpdate.updateAvailable}
+        incomingVersion={pwaUpdate.incomingVersion}
+        updateSnoozed={pwaUpdate.snoozed}
+        onApplyUpdate={pwaUpdate.applyUpdate}
+        onSnoozeUpdate={handleSnoozeUpdate}
         extraSections={
           <MirrorSettings
-            betaEnabled={betaMirror}
-            onBetaChange={handleBetaMirror}
+            enabled={mirrorEnabled}
+            onEnabledChange={handleMirrorEnabled}
             room={mirror.room}
             status={mirror.status}
             error={mirror.error}
@@ -160,16 +181,23 @@ function ControllerApp() {
             onCopyLink={() => {
               void handleCopyLink();
             }}
+            onShowTutorial={openTutorial}
           />
         }
       />
-      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <HelpPanel
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        onShowTutorial={openTutorial}
+      />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
+      <TutorialSlideshow open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       <Toast visible={toastVisible} message={toastMessage} />
       <UpdateBanner
-        visible={pwaUpdate.updateAvailable}
+        visible={pwaUpdate.bannerVisible}
         incomingVersion={pwaUpdate.incomingVersion}
         onUpdate={pwaUpdate.applyUpdate}
+        onLater={handleSnoozeUpdate}
       />
     </>
   );

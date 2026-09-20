@@ -2,6 +2,15 @@
 
 Toutes les dates sont en UTC.
 
+## 2.6.0 — 2026-09-20
+
+- **Fin de bêta** : le miroir télécommande (et l’écran Visuel) sont présentés comme des fonctions stables.
+- **Tutoriel** : diaporama illustré (écran de jeu, commandes, saisie des temps, miroir télécommande ↔ Visuel), bouton « Tutoriel ».
+- **Saisie clavier** des temps (base, après casse, extension, seuils, taille des chiffres) en plus des +/−, avec bornes. Pas de clavier accidentel sur l’écran de jeu.
+- **Bibliothèque d’alertes** originale H8timer : Pack Crétins (original), Pack Minions-like (original), sélection fixe ou aléatoire, bips 1 s ou alerte ~5 s, son de fin distinct, import de fichiers. Aucun extrait Ubisoft / Illumination.
+- **Mises à jour PWA** : « Mettre à jour » ou « Plus tard / Rester sur cette version ». Pas de vrai rollback une fois la nouvelle version installée (limitation navigateur), expliqué dans l’app.
+- **Noms** : vider un nom ne réécrit plus « P1 » / « P ». Placeholder d’affichage uniquement.
+
 ## 2.5.6 — 2026-09-20
 
 - **Surface plus large** : moins de marge latérale ; le tableau occupe presque toute la largeur téléphone / tablette.

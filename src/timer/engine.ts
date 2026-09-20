@@ -1,7 +1,7 @@
 import type { DigitState, Effect, EngineState, PlayerId, TickResult, TimerConfig } from './types';
 
 function freshAlerts(): EngineState['alertsFired'] {
-  return { warning: false, lastTickSecond: 999 };
+  return { warning: false, critical: false, lastTickSecond: 999 };
 }
 
 export function createInitialState(config: TimerConfig): EngineState {
@@ -94,13 +94,14 @@ export function useExtension(state: EngineState, config: TimerConfig, now: numbe
 
   const expectedTime = state.expectedTime + config.tempsExtension * 1000;
   const remainingTime = expectedTime - now;
-  let { warning, lastTickSecond } = state.alertsFired;
+  let { warning, critical, lastTickSecond } = state.alertsFired;
 
   if (remainingTime > config.seuilAlerte * 1000) {
     warning = false;
   }
   if (remainingTime > 5000) {
     lastTickSecond = 999;
+    critical = false;
   }
 
   return {
@@ -112,7 +113,7 @@ export function useExtension(state: EngineState, config: TimerConfig, now: numbe
       ...state.extensionsUsedInGame,
       [state.currentPlayer]: true,
     },
-    alertsFired: { warning, lastTickSecond },
+    alertsFired: { warning, critical, lastTickSecond },
   };
 }
 
@@ -145,20 +146,28 @@ function collectAlerts(state: EngineState, config: TimerConfig): { alertsFired: 
   const remainingSec = state.remainingTime / 1000;
   const currentWholeSecond = Math.floor(remainingSec);
   const effects: Effect[] = [];
-  let { warning, lastTickSecond } = state.alertsFired;
+  let { warning, critical, lastTickSecond } = state.alertsFired;
 
   if (remainingSec <= config.seuilAlerte && !warning) {
     warning = true;
     effects.push({ type: 'sound', sound: 'warning' });
   }
 
-  if (remainingSec <= 5 && state.isRunning && currentWholeSecond < lastTickSecond) {
-    effects.push({ type: 'sound', sound: 'countdown_tick' });
-    effects.push({ type: 'vibrate', pattern: 50 });
-    lastTickSecond = currentWholeSecond;
+  if (remainingSec <= 5 && state.isRunning) {
+    if (config.criticalAlertStyle === 'oneshot') {
+      if (!critical) {
+        critical = true;
+        effects.push({ type: 'sound', sound: 'critical_oneshot' });
+        effects.push({ type: 'vibrate', pattern: 50 });
+      }
+    } else if (currentWholeSecond < lastTickSecond) {
+      effects.push({ type: 'sound', sound: 'countdown_tick' });
+      effects.push({ type: 'vibrate', pattern: 50 });
+      lastTickSecond = currentWholeSecond;
+    }
   }
 
-  return { alertsFired: { warning, lastTickSecond }, effects };
+  return { alertsFired: { warning, critical, lastTickSecond }, effects };
 }
 
 export function getDigitState(remainingTime: number, config: Pick<TimerConfig, 'seuilAlerte' | 'seuilCritique'>): DigitState {
