@@ -23,6 +23,17 @@ export function saveBetaMirrorEnabled(
   }
 }
 
+export function loadMirrorEnabled(storage: Pick<Storage, 'getItem'> | undefined = localStorage): boolean {
+  return loadBetaMirrorEnabled(storage);
+}
+
+export function saveMirrorEnabled(
+  enabled: boolean,
+  storage: Pick<Storage, 'setItem' | 'removeItem'> | undefined = localStorage,
+): void {
+  saveBetaMirrorEnabled(enabled, storage);
+}
+
 export function loadMirrorSession(
   storage: Pick<Storage, 'getItem'> | undefined = sessionStorage,
 ): { room: string; secret: string } | null {

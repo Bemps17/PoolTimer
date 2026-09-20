@@ -74,7 +74,7 @@ export function DisplayView({ room }: DisplayViewProps) {
       role="presentation"
     >
       <div className="display-top">
-        <span className="beta-badge">Bêta</span>
+        <span className="display-role">Miroir</span>
         <span className="display-room">{formatRoomCode(room)}</span>
         <span
           className={`display-status display-status-${status === 'error' ? 'error' : waiting ? 'wait' : 'live'}`}
@@ -87,12 +87,14 @@ export function DisplayView({ room }: DisplayViewProps) {
           <PlayerStatus
             name={config.p1Name}
             color={config.p1Color}
+            seat={1}
             active={snapshot?.currentPlayer === 1}
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[1])}
           />
           <PlayerStatus
             name={config.p2Name}
             color={config.p2Color}
+            seat={2}
             active={snapshot?.currentPlayer === 2}
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[2])}
           />

@@ -1,5 +1,3 @@
-export type MirrorGuideVariant = 'help' | 'settings';
-
 function MirrorGuideBody() {
   return (
     <>
@@ -9,8 +7,8 @@ function MirrorGuideBody() {
       </p>
       <ol className="mirror-guide-steps">
         <li>
-          Sur la télécommande : ⚙️ → <strong>Bêta / Work in progress</strong> → Miroir
-          télécommande <strong>Oui</strong> → <strong>Ouvrir une salle</strong>.
+          Sur la télécommande : ⚙️ → <strong>Miroir télécommande</strong> → <strong>Oui</strong> →{' '}
+          <strong>Ouvrir une salle</strong>.
         </li>
         <li>Un code à 6 caractères et un QR s’affichent. Gardez ce téléphone comme commande.</li>
         <li>
@@ -41,19 +39,21 @@ function MirrorGuideBody() {
   );
 }
 
+export type MirrorGuideVariant = 'help' | 'settings';
+
 export function MirrorGuide({ variant }: { variant: MirrorGuideVariant }) {
   switch (variant) {
     case 'help':
       return (
         <section id="aide-miroir" className="mirror-guide-help" aria-labelledby="aide-miroir-title">
-          <h3 id="aide-miroir-title">Miroir télécommande (bêta)</h3>
+          <h3 id="aide-miroir-title">Miroir télécommande</h3>
           <MirrorGuideBody />
         </section>
       );
     case 'settings':
       return (
-        <details className="mirror-guide" open>
-          <summary>Tutoriel — lier un écran Visuel</summary>
+        <details className="mirror-guide">
+          <summary>Rappel — lier un écran Visuel</summary>
           <MirrorGuideBody />
         </details>
       );

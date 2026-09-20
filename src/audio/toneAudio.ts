@@ -1,6 +1,6 @@
 import * as Tone from 'tone';
 import type { SoundType, TimerConfig } from '../timer/types';
-import { playMinionsArghh, shouldPlayMinionsArghh } from './minions';
+import { playAlertById, preloadAlertPack, resolveAlertSoundId } from './playAlert';
 
 interface AudioGraph {
   volumeNode: Tone.Volume;
@@ -61,41 +61,93 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
   }
 }
 
-export function playSound(type: SoundType, config: TimerConfig): void {
-  const isAlertType = type === 'warning' || type === 'countdown_tick' || type === 'gong';
-  const isClickType = type === 'click';
-  if ((isAlertType && !config.sonAlertes) || (isClickType && !config.sonClics)) {
-    return;
-  }
-
-  if (shouldPlayMinionsArghh(type, config)) {
-    playMinionsArghh(config.volume);
-    return;
-  }
-
+function playClassicTone(id: string, config: TimerConfig): void {
   if (!graph) return;
-
   graph.volumeNode.volume.value = config.volume;
   const now = Tone.now();
+  switch (id) {
+    case 'classic-warning':
+      graph.bellSynth.triggerAttack(300, now);
+      return;
+    case 'classic-tick':
+      graph.countdownSynth.triggerAttackRelease('G5', '16n', now);
+      return;
+    case 'classic-oneshot5s':
+      for (let beat = 0; beat < 5; beat += 1) {
+        graph.countdownSynth.triggerAttackRelease('G5', '16n', now + beat);
+      }
+      return;
+    case 'classic-gong':
+      graph.gong.triggerAttackRelease('A3', '0.5s', now);
+      return;
+    default:
+      return;
+  }
+}
 
+function playClassicType(type: SoundType, config: TimerConfig): void {
   switch (type) {
     case 'warning':
-      graph.bellSynth.triggerAttack(300, now);
-      break;
+      playClassicTone('classic-warning', config);
+      return;
     case 'countdown_tick':
-      graph.countdownSynth.triggerAttackRelease('G5', '16n', now);
-      break;
+      playClassicTone('classic-tick', config);
+      return;
+    case 'critical_oneshot':
+      playClassicTone('classic-oneshot5s', config);
+      return;
     case 'gong':
-      graph.gong.triggerAttackRelease('A3', '0.5s', now);
-      break;
+      playClassicTone('classic-gong', config);
+      return;
     case 'click':
-      graph.clickSynth.triggerAttackRelease('C4', '32n', now, 0.5);
-      break;
+      if (!graph) return;
+      graph.volumeNode.volume.value = config.volume;
+      graph.clickSynth.triggerAttackRelease('C4', '32n', Tone.now(), 0.5);
+      return;
     default: {
       const exhaustive: never = type;
       return exhaustive;
     }
   }
+}
+
+export function playSound(type: SoundType, config: TimerConfig): void {
+  const isAlertType =
+    type === 'warning' || type === 'countdown_tick' || type === 'gong' || type === 'critical_oneshot';
+  const isClickType = type === 'click';
+  if ((isAlertType && !config.sonAlertes) || (isClickType && !config.sonClics)) {
+    return;
+  }
+
+  if (isClickType) {
+    playClassicType('click', config);
+    return;
+  }
+
+  const id = resolveAlertSoundId(type, config);
+  if (!id) {
+    playClassicType(type, config);
+    return;
+  }
+
+  const routed = playAlertById(id, config.volume);
+  if (routed === 'classic' || routed === 'missing') {
+    if (id.startsWith('classic-')) {
+      playClassicTone(id, config);
+      return;
+    }
+    playClassicType(type, config);
+  }
+}
+
+export function previewAlertSound(id: string, config: TimerConfig): void {
+  void initializeAudio(config.volume).then(() => {
+    if (!config.sonAlertes) return;
+    const routed = playAlertById(id, config.volume);
+    if (routed === 'classic' || routed === 'missing') {
+      playClassicTone(id.startsWith('classic-') ? id : 'classic-warning', config);
+    }
+  });
 }
 
 export function setAudioVolume(volumeDb: number): void {
@@ -114,3 +166,5 @@ export function vibrate(pattern: number | number[], enabled: boolean): void {
     console.warn('Vibration failed.', error);
   }
 }
+
+export { preloadAlertPack };

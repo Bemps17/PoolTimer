@@ -199,6 +199,7 @@ export function Scoreboard({
           <PlayerStatus
             name={config.p1Name}
             color={config.p1Color}
+            seat={1}
             active={state.currentPlayer === 1}
             extensionUsed={state.extensionsUsedInGame[1]}
             onSelect={() => onSelectPlayer(1)}
@@ -206,6 +207,7 @@ export function Scoreboard({
           <PlayerStatus
             name={config.p2Name}
             color={config.p2Color}
+            seat={2}
             active={state.currentPlayer === 2}
             extensionUsed={state.extensionsUsedInGame[2]}
             onSelect={() => onSelectPlayer(2)}

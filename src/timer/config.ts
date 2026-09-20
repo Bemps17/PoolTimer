@@ -1,4 +1,5 @@
-import { sanitizePlayerName } from './playerName';
+import { defaultIdsForPack, isAlertPackId, isAlertPickMode, isCriticalAlertStyle, sanitizeSoundIdList } from '../audio/soundCatalog';
+import { readStoredPlayerName } from './playerName';
 import type { CompetitionMode, TimerConfig } from './types';
 
 export const CONFIG_STORAGE_KEY = 'billiardTimerConfig';
@@ -97,6 +98,12 @@ export function getDefaultConfig(): TimerConfig {
     autoStartOnPlayerSelect: false,
     minionsUnlocked: false,
     minionsMode: false,
+    alertPack: 'classic',
+    alertPickMode: 'fixed',
+    alertWarningIds: defaultIdsForPack('classic').warning,
+    alertCriticalIds: defaultIdsForPack('classic').critical,
+    alertEndIds: defaultIdsForPack('classic').end,
+    criticalAlertStyle: 'repeat',
     p1Name: 'P1',
     p1Color: '#3498db',
     p2Name: 'P2',
@@ -146,8 +153,13 @@ export function mergeConfig(saved: unknown): TimerConfig {
   if (!saved || typeof saved !== 'object') return defaults;
   const s = saved as Partial<TimerConfig>;
 
-  const p1Name = sanitizePlayerName(s.p1Name, defaults.p1Name);
-  const p2Name = sanitizePlayerName(s.p2Name, defaults.p2Name);
+  const p1Name = readStoredPlayerName(s.p1Name, defaults.p1Name);
+  const p2Name = readStoredPlayerName(s.p2Name, defaults.p2Name);
+  const alertPack = isAlertPackId(s.alertPack) ? s.alertPack : defaults.alertPack;
+  const criticalAlertStyle = isCriticalAlertStyle(s.criticalAlertStyle)
+    ? s.criticalAlertStyle
+    : defaults.criticalAlertStyle;
+  const packDefaults = defaultIdsForPack(alertPack, criticalAlertStyle);
 
   return {
     tempsBase: clampInt(s.tempsBase, defaults.tempsBase, CONFIG_LIMITS.tempsBase.min, CONFIG_LIMITS.tempsBase.max),
@@ -187,6 +199,12 @@ export function mergeConfig(saved: unknown): TimerConfig {
     minionsUnlocked:
       asBoolean(s.minionsUnlocked, defaults.minionsUnlocked) || asBoolean(s.minionsMode, defaults.minionsMode),
     minionsMode: asBoolean(s.minionsMode, defaults.minionsMode),
+    alertPack,
+    alertPickMode: isAlertPickMode(s.alertPickMode) ? s.alertPickMode : defaults.alertPickMode,
+    alertWarningIds: sanitizeSoundIdList(s.alertWarningIds, packDefaults.warning),
+    alertCriticalIds: sanitizeSoundIdList(s.alertCriticalIds, packDefaults.critical),
+    alertEndIds: sanitizeSoundIdList(s.alertEndIds, packDefaults.end),
+    criticalAlertStyle,
     p1Name,
     p1Color: typeof s.p1Color === 'string' ? s.p1Color : defaults.p1Color,
     p2Name,

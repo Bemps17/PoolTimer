@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.5.6** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.6.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -13,10 +13,10 @@ Version actuelle : **2.5.6** (voir [CHANGELOG.md](CHANGELOG.md)).
 - Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable
-- Alertes visuelles, sonores (Tone.js) et vibration
+- Alertes visuelles, sonores et vibration. Bibliothèque **originale H8timer** (classique, Pack Crétins, Pack Minions-like), tirage aléatoire, bips 1 s ou alerte ~5 s, import de fichiers
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
-- **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; durées via +/− dans les réglages ; noms éditables uniquement après un appui explicite « modifier »
-- **Miroir télécommande (bêta)** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet. Tutoriel dans l’app : ⚙️ → Mode d’emploi, ou ⚙️ → Bêta / Work in progress.
+- **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; dans ⚙️, durées via +/− **et** saisie au clavier ; noms éditables uniquement après un appui explicite « modifier » (un nom vide est autorisé)
+- **Miroir télécommande** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet. Tutoriel illustré : bouton **Tutoriel** (⚙️, aide, ou section Miroir).
 
 ## Lancer en local
 
@@ -55,7 +55,7 @@ MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror
 
 Depuis le menu ⚙️ → **Installer l’application** (Chrome / Edge). Sur iPhone / iPad : **Partager → Sur l’écran d’accueil**.
 
-Quand une version plus récente est publiée, un bandeau **Nouvelle version disponible** propose **Mettre à jour** (le chrono en cours n’est pas rechargé tout seul). L’app compare `public/version.json` (réseau, sans cache) à la version embarquée, en plus du service worker. Dans ⚙️ : **Vérifier les mises à jour**.
+Quand une version plus récente est publiée, un bandeau **Nouvelle version disponible** propose **Mettre à jour** ou **Plus tard** (rester sur cette version). Le chrono en cours n’est pas rechargé tout seul. Une fois la mise à jour installée, un vrai retour à l’ancienne version n’est en général pas possible (limitation PWA / navigateur). L’app compare `public/version.json` (réseau, sans cache) à la version embarquée, en plus du service worker. Dans ⚙️ : **Vérifier les mises à jour**.
 
 1. Ouvrir l'app dans Chrome (Android) ou Safari (iOS).
 2. Android : bouton d’installation dans les réglages, ou menu → **Installer l'application**.
@@ -71,7 +71,7 @@ npm run icons
 
 Projet Vite : build `npm run build`, sortie `dist/`.
 
-### Variable d’environnement (miroir bêta)
+### Variable d’environnement (miroir)
 
 | Variable | Exemple | Rôle |
 | --- | --- | --- |
@@ -107,7 +107,7 @@ Après un correctif du Worker (ex. 2.5.3, relais `push`), **redéployer** est ob
 
 ## Utiliser le miroir (arbitre)
 
-Le tutoriel pas à pas est dans l’app : **⚙️ → Mode d’emploi** et **⚙️ → Bêta / Work in progress**.
+Le tutoriel pas à pas est dans l’app : bouton **Tutoriel** (diaporama) et **⚙️ → Mode d’emploi**.
 
 1. **Télécommande** (téléphone) : Miroir télécommande **Oui** → **Ouvrir une salle** (code + QR).
 2. **Écran Visuel** : ouvrir [https://pooltimer.vercel.app](https://pooltimer.vercel.app), scanner le QR ou aller sur `/d/CODE`.
@@ -123,7 +123,7 @@ Pas besoin du même Wi‑Fi (sync Internet). Une seule télécommande par salle.
 | Clic simple sur l'écran (à l'arrêt) | Démarrer (même délai) |
 | Double-clic, ou bouton reset | Nouveau coup (temps de base ; chrono figé par défaut, option auto-start) |
 | APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
-| P1 / P2 | Change de joueur, temps de base (option : relance aussi le chrono) |
+| P1 / P2 (bandeau) | Change de joueur, temps de base (option : relance aussi le chrono). Nom vide → affichage « Joueur 1 / 2 » |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
 | NEW | Nouvelle manche ; appui long : active / désactive Minions |
 | ⚙️ (pied de page) | Ouvre la configuration (reste visible en boutons invisibles) |

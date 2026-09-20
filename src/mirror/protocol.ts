@@ -1,4 +1,4 @@
-import { sanitizePlayerName } from '../timer/playerName';
+import { readStoredPlayerName } from '../timer/playerName';
 import type { EngineState, PlayerId, ShotKind, Theme, TimerConfig } from '../timer/types';
 
 export const MIRROR_PROTOCOL = 1;
@@ -135,9 +135,9 @@ export function toDisplayConfig(config: TimerConfig): MirrorDisplayConfig {
     seuilCritique: config.seuilCritique,
     affichageMs: config.affichageMs,
     tailleChiffres: config.tailleChiffres,
-    p1Name: sanitizePlayerName(config.p1Name, 'P1'),
+    p1Name: readStoredPlayerName(config.p1Name, ''),
     p1Color: config.p1Color,
-    p2Name: sanitizePlayerName(config.p2Name, 'P2'),
+    p2Name: readStoredPlayerName(config.p2Name, ''),
     p2Color: config.p2Color,
     theme: config.theme,
   };
@@ -252,9 +252,9 @@ function parseDisplayConfig(raw: unknown): MirrorDisplayConfig | undefined {
     seuilCritique: value.seuilCritique as number,
     affichageMs: value.affichageMs,
     tailleChiffres: value.tailleChiffres as number,
-    p1Name: sanitizePlayerName(value.p1Name, 'P1'),
+    p1Name: readStoredPlayerName(value.p1Name, ''),
     p1Color: value.p1Color,
-    p2Name: sanitizePlayerName(value.p2Name, 'P2'),
+    p2Name: readStoredPlayerName(value.p2Name, ''),
     p2Color: value.p2Color,
     theme,
   };

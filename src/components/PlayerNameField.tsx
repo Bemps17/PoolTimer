@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PLAYER_NAME_MAX_LENGTH, clampPlayerNameInput, sanitizePlayerName } from '../timer/playerName';
+import { PLAYER_NAME_MAX_LENGTH, clampPlayerNameInput, displayPlayerName, storedPlayerName } from '../timer/playerName';
 
 interface PlayerNameFieldProps {
   label: string;
@@ -7,6 +7,7 @@ interface PlayerNameFieldProps {
   colorId: string;
   name: string;
   color: string;
+  seat: 1 | 2;
   onNameChange: (name: string) => void;
   onColorChange: (color: string) => void;
 }
@@ -17,15 +18,22 @@ export function PlayerNameField({
   colorId,
   name,
   color,
+  seat,
   onNameChange,
   onColorChange,
 }: PlayerNameFieldProps) {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const placeholder = displayPlayerName('', seat);
 
   useEffect(() => {
     if (editing) inputRef.current?.focus();
   }, [editing]);
+
+  const commit = () => {
+    onNameChange(storedPlayerName(name));
+    setEditing(false);
+  };
 
   return (
     <div className="parametre-groupe">
@@ -38,21 +46,18 @@ export function PlayerNameField({
             type="text"
             maxLength={PLAYER_NAME_MAX_LENGTH}
             value={name}
+            placeholder={placeholder}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="words"
             spellCheck={false}
             enterKeyHint="done"
             onChange={(event) => onNameChange(clampPlayerNameInput(event.target.value))}
-            onBlur={() => {
-              onNameChange(sanitizePlayerName(name, ''));
-              setEditing(false);
-            }}
+            onBlur={commit}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
-                onNameChange(sanitizePlayerName(name, ''));
-                setEditing(false);
+                commit();
               }
             }}
           />
@@ -63,7 +68,9 @@ export function PlayerNameField({
             onClick={() => setEditing(true)}
             aria-label={`Modifier le nom ${label}`}
           >
-            <span>{name}</span>
+            <span className={name.trim() ? undefined : 'name-placeholder'}>
+              {name.trim() ? name : placeholder}
+            </span>
             <span className="name-edit-hint">modifier</span>
           </button>
         )}

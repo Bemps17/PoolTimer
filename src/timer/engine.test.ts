@@ -95,6 +95,21 @@ describe('mergeConfig', () => {
     expect(mergeConfig({ p1Name: 'Jean-Baptiste Alexandre Moreau-Dupont' }).p1Name).toHaveLength(32);
   });
 
+  it('persists a cleared player name instead of writing P1 / P back', () => {
+    const merged = mergeConfig({ p1Name: '', p2Name: '   ' });
+    expect(merged.p1Name).toBe('');
+    expect(merged.p2Name).toBe('');
+    expect(mergeConfig({ p1Name: 'P' }).p1Name).toBe('P');
+  });
+
+  it('defaults the original alert library when the saved config is legacy', () => {
+    const merged = mergeConfig({ tempsBase: 45 });
+    expect(merged.alertPack).toBe('classic');
+    expect(merged.alertPickMode).toBe('fixed');
+    expect(merged.criticalAlertStyle).toBe('repeat');
+    expect(merged.alertWarningIds).toContain('classic-warning');
+  });
+
   it('keeps Minions mode hidden until unlocked', () => {
     const merged = mergeConfig({ tempsBase: 45 });
     expect(merged.minionsUnlocked).toBe(false);
@@ -362,6 +377,22 @@ describe('shot clock engine', () => {
     state = useExtension(state, config, 0);
     expect(state.extensionsUsedInGame[1]).toBe(false);
     expect(state.remainingTime).toBe(45_000);
+  });
+
+  it('fires repeating 1s ticks under 5s by default, or a single ~5s oneshot', () => {
+    let state = startTimer(createInitialState(config), 0);
+    const firstTick = tick(state, config, 40_200);
+    expect(firstTick.effects).toContainEqual({ type: 'sound', sound: 'countdown_tick' });
+    const secondTick = tick(firstTick.state, config, 41_200);
+    expect(secondTick.effects).toContainEqual({ type: 'sound', sound: 'countdown_tick' });
+
+    const oneshotConfig = { ...config, criticalAlertStyle: 'oneshot' as const };
+    state = startTimer(createInitialState(oneshotConfig), 0);
+    const once = tick(state, oneshotConfig, 40_200);
+    expect(once.effects).toContainEqual({ type: 'sound', sound: 'critical_oneshot' });
+    const again = tick(once.state, oneshotConfig, 41_200);
+    expect(again.effects).not.toContainEqual({ type: 'sound', sound: 'critical_oneshot' });
+    expect(again.effects).not.toContainEqual({ type: 'sound', sound: 'countdown_tick' });
   });
 
   it('fires the warning then the gong when time elapses', () => {

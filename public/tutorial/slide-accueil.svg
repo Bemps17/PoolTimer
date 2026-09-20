@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="t">
+  <title id="t">Écran de jeu H8timer</title>
+  <rect width="360" height="240" rx="16" fill="#0a0a0a"/>
+  <rect x="24" y="12" width="312" height="216" rx="22" fill="#1a1a1a" stroke="#111" stroke-width="4"/>
+  <rect x="40" y="28" width="140" height="36" rx="8" fill="#0d1a24" stroke="#3498db" stroke-width="2"/>
+  <text x="110" y="51" text-anchor="middle" fill="#e0e0e0" font-family="sans-serif" font-size="14" font-weight="700">Joueur 1</text>
+  <rect x="180" y="28" width="140" height="36" rx="8" fill="#1a1010" stroke="#333" stroke-width="2"/>
+  <text x="250" y="51" text-anchor="middle" fill="#888" font-family="sans-serif" font-size="14">Joueur 2</text>
+  <rect x="48" y="76" width="264" height="88" rx="10" fill="#000"/>
+  <text x="180" y="138" text-anchor="middle" fill="#e0e0e0" font-family="sans-serif" font-size="52" font-weight="700">45</text>
+  <rect x="56" y="176" width="52" height="36" rx="10" fill="#282828"/>
+  <rect x="122" y="176" width="52" height="36" rx="10" fill="#20c20e"/>
+  <rect x="188" y="176" width="52" height="36" rx="10" fill="#282828"/>
+  <text x="214" y="199" text-anchor="middle" fill="#e0e0e0" font-family="sans-serif" font-size="11">NEW</text>
+  <rect x="254" y="176" width="52" height="36" rx="10" fill="#282828"/>
+  <circle cx="280" cy="194" r="8" fill="none" stroke="#e0e0e0" stroke-width="2"/>
+  <path d="M276 194 h8" stroke="#e0e0e0" stroke-width="2"/>
+</svg>

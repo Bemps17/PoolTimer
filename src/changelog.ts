@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.6';
+export const APP_VERSION = '2.6.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.0',
+    date: '2026-09-20',
+    title: 'Tutoriel, sons originaux et saisie clavier',
+    notes: [
+      'Le miroir télécommande n’est plus présenté comme une bêta : réglages, aide, écran Visuel et tutoriel parlent d’une fonction prête à l’emploi.',
+      'Bouton « Tutoriel » : diaporama illustré (écran de jeu, commandes, saisie des temps, miroir télécommande ↔ Visuel).',
+      'Les durées (temps de base, après casse, extension, alertes, taille des chiffres) se tapent au clavier en plus des +/−, avec contrôle des bornes. Pas de clavier accidentel sur l’écran de jeu.',
+      'Bibliothèque d’alertes originale H8timer : Pack Crétins (original), Pack Minions-like (original), tirage fixe ou aléatoire, bips chaque seconde ou un son ~5 s, son de fin distinct, import de vos fichiers. Aucun extrait Ubisoft / Illumination.',
+      'Mise à jour PWA : « Mettre à jour » ou « Plus tard / Rester sur cette version ». Un retour vers une version déjà remplacée n’est en général pas possible (limitation navigateur).',
+      'Noms : un champ vidé reste vide (plus de P1 / P réinjectés). L’écran affiche « Joueur 1 / 2 » uniquement en placeholder.',
+    ],
+  },
   {
     version: '2.5.6',
     date: '2026-09-20',

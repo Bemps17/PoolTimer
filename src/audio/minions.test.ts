@@ -24,14 +24,15 @@ describe('toggleMinionsMode', () => {
     const next = toggleMinionsMode(base);
     expect(next.minionsUnlocked).toBe(true);
     expect(next.minionsMode).toBe(true);
-    expect(minionsToggleMessage(next.minionsMode)).toBe('Mode Minions activé');
+    expect(next.alertPack).toBe('minionsLike');
+    expect(minionsToggleMessage(next.minionsMode)).toBe('Pack Minions-like (original) activé');
   });
 
   it('disables Minions from a long-press while keeping the setting unlocked', () => {
     const next = toggleMinionsMode({ ...base, minionsUnlocked: true, minionsMode: true });
     expect(next.minionsUnlocked).toBe(true);
     expect(next.minionsMode).toBe(false);
-    expect(minionsToggleMessage(next.minionsMode)).toBe('Mode Minions désactivé');
+    expect(minionsToggleMessage(next.minionsMode)).toBe('Pack Minions-like (original) désactivé');
   });
 
   it('turns Minions back on after it was disabled', () => {
