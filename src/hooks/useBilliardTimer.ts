@@ -111,9 +111,10 @@ export function useBilliardTimer() {
 
   const selectPlayer = useCallback(
     (player: PlayerId) => {
-      if (stateRef.current.currentPlayer === player) return;
+      const samePlayer = stateRef.current.currentPlayer === player;
+      if (samePlayer && !configRef.current.autoStartOnPlayerSelect) return;
       playClick();
-      apply((current) => selectPlayerState(current, player, configRef.current));
+      apply((current) => selectPlayerState(current, player, configRef.current, Date.now()));
     },
     [apply, playClick],
   );

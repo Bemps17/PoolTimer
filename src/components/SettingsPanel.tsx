@@ -258,6 +258,13 @@ export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: S
               options={YES_NO}
               onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
             />
+            <SelectField
+              label="Relancer le chrono au clic joueur"
+              htmlId="autoStartOnPlayerSelect"
+              value={String(config.autoStartOnPlayerSelect)}
+              options={YES_NO}
+              onChange={(value) => patch({ autoStartOnPlayerSelect: parseBooleanSelect(value) })}
+            />
           </div>
 
           <div className="section-panel">

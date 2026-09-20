@@ -35,6 +35,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
             <li>
               <strong>Cliquez sur P1/P2 :</strong> change de joueur et réinitialise au temps de base.
+              Si l'option « Relancer le chrono au clic joueur » est activée, le clic (même sur le
+              joueur déjà actif) relance aussi le chrono.
             </li>
             <li>
               <strong>EXTENSION :</strong> une fois par joueur et par manche, uniquement pendant que le chrono
@@ -73,6 +75,10 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
             <li>
               <strong>Le mode d'interface</strong> (boutons ou tout tactile).
+            </li>
+            <li>
+              <strong>L'automatisation</strong> : redémarrage après nouveau coup, et relance du chrono
+              au clic sur un joueur.
             </li>
           </ul>
           <p>

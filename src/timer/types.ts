@@ -18,6 +18,7 @@ export interface TimerConfig {
   affichageMs: boolean;
   modeInterface: InterfaceMode;
   autoStartOnReset: boolean;
+  autoStartOnPlayerSelect: boolean;
   p1Name: string;
   p1Color: string;
   p2Name: string;
