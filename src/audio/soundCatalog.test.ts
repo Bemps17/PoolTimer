@@ -24,6 +24,7 @@ describe('sound catalog', () => {
   });
 
   it('defaults critical clips to 1s ticks or a 5s oneshot depending on style', () => {
+    expect(defaultIdsForPack('classic').warning).toEqual(['classic-alert-time']);
     expect(defaultIdsForPack('classic', 'repeat').critical).toEqual(['classic-tick']);
     expect(defaultIdsForPack('classic', 'oneshot').critical).toEqual(['classic-oneshot5s']);
     expect(defaultIdsForPack('cretins', 'oneshot').critical).toEqual(['cretins-alerte5s']);

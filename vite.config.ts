@@ -16,6 +16,9 @@ export default defineConfig({
         'icon-512.png',
         'icon-512-maskable.png',
         'apple-touch-icon.png',
+        'sound/alert-time.mp3',
+        'sound/clic.mp3',
+        'sound/minions-arghh.mp3',
         'sound/original/cretins-couac.wav',
         'sound/original/cretins-glousse.wav',
         'sound/original/cretins-tick.wav',
@@ -67,7 +70,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3,wav,webmanifest}'],
         globIgnores: ['**/version.json'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,

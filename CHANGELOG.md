@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.6.1 — 2026-09-20
+
+- **Sons d’origine restaurés** : alerte initiale (`public/sound/alert-time.mp3`), clic (`clic.mp3`), cri Arghh Minions (`minions-arghh.mp3`) déjà présents dans le dépôt avant 2.6.0.
+- **Mode Minions** (appui long sur NEW) rejoue le fichier historique, sans remplacer le pack choisi. Packs Crétins / Minions-like (originaux H8timer) restent des options dans ⚙️ → Bibliothèque d’alertes.
+- Pack classique par défaut = alerte initiale du dépôt. **Aucun extrait Voicemod n’est embarqué** : téléchargez-les vous-même puis Importer (l’app ne va pas les chercher).
+
 ## 2.6.0 — 2026-09-20
 
 - **Fin de bêta** : le miroir télécommande (et l’écran Visuel) sont présentés comme des fonctions stables.

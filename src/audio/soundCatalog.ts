@@ -9,15 +9,39 @@ export interface CatalogSound {
   label: string;
   /** Approximate playback length in seconds (oneshot 5s clips are ~5). */
   durationSec: number;
-  kind: 'warning' | 'tick' | 'oneshot5s' | 'end';
+  kind: 'warning' | 'tick' | 'oneshot5s' | 'end' | 'click';
   src?: string;
 }
 
 export const SOUND_CATALOG: CatalogSound[] = [
-  { id: 'classic-warning', pack: 'classic', label: 'Cloche (classique)', durationSec: 0.4, kind: 'warning' },
+  {
+    id: 'classic-alert-time',
+    pack: 'classic',
+    label: 'Alerte initiale (fichier d’origine)',
+    durationSec: 1.1,
+    kind: 'warning',
+    src: '/sound/alert-time.mp3',
+  },
+  {
+    id: 'minions-arghh',
+    pack: 'classic',
+    label: 'Arghh Minions (fichier d’origine)',
+    durationSec: 1,
+    kind: 'warning',
+    src: '/sound/minions-arghh.mp3',
+  },
+  { id: 'classic-warning', pack: 'classic', label: 'Cloche Tone.js (classique)', durationSec: 0.4, kind: 'warning' },
   { id: 'classic-tick', pack: 'classic', label: 'Bip 1 s (classique)', durationSec: 0.12, kind: 'tick' },
   { id: 'classic-oneshot5s', pack: 'classic', label: 'Alerte ~5 s (classique)', durationSec: 5, kind: 'oneshot5s' },
   { id: 'classic-gong', pack: 'classic', label: 'Gong de fin (classique)', durationSec: 0.6, kind: 'end' },
+  {
+    id: 'classic-clic',
+    pack: 'classic',
+    label: 'Clic (fichier d’origine)',
+    durationSec: 0.15,
+    kind: 'click',
+    src: '/sound/clic.mp3',
+  },
   {
     id: 'cretins-couac',
     pack: 'cretins',
@@ -101,7 +125,7 @@ export const SOUND_CATALOG: CatalogSound[] = [
 ];
 
 export const PACK_LABELS: Record<AlertPackId, string> = {
-  classic: 'Pack classique',
+  classic: 'Pack classique (alertes d’origine)',
   cretins: 'Pack Crétins (original)',
   minionsLike: 'Pack Minions-like (original)',
 };
@@ -137,7 +161,7 @@ export function defaultIdsForPack(
   switch (pack) {
     case 'classic':
       return {
-        warning: ['classic-warning'],
+        warning: ['classic-alert-time'],
         critical: [criticalStyle === 'oneshot' ? 'classic-oneshot5s' : 'classic-tick'],
         end: ['classic-gong'],
       };

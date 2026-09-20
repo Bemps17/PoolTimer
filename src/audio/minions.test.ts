@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { getDefaultConfig } from '../timer/config';
-import { minionsToggleMessage, shouldPlayMinionsArghh, toggleMinionsMode } from './minions';
+import {
+  MINIONS_ARGHH_SRC,
+  minionsToggleMessage,
+  shouldPlayMinionsArghh,
+  toggleMinionsMode,
+} from './minions';
 
 const base = getDefaultConfig();
 
@@ -24,20 +29,32 @@ describe('toggleMinionsMode', () => {
     const next = toggleMinionsMode(base);
     expect(next.minionsUnlocked).toBe(true);
     expect(next.minionsMode).toBe(true);
-    expect(next.alertPack).toBe('minionsLike');
-    expect(minionsToggleMessage(next.minionsMode)).toBe('Pack Minions-like (original) activé');
+    expect(next.alertPack).toBe(base.alertPack);
+    expect(minionsToggleMessage(next.minionsMode)).toBe('Mode Minions activé');
   });
 
   it('disables Minions from a long-press while keeping the setting unlocked', () => {
     const next = toggleMinionsMode({ ...base, minionsUnlocked: true, minionsMode: true });
     expect(next.minionsUnlocked).toBe(true);
     expect(next.minionsMode).toBe(false);
-    expect(minionsToggleMessage(next.minionsMode)).toBe('Pack Minions-like (original) désactivé');
+    expect(minionsToggleMessage(next.minionsMode)).toBe('Mode Minions désactivé');
   });
 
   it('turns Minions back on after it was disabled', () => {
     const next = toggleMinionsMode({ ...base, minionsUnlocked: true, minionsMode: false });
     expect(next.minionsUnlocked).toBe(true);
     expect(next.minionsMode).toBe(true);
+  });
+
+  it('does not switch the selected alert pack', () => {
+    const next = toggleMinionsMode({ ...base, alertPack: 'cretins', minionsMode: false });
+    expect(next.alertPack).toBe('cretins');
+    expect(next.minionsMode).toBe(true);
+  });
+});
+
+describe('historic Minions clip', () => {
+  it('points at the in-repo Arghh file', () => {
+    expect(MINIONS_ARGHH_SRC).toBe('/sound/minions-arghh.mp3');
   });
 });

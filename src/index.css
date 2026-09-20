@@ -902,6 +902,22 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 }
 .sound-custom-list li span { flex: 1; }
 .sound-import-error { color: var(--c-digit-critical); }
+.sound-import-ok { color: var(--c-ext-available); }
+.sound-import-box {
+    margin-top: 1rem;
+    padding: 0.85rem 0.9rem;
+    border: 1px dashed var(--c-panel-input-border);
+    border-radius: 10px;
+}
+.sound-import-box.drag-over {
+    border-color: var(--c-primary);
+    background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+}
+.sound-import-box h4 {
+    margin: 0 0 0.45rem;
+    color: var(--c-panel-text-primary);
+    font-size: 0.95rem;
+}
 
 .sr-only {
     position: absolute;

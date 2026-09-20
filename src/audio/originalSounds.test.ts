@@ -4,7 +4,9 @@ import { SOUND_CATALOG } from './soundCatalog';
 
 describe('original sound files', () => {
   it('ships synthesized wavs for original packs (no franchise samples)', () => {
-    const withSrc = SOUND_CATALOG.filter((sound) => sound.src);
+    const withSrc = SOUND_CATALOG.filter(
+      (sound) => sound.src && (sound.pack === 'cretins' || sound.pack === 'minionsLike'),
+    );
     expect(withSrc.length).toBeGreaterThanOrEqual(8);
     for (const sound of withSrc) {
       const relative = sound.src!.replace(/^\//, '');

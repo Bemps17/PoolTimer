@@ -54,8 +54,8 @@ export function HelpPanel({ open, onClose, onShowTutorial }: HelpPanelProps) {
               tourne.
             </li>
             <li>
-              <strong>NEW :</strong> nouvelle manche. Un appui long active ou désactive le pack Minions-like
-              (original H8timer).
+              <strong>NEW :</strong> nouvelle manche. Un appui long active ou désactive le mode Minions (cri Arghh
+              historique à la première alerte orange).
             </li>
             <li>
               <strong>Plein écran :</strong> à activer depuis la configuration (dans le navigateur).
@@ -96,8 +96,10 @@ export function HelpPanel({ open, onClose, onShowTutorial }: HelpPanelProps) {
               <strong>La taille des chiffres</strong> du chronomètre.
             </li>
             <li>
-              <strong>Les sons</strong> : packs originaux H8timer (classique, Crétins, Minions-like), tirage
-              fixe ou aléatoire, bips 1 s ou alerte ~5 s, import de vos fichiers.
+              <strong>Les sons</strong> : pack classique (alertes d’origine du dépôt + cloche Tone.js), Pack Crétins et
+              Pack Minions-like (originaux H8timer), tirage fixe ou aléatoire, bips 1 s ou alerte ~5 s. Pour des extraits
+              Voicemod « funny » : téléchargez-les vous-même puis ⚙️ → Bibliothèque d’alertes → Importer (l’app ne les
+              récupère pas).
             </li>
             <li>
               <strong>Le mode d'interface</strong> (boutons visibles ou boutons invisibles).

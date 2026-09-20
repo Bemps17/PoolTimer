@@ -379,13 +379,19 @@ export function SettingsPanel({
               onChange={(value) => patch({ autoStartOnPlayerSelect: parseBooleanSelect(value) })}
             />
             {config.minionsUnlocked ? (
-              <SelectField
-                label="Mode Minions"
-                htmlId="minionsMode"
-                value={String(config.minionsMode)}
-                options={YES_NO}
-                onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
-              />
+              <>
+                <SelectField
+                  label="Mode Minions"
+                  htmlId="minionsMode"
+                  value={String(config.minionsMode)}
+                  options={YES_NO}
+                  onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
+                />
+                <p className="install-hint">
+                  Cri Arghh historique (fichier du dépôt) à la première alerte orange. Même raccourci : appui long sur
+                  NEW.
+                </p>
+              </>
             ) : null}
           </div>
 
