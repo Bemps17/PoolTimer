@@ -147,10 +147,25 @@ export function buildSnapshot(state: EngineState, config: TimerConfig, now: numb
   };
 }
 
-export function remainingFromSnapshot(snapshot: MirrorSnapshot, now: number): number {
+export function remainingAtSend(snapshot: MirrorSnapshot): number {
+  if (snapshot.isRunning && snapshot.expectedEnd > 0) {
+    return Math.max(0, snapshot.expectedEnd - snapshot.controllerNow);
+  }
+  return Math.max(0, snapshot.remainingTime);
+}
+
+export function remainingFromSnapshot(snapshot: MirrorSnapshot, now: number, receivedAt: number): number {
   if (!snapshot.isRunning) return Math.max(0, snapshot.remainingTime);
-  const elapsed = now - snapshot.controllerNow;
-  return Math.max(0, snapshot.remainingTime - elapsed);
+  return Math.max(0, remainingAtSend(snapshot) - (now - receivedAt));
+}
+
+export function seqFromWelcome(seq: number): number {
+  if (!Number.isFinite(seq) || seq < 0) return 0;
+  return seq;
+}
+
+export function nextPushSeq(currentSeq: number): number {
+  return currentSeq + 1;
 }
 
 export function parseClientMessage(raw: unknown): ClientMessage | undefined {
@@ -242,7 +257,20 @@ export function parseServerMessage(raw: unknown): ServerMessage | undefined {
     case 'welcome': {
       const value = raw as ServerMessage & { type: 'welcome' };
       if (typeof value.room !== 'string' || (value.role !== 'controller' && value.role !== 'display')) return undefined;
-      return value;
+      if (typeof value.displayCount !== 'number' || typeof value.controllerConnected !== 'boolean') return undefined;
+      if (typeof value.serverTime !== 'number' || !Number.isFinite(value.serverTime)) return undefined;
+      if (typeof value.seq !== 'number' || !Number.isFinite(value.seq)) return undefined;
+      const snapshot = value.snapshot == null ? null : (parseSnapshot(value.snapshot) ?? null);
+      return {
+        type: 'welcome',
+        room: value.room,
+        role: value.role,
+        displayCount: value.displayCount,
+        controllerConnected: value.controllerConnected,
+        serverTime: value.serverTime,
+        snapshot,
+        seq: value.seq,
+      };
     }
     case 'snapshot': {
       const value = raw as { seq?: unknown; snapshot?: unknown; serverTime?: unknown };

@@ -5,8 +5,10 @@ import {
   buildSnapshot,
   generateRoomCode,
   generateRoomSecret,
+  nextPushSeq,
   parseServerMessage,
   remainingFromSnapshot,
+  seqFromWelcome,
   type MirrorSnapshot,
 } from '../mirror/protocol';
 import { clearMirrorSession, loadMirrorSession, saveMirrorSession } from '../mirror/storage';
@@ -26,6 +28,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
   const [error, setError] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(0);
   const seqRef = useRef(0);
+  const pushReadyRef = useRef(false);
   const socketRef = useRef<WebSocket | null>(null);
   const stopRef = useRef<(() => void) | null>(null);
   const stateRef = useRef(state);
@@ -36,7 +39,8 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
   const sendSnapshot = useCallback(() => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
-    seqRef.current += 1;
+    if (!pushReadyRef.current) return;
+    seqRef.current = nextPushSeq(seqRef.current);
     socket.send(
       JSON.stringify({
         type: 'push',
@@ -63,6 +67,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
 
       stop();
       seqRef.current = 0;
+      pushReadyRef.current = false;
       setRoom(nextRoom);
       setStatus('connecting');
       setError(null);
@@ -79,7 +84,6 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
           retryMs = 500;
           setStatus('live');
           setError(null);
-          sendSnapshot();
         };
         ws.onmessage = (event) => {
           let parsed: unknown;
@@ -92,6 +96,11 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
           if (!message) return;
           switch (message.type) {
             case 'welcome':
+              seqRef.current = seqFromWelcome(message.seq);
+              pushReadyRef.current = true;
+              setDisplayCount(message.displayCount);
+              sendSnapshot();
+              break;
             case 'peers':
               setDisplayCount(message.displayCount);
               break;
@@ -109,6 +118,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
           }
         };
         ws.onclose = () => {
+          pushReadyRef.current = false;
           if (cancelled) return;
           setStatus('connecting');
           retryTimer = window.setTimeout(open, retryMs);
@@ -129,6 +139,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
   const closeRoom = useCallback(() => {
     stop();
     seqRef.current = 0;
+    pushReadyRef.current = false;
     clearMirrorSession();
     setRoom(null);
     setDisplayCount(0);
@@ -165,6 +176,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
     state.expectedTime,
     state.isExtensionUsedForShot,
     state.extensionsUsedInGame,
+    state.isRunning ? null : state.remainingTime,
     config,
   ]);
 
@@ -184,7 +196,7 @@ export function useDisplayMirror(room: string) {
   const [snapshot, setSnapshot] = useState<MirrorSnapshot | null>(null);
   const [remainingTime, setRemainingTime] = useState(0);
   const [controllerConnected, setControllerConnected] = useState(false);
-  const snapshotRef = useRef<MirrorSnapshot | null>(null);
+  const snapshotRef = useRef<{ snapshot: MirrorSnapshot; receivedAt: number } | null>(null);
 
   useEffect(() => {
     const url = buildMirrorWsUrl(room, 'display');
@@ -193,6 +205,13 @@ export function useDisplayMirror(room: string) {
       setError('Relais non configuré (VITE_MIRROR_WS_URL).');
       return undefined;
     }
+
+    const applySnapshot = (next: MirrorSnapshot) => {
+      const receivedAt = Date.now();
+      snapshotRef.current = { snapshot: next, receivedAt };
+      setSnapshot(next);
+      setRemainingTime(remainingFromSnapshot(next, receivedAt, receivedAt));
+    };
 
     let cancelled = false;
     let retryMs = 500;
@@ -218,16 +237,10 @@ export function useDisplayMirror(room: string) {
         switch (message.type) {
           case 'welcome':
             setControllerConnected(message.controllerConnected);
-            if (message.snapshot) {
-              snapshotRef.current = message.snapshot;
-              setSnapshot(message.snapshot);
-              setRemainingTime(remainingFromSnapshot(message.snapshot, Date.now()));
-            }
+            if (message.snapshot) applySnapshot(message.snapshot);
             break;
           case 'snapshot':
-            snapshotRef.current = message.snapshot;
-            setSnapshot(message.snapshot);
-            setRemainingTime(remainingFromSnapshot(message.snapshot, Date.now()));
+            applySnapshot(message.snapshot);
             break;
           case 'peers':
             setControllerConnected(message.controllerConnected);
@@ -264,7 +277,7 @@ export function useDisplayMirror(room: string) {
     const id = window.setInterval(() => {
       const current = snapshotRef.current;
       if (!current) return;
-      setRemainingTime(remainingFromSnapshot(current, Date.now()));
+      setRemainingTime(remainingFromSnapshot(current.snapshot, Date.now(), current.receivedAt));
     }, 50);
     return () => window.clearInterval(id);
   }, []);

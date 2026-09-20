@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.1';
+export const APP_VERSION = '2.5.2';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.2',
+    date: '2026-09-20',
+    title: 'Miroir : décompte figé',
+    notes: [
+      'L’écran miroir recompte quand la télécommande lance le chrono, y compris après une reconnexion.',
+      'Le relais accepte à nouveau les pushes après reconnect (seq du welcome + reset seq au claim).',
+      'Décompte interpolé à l’heure de réception sur l’écran, sans dépendre d’horloges identiques.',
+      'Redéployer le Worker Cloudflare (`worker/`) pour le reset de seq côté Durable Object.',
+    ],
+  },
   {
     version: '2.5.1',
     date: '2026-09-20',

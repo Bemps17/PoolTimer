@@ -9,6 +9,7 @@ export class EphemeralRoom {
     if (!secret) return 'busy';
     if (!this.controllerSecret || this.controllerSecret === secret) {
       this.controllerSecret = secret;
+      this.seq = 0;
       return 'ok';
     }
     return 'busy';

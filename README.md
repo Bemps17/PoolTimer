@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.5.1** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.5.2** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
