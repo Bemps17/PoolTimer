@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { TUTORIAL_SLIDES } from './slides';
 
@@ -11,8 +13,23 @@ describe('tutorial slides', () => {
     for (const slide of TUTORIAL_SLIDES) {
       expect(slide.title.length).toBeGreaterThan(3);
       expect(slide.caption.length).toBeGreaterThan(20);
-      expect(slide.image.startsWith('/tutorial/')).toBe(true);
-      expect(slide.image.endsWith('.svg')).toBe(true);
+      expect(slide.fileName).toMatch(/^slide-[\w-]+\.svg$/);
+      expect(
+        slide.image.startsWith('data:image/svg+xml') || slide.image.includes(slide.fileName),
+        slide.id,
+      ).toBe(true);
+      expect(slide.imageFallback).toBe(`/tutorial/${slide.fileName}`);
+    }
+  });
+
+  it('ships each illustration as a bundled SVG and a public/tutorial copy', () => {
+    for (const slide of TUTORIAL_SLIDES) {
+      const bundled = new URL(`./assets/${slide.fileName}`, import.meta.url);
+      const published = new URL(`../../public/tutorial/${slide.fileName}`, import.meta.url);
+      expect(existsSync(fileURLToPath(bundled)), slide.fileName).toBe(true);
+      expect(existsSync(fileURLToPath(published)), `public/${slide.fileName}`).toBe(true);
+      expect(readFileSync(bundled, 'utf8')).toMatch(/<svg[\s>]/);
+      expect(readFileSync(published, 'utf8')).toMatch(/<svg[\s>]/);
     }
   });
 });

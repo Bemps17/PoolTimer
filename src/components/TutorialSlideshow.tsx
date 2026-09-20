@@ -56,7 +56,16 @@ export function TutorialSlideshow({ open, onClose, initialIndex = 0 }: TutorialS
           </button>
         </div>
         <div className="tutorial-figure">
-          <img src={slide.image} alt={slide.alt} />
+          <img
+            src={slide.image}
+            alt={slide.alt}
+            onError={(event) => {
+              const img = event.currentTarget;
+              if (img.dataset.fallback === '1') return;
+              img.dataset.fallback = '1';
+              img.src = slide.imageFallback;
+            }}
+          />
         </div>
         <p className="tutorial-caption">{slide.caption}</p>
         <div className="tutorial-dots" role="tablist" aria-label="Diapositives">

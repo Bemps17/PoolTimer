@@ -181,15 +181,10 @@ function ControllerApp() {
             onCopyLink={() => {
               void handleCopyLink();
             }}
-            onShowTutorial={openTutorial}
           />
         }
       />
-      <HelpPanel
-        open={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        onShowTutorial={openTutorial}
-      />
+      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <TutorialSlideshow open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       <Toast visible={toastVisible} message={toastMessage} />

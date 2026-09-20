@@ -153,8 +153,8 @@ export function SoundLibrarySettings({ config, onChange }: SoundLibrarySettingsP
   const maxKo = Math.round(MAX_CUSTOM_SOUND_BYTES / 1000);
 
   return (
-    <div className="section-panel">
-      <h3>Bibliothèque d’alertes</h3>
+    <div className="settings-subsection">
+      <h4>Bibliothèque d’alertes</h4>
       <p className="install-hint">
         Par défaut : <strong>alertes d’origine</strong> du dépôt (fichier <code>alert-time.mp3</code>, clics, cloche
         Tone.js). L’appui long sur <strong>NEW</strong> rejoue le cri Arghh Minions historique. Les packs{' '}

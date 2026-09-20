@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.6.2 — 2026-09-20
+
+- **Réglages plus courts** : sections repliables regroupées (thèmes / apparence, sons & vibration, compétition & temps, etc.) et typographie plus dense.
+- **Un seul bouton Tutoriel** en haut du menu ⚙️ (plus de doublon dans Miroir).
+- **Images du tutoriel** : chemins Vite (`import.meta.url` + `public/tutorial` via `BASE_URL`) pour les diapositives en PWA de production.
+
 ## 2.6.1 — 2026-09-20
 
 - **Sons d’origine restaurés** : alerte initiale (`public/sound/alert-time.mp3`), clic (`clic.mp3`), cri Arghh Minions (`minions-arghh.mp3`) déjà présents dans le dépôt avant 2.6.0.

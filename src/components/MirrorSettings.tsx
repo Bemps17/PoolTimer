@@ -18,7 +18,6 @@ interface MirrorSettingsProps {
   onCreateRoom: () => void;
   onCloseRoom: () => void;
   onCopyLink: () => void;
-  onShowTutorial: () => void;
 }
 
 const YES_NO = [
@@ -38,7 +37,6 @@ export function MirrorSettings({
   onCreateRoom,
   onCloseRoom,
   onCopyLink,
-  onShowTutorial,
 }: MirrorSettingsProps) {
   const configured = isMirrorRelayConfigured();
   const live = Boolean(room) && status !== 'idle';
@@ -63,15 +61,11 @@ export function MirrorSettings({
   })();
 
   return (
-    <div className="section-panel">
-      <h3>Miroir télécommande</h3>
+    <>
       <p className="install-hint">
         Le téléphone reste la commande ; une tablette, une TV ou un PC affiche le chrono via Internet (code court +
-        QR). Même Wi‑Fi non obligatoire.
+        QR). Même Wi‑Fi non obligatoire. Diaporama : bouton <strong>Tutoriel</strong> en haut de ce menu.
       </p>
-      <button type="button" className="bouton-menu" onClick={onShowTutorial}>
-        Tutoriel
-      </button>
       <MirrorGuide variant="settings" />
       <SelectField
         label="Miroir télécommande"
@@ -109,6 +103,6 @@ export function MirrorSettings({
           )}
         </>
       ) : null}
-    </div>
+    </>
   );
 }

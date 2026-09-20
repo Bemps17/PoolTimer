@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.1';
+export const APP_VERSION = '2.6.2';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.2',
+    date: '2026-09-20',
+    title: 'Réglages compacts et tutoriel illustré',
+    notes: [
+      'Menu ⚙️ regroupé en sections repliables (joueurs, compétition & temps, apparence, sons & vibration, automatisation, miroir, application) avec une mise en page plus dense.',
+      'Un seul bouton « Tutoriel », toujours visible en haut du menu Configuration.',
+      'Illustrations du diaporama : URLs Vite (import hashed + public/tutorial via BASE_URL) pour que les images s’affichent en PWA de production.',
+    ],
+  },
   {
     version: '2.6.1',
     date: '2026-09-20',
