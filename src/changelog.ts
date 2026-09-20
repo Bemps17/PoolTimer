@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.3.1';
+export const APP_VERSION = '2.3.2';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.3.2',
+    date: '2026-09-20',
+    title: 'Pause au tap',
+    notes: [
+      'Pause immédiate dès le premier appui sur l’écran (plus de délai de 300 ms).',
+      'Le double appui « nouveau coup » ne s’applique plus que chrono à l’arrêt, pour ne pas relancer à la place d’une pause.',
+    ],
+  },
   {
     version: '2.3.1',
     date: '2026-09-20',

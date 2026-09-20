@@ -78,9 +78,11 @@ export function startTimer(state: EngineState, now: number): EngineState {
   };
 }
 
-export function pauseTimer(state: EngineState): EngineState {
+export function pauseTimer(state: EngineState, now = 0): EngineState {
   if (!state.isRunning) return state;
-  return { ...state, isRunning: false };
+  const remainingTime =
+    state.expectedTime > 0 ? Math.max(0, state.expectedTime - now) : Math.max(0, state.remainingTime);
+  return { ...state, isRunning: false, remainingTime };
 }
 
 export function canUseExtension(state: EngineState): boolean {

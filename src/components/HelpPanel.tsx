@@ -23,10 +23,13 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           <h3>Contrôles Principaux</h3>
           <ul>
             <li>
-              <strong>Clic simple (écran) :</strong> lance ou met en pause le chronomètre.
+              <strong>Clic simple (écran) :</strong> si le chrono tourne, pause immédiate. S’il est à
+              l’arrêt, un clic le relance.
             </li>
             <li>
-              <strong>Double-clic (écran) ou bouton reset :</strong> nouveau coup, temps de base.
+              <strong>Double-clic (écran, chrono à l’arrêt) ou bouton reset :</strong> nouveau coup, temps
+              de base. Si « Redémarrage auto après nouveau coup » est activé, le chrono repart tout seul
+              après ce reset — ça ne concerne pas la pause.
             </li>
             <li>
               <strong>Après casse :</strong> charge le temps post-casse (réglable, 1:30 par défaut FFB) pour le

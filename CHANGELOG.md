@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 2.3.2 — 2026-09-20
+
+- **Pause** immédiate au premier appui sur l’écran (plus de conflit avec le double-tap / auto-start).
+- Double appui « nouveau coup » uniquement quand le chrono est à l’arrêt.
+
 ## 2.3.1 — 2026-09-20
 
 - Détection d’une **nouvelle version** via `version.json` (même si le service worker ne prévient pas).

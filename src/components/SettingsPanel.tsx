@@ -328,6 +328,10 @@ export function SettingsPanel({
               options={YES_NO}
               onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
             />
+            <p className="install-hint">
+              Après un nouveau coup (double appui sur l’écran à l’arrêt, ou bouton reset). N’empêche jamais la
+              pause : un appui pendant que le chrono tourne met toujours en pause.
+            </p>
             <SelectField
               label="Relancer le chrono au clic joueur"
               htmlId="autoStartOnPlayerSelect"

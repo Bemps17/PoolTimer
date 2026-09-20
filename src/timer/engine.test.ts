@@ -262,6 +262,21 @@ describe('shot clock engine', () => {
     expect(expired.effects).toContainEqual({ type: 'sound', sound: 'gong' });
   });
 
+  it('snapshots remaining time from expectedTime when pausing', () => {
+    const started = startTimer(createInitialState(config), 1_000);
+    expect(started.expectedTime).toBe(46_000);
+    const paused = pauseTimer(started, 6_000);
+    expect(paused.isRunning).toBe(false);
+    expect(paused.remainingTime).toBe(40_000);
+  });
+
+  it('clamps remaining time to zero if pause happens after expectedTime', () => {
+    const started = startTimer(createInitialState(config), 1_000);
+    const paused = pauseTimer(started, 50_000);
+    expect(paused.isRunning).toBe(false);
+    expect(paused.remainingTime).toBe(0);
+  });
+
   it('does not start from zero remaining time', () => {
     const expired = { ...createInitialState(config), remainingTime: 0 };
     expect(startTimer(expired, 10).isRunning).toBe(false);

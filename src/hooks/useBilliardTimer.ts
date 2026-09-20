@@ -95,7 +95,7 @@ export function useBilliardTimer() {
 
   const togglePlayPause = useCallback(() => {
     playClick();
-    apply((current) => (current.isRunning ? pauseTimer(current) : startTimer(current, Date.now())));
+    apply((current) => (current.isRunning ? pauseTimer(current, Date.now()) : startTimer(current, Date.now())));
   }, [apply, playClick]);
 
   const resetShot = useCallback(() => {
