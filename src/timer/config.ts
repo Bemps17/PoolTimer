@@ -1,12 +1,30 @@
-import type { TimerConfig } from './types';
+import type { CompetitionMode, TimerConfig } from './types';
 
 export const CONFIG_STORAGE_KEY = 'billiardTimerConfig';
 
-export const FFB_BLACKBALL_PRESET = {
+export const COMPETITION_SHOT_TIMING = {
   tempsBase: 45,
-  tempsApresCasse: 90,
-  tempsExtension: 45,
+  tempsExtension: 15,
+  seuilAlerte: 15,
+  seuilCritique: 5,
 } as const;
+
+export const FFB_AFTER_BREAK_DEFAULT = 90;
+
+export const FFB_BLACKBALL_PRESET = {
+  ...COMPETITION_SHOT_TIMING,
+  theme: 'ffb' as const,
+};
+
+export const FBEP_ULTIMATE_PRESET = {
+  ...COMPETITION_SHOT_TIMING,
+  theme: 'fbep' as const,
+};
+
+/** Ambiance FFB : bleu franc. */
+export const FFB_AMBIANCE = '#0066CC';
+/** Ambiance Ultimate FBEP : vert canard. */
+export const FBEP_AMBIANCE = '#007879';
 
 export const CONFIG_LIMITS = {
   tempsBase: { min: 10, max: 180 },
@@ -14,21 +32,44 @@ export const CONFIG_LIMITS = {
   tempsExtension: { min: 5, max: 90 },
   seuilAlerte: { min: 1, max: 179 },
   seuilCritique: { min: 1, max: 179 },
+  tailleChiffres: { min: 60, max: 140 },
 } as const;
+
+/** Baseline plus grande que l’ancien ratio 0.55 de la largeur d’écran. */
+export const TIMER_DIGIT_WIDTH_RATIO = 0.75;
+export const TIMER_DIGIT_HEIGHT_RATIO = 0.95;
+
+export function computeTimerFontSize(
+  screenWidth: number,
+  screenHeight: number,
+  tailleChiffres: number,
+): number {
+  const scale =
+    clampInt(
+      tailleChiffres,
+      100,
+      CONFIG_LIMITS.tailleChiffres.min,
+      CONFIG_LIMITS.tailleChiffres.max,
+    ) / 100;
+  const widthBased = Math.max(0, screenWidth) * TIMER_DIGIT_WIDTH_RATIO * scale;
+  const heightBased = Math.max(0, screenHeight) * TIMER_DIGIT_HEIGHT_RATIO;
+  return Math.min(widthBased, heightBased);
+}
 
 export function getDefaultConfig(): TimerConfig {
   return {
-    tempsBase: FFB_BLACKBALL_PRESET.tempsBase,
-    tempsApresCasse: FFB_BLACKBALL_PRESET.tempsApresCasse,
-    tempsExtension: FFB_BLACKBALL_PRESET.tempsExtension,
-    seuilAlerte: 15,
-    seuilCritique: 5,
+    tempsBase: COMPETITION_SHOT_TIMING.tempsBase,
+    tempsApresCasse: FFB_AFTER_BREAK_DEFAULT,
+    tempsExtension: COMPETITION_SHOT_TIMING.tempsExtension,
+    seuilAlerte: COMPETITION_SHOT_TIMING.seuilAlerte,
+    seuilCritique: COMPETITION_SHOT_TIMING.seuilCritique,
     volume: -10,
     sonAlertes: true,
     sonClics: true,
     vibration: true,
     affichageMs: true,
     modeInterface: 'boutons',
+    tailleChiffres: 100,
     autoStartOnReset: true,
     autoStartOnPlayerSelect: false,
     minionsUnlocked: false,
@@ -59,6 +100,8 @@ function asTheme(value: unknown): TimerConfig['theme'] {
     case 'sombre':
     case 'light':
     case 'cyberpunk':
+    case 'ffb':
+    case 'fbep':
       return value;
     default:
       return 'sombre';
@@ -110,6 +153,12 @@ export function mergeConfig(saved: unknown): TimerConfig {
     vibration: asBoolean(s.vibration, defaults.vibration),
     affichageMs: asBoolean(s.affichageMs, defaults.affichageMs),
     modeInterface: asInterfaceMode(s.modeInterface),
+    tailleChiffres: clampInt(
+      s.tailleChiffres,
+      defaults.tailleChiffres,
+      CONFIG_LIMITS.tailleChiffres.min,
+      CONFIG_LIMITS.tailleChiffres.max,
+    ),
     autoStartOnReset: asBoolean(s.autoStartOnReset, defaults.autoStartOnReset),
     autoStartOnPlayerSelect: asBoolean(s.autoStartOnPlayerSelect, defaults.autoStartOnPlayerSelect),
     minionsUnlocked:
@@ -140,9 +189,19 @@ export function saveConfig(config: TimerConfig): void {
   }
 }
 
+export function applyCompetitionPreset(config: TimerConfig, mode: CompetitionMode): TimerConfig {
+  switch (mode) {
+    case 'ffb':
+      return { ...config, ...FFB_BLACKBALL_PRESET };
+    case 'fbep':
+      return { ...config, ...FBEP_ULTIMATE_PRESET };
+    default: {
+      const exhaustive: never = mode;
+      return exhaustive;
+    }
+  }
+}
+
 export function applyFfbPreset(config: TimerConfig): TimerConfig {
-  return {
-    ...config,
-    ...FFB_BLACKBALL_PRESET,
-  };
+  return applyCompetitionPreset(config, 'ffb');
 }

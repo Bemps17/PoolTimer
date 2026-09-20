@@ -59,6 +59,46 @@ body.theme-cyberpunk {
     --c-panel-text-secondary: #a992c1;
 }
 
+body.theme-ffb {
+    --c-ambiance: #0066CC;
+    --c-background: color-mix(in srgb, #0066CC 16%, #000);
+    --c-bezel: color-mix(in srgb, #0066CC 42%, #000);
+    --c-screen: #000810;
+    --c-button-bg: color-mix(in srgb, #0066CC 38%, #111);
+    --c-text-primary: #e8f3ff;
+    --c-text-secondary: #7ea8cc;
+    --c-border: #0066CC;
+    --c-primary: #0066CC;
+    --c-play: #0066CC;
+    --c-digit-default: #d6ecff;
+    --c-panel-bg: color-mix(in srgb, #0066CC 28%, #071018);
+    --c-panel-header-border: #0066CC;
+    --c-panel-input-bg: #07182c;
+    --c-panel-input-border: #0066CC;
+    --c-panel-text-primary: #e8f3ff;
+    --c-panel-text-secondary: #8fb4d4;
+}
+
+body.theme-fbep {
+    --c-ambiance: #007879;
+    --c-background: color-mix(in srgb, #007879 16%, #000);
+    --c-bezel: color-mix(in srgb, #007879 42%, #000);
+    --c-screen: #000d0b;
+    --c-button-bg: color-mix(in srgb, #007879 38%, #111);
+    --c-text-primary: #e5faf6;
+    --c-text-secondary: #7db8ad;
+    --c-border: #007879;
+    --c-primary: #007879;
+    --c-play: #007879;
+    --c-digit-default: #d6fff6;
+    --c-panel-bg: color-mix(in srgb, #007879 28%, #071410);
+    --c-panel-header-border: #007879;
+    --c-panel-input-bg: #05241f;
+    --c-panel-input-border: #007879;
+    --c-panel-text-primary: #e5faf6;
+    --c-panel-text-secondary: #8fc9bf;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, #root { height: 100%; overflow: hidden; background-color: var(--c-background); transition: background-color 0.4s ease; }
 
@@ -94,6 +134,8 @@ body {
     transition: box-shadow 0.5s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
 body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px #7b2cbf80; }
+body.theme-ffb .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #0066CC 55%, transparent), 0 0 18px #0066CC; }
+body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #007879 55%, transparent), 0 0 18px #007879; }
 
 .scoreboard-body.is-flashing-warning { animation: flash-warning 1.5s infinite; }
 .scoreboard-body.is-flashing-critical { animation: flash-critical 0.5s infinite; }
@@ -108,13 +150,17 @@ body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.
 .top-bar {
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 0.5rem;
+    justify-content: stretch;
+    align-items: stretch;
+    padding: 0;
 }
 
-.top-bar-players { display: flex; gap: 0.5rem; flex-grow: 1; }
-.top-bar-controls { display: flex; align-items: center; gap: 0.5rem; }
+.top-bar-players {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    flex: 1 1 auto;
+}
 
 .player-status {
     font-family: var(--font-body);
@@ -122,20 +168,26 @@ body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.
     font-size: 1.2rem;
     color: var(--c-text-primary);
     background: rgba(0, 0, 0, 0.4);
-    padding: 0.5rem 1rem;
+    padding: 0.65rem 1rem;
     border-radius: 8px;
     text-align: center;
     border: 2px solid transparent;
     opacity: 0.5;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
     cursor: pointer;
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
 }
 .player-status:not(.active):hover {
     opacity: 0.75;
-    transform: translateY(-2px);
 }
 body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333; }
-.player-status.active { opacity: 1; transform: scale(1.05); cursor: default; }
+.player-status.active { opacity: 1; cursor: default; }
 .ext-status.ext-available { color: var(--c-ext-available); }
 .ext-status.ext-used { color: var(--c-ext-used); }
 
@@ -159,9 +211,7 @@ body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333
 }
 #menuArbitre:hover svg { transform: rotate(45deg); }
 #menuArbitre.active svg { transform: rotate(135deg); color: var(--c-primary); }
-#btnFullScreen .compress-icon { display: none; }
-:fullscreen #btnFullScreen .expand-icon { display: none; }
-:fullscreen #btnFullScreen .compress-icon { display: block; }
+#menuArbitre.active { color: var(--c-primary); }
 
 .timer-screen {
     width: 100%;
@@ -194,7 +244,7 @@ body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333
 .timer-officiel {
     font-family: var(--font-timer);
     font-weight: 700;
-    font-size: 10rem;
+    font-size: 12rem;
     line-height: 1;
     color: var(--c-digit-default);
     text-shadow: 0 0 2px var(--c-digit-default), 0 0 8px rgba(224, 224, 224, 0.5);
@@ -271,12 +321,26 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.1rem;
     flex-shrink: 0;
-    transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.4s ease;
+    position: relative;
+    z-index: 2;
+    transition: background-color 0.4s ease;
 }
 
-.scoreboard-body.tactile-mode .control-panel { opacity: 0; visibility: hidden; }
+.scoreboard-body.tactile-mode .control-panel {
+    justify-content: flex-end;
+}
+
+.scoreboard-body.tactile-mode .control-game-btn {
+    display: none;
+}
+
+.scoreboard-body.tactile-mode #menuArbitre {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
 
 .bouton-sport {
     width: 70px; height: 70px; border-radius: 50%; border: 2px solid #000;
@@ -356,6 +420,46 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 }
 .bouton-menu:hover:not(:disabled) { filter: brightness(1.1); }
 .bouton-menu:disabled { background-color: #555; cursor: not-allowed; }
+
+.preset-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+.preset-card {
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 0.9rem 0.55rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    text-align: center;
+    line-height: 1.25;
+    transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.preset-card small {
+    display: block;
+    margin-top: 0.3rem;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    opacity: 0.9;
+}
+.preset-ffb {
+    background: linear-gradient(165deg, #0066CC, color-mix(in srgb, #0066CC 40%, #000));
+    border-color: #0066CC;
+}
+.preset-fbep {
+    background: linear-gradient(165deg, #007879, color-mix(in srgb, #007879 40%, #000));
+    border-color: #007879;
+}
+.preset-card:hover { filter: brightness(1.08); }
+.preset-card.active {
+    box-shadow: 0 0 0 2px #fff, 0 0 16px color-mix(in srgb, var(--c-primary) 70%, transparent);
+    transform: translateY(-1px);
+}
 
 .app-version {
     margin: 0 0 0.75rem;
@@ -501,7 +605,7 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 @media (max-width: 500px), (max-height: 750px) {
     .scoreboard-body { padding: 1rem; border-radius: 20px; }
     .timer-screen { margin: 0.5rem 0; }
-    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 1rem; }
+    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 0.75rem; }
     .bouton-sport { width: 60px; height: 60px; }
     .bouton-sport svg { width: 26px; height: 26px; }
     .bouton-carré { font-size: 1rem; }

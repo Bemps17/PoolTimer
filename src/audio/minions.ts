@@ -9,6 +9,17 @@ export function shouldPlayMinionsArghh(sound: SoundType, config: TimerConfig): b
   return sound === 'warning' && config.minionsMode && config.sonAlertes;
 }
 
+export function toggleMinionsMode(config: TimerConfig): TimerConfig {
+  if (config.minionsMode) {
+    return { ...config, minionsMode: false };
+  }
+  return { ...config, minionsUnlocked: true, minionsMode: true };
+}
+
+export function minionsToggleMessage(enabled: boolean): string {
+  return enabled ? 'Mode Minions activé' : 'Mode Minions désactivé';
+}
+
 export function preloadMinionsArghh(): void {
   if (typeof Audio === 'undefined') return;
   if (!minionsAudio) {

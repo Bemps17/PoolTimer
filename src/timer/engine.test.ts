@@ -1,5 +1,15 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { applyFfbPreset, getDefaultConfig, mergeConfig } from './config';
+import {
+  applyCompetitionPreset,
+  applyFfbPreset,
+  computeTimerFontSize,
+  FBEP_AMBIANCE,
+  FFB_AMBIANCE,
+  getDefaultConfig,
+  mergeConfig,
+  TIMER_DIGIT_WIDTH_RATIO,
+} from './config';
 import {
   canUseExtension,
   createInitialState,
@@ -10,6 +20,7 @@ import {
   setupApresCasse,
   setupNewShot,
   startTimer,
+  themeBodyClass,
   tick,
   useExtension,
 } from './engine';
@@ -44,11 +55,23 @@ describe('mergeConfig', () => {
     expect(merged.tempsApresCasse).toBe(90);
     expect(merged.theme).toBe('cyberpunk');
     expect(merged.autoStartOnPlayerSelect).toBe(false);
+    expect(merged.tailleChiffres).toBe(100);
+  });
+
+  it('restores FFB and FBEP themes from storage', () => {
+    expect(mergeConfig({ theme: 'ffb' }).theme).toBe('ffb');
+    expect(mergeConfig({ theme: 'fbep' }).theme).toBe('fbep');
   });
 
   it('persists autoStartOnPlayerSelect when present', () => {
     const merged = mergeConfig({ autoStartOnPlayerSelect: true });
     expect(merged.autoStartOnPlayerSelect).toBe(true);
+  });
+
+  it('persists and clamps the timer digit size', () => {
+    expect(mergeConfig({ tailleChiffres: 120 }).tailleChiffres).toBe(120);
+    expect(mergeConfig({ tailleChiffres: 20 }).tailleChiffres).toBe(60);
+    expect(mergeConfig({ tailleChiffres: 200 }).tailleChiffres).toBe(140);
   });
 
   it('keeps Minions mode hidden until unlocked', () => {
@@ -63,11 +86,66 @@ describe('mergeConfig', () => {
     expect(merged.minionsUnlocked).toBe(true);
   });
 
-  it('applies the FFB Blackball preset', () => {
-    const preset = applyFfbPreset({ ...getDefaultConfig(), tempsBase: 30, tempsExtension: 15, tempsApresCasse: 60 });
+  it('applies FFB Blackball timings and blue ambiance without resetting après casse', () => {
+    const preset = applyCompetitionPreset(
+      { ...getDefaultConfig(), tempsBase: 30, tempsExtension: 45, tempsApresCasse: 60, seuilAlerte: 20, theme: 'sombre' },
+      'ffb',
+    );
     expect(preset.tempsBase).toBe(45);
-    expect(preset.tempsApresCasse).toBe(90);
-    expect(preset.tempsExtension).toBe(45);
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.seuilAlerte).toBe(15);
+    expect(preset.seuilCritique).toBe(5);
+    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.theme).toBe('ffb');
+  });
+
+  it('applies Ultimate FBEP with the same timings and teal ambiance', () => {
+    const preset = applyCompetitionPreset({ ...getDefaultConfig(), tempsApresCasse: 75 }, 'fbep');
+    expect(preset.tempsBase).toBe(45);
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.tempsApresCasse).toBe(75);
+    expect(preset.theme).toBe('fbep');
+  });
+
+  it('keeps applyFfbPreset as the Blackball competition mode', () => {
+    const preset = applyFfbPreset({ ...getDefaultConfig(), tempsExtension: 45, tempsApresCasse: 60 });
+    expect(preset.tempsExtension).toBe(15);
+    expect(preset.tempsApresCasse).toBe(60);
+    expect(preset.theme).toBe('ffb');
+  });
+
+  it('maps competition themes to body classes', () => {
+    expect(themeBodyClass('ffb')).toBe('theme-ffb');
+    expect(themeBodyClass('fbep')).toBe('theme-fbep');
+    expect(themeBodyClass('sombre')).toBe('');
+  });
+
+  it('pins FFB blue and FBEP vert canard accents in CSS', () => {
+    expect(FFB_AMBIANCE).toBe('#0066CC');
+    expect(FBEP_AMBIANCE).toBe('#007879');
+    const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8');
+    const ffbBlock = css.slice(css.indexOf('body.theme-ffb'), css.indexOf('body.theme-fbep'));
+    const fbepBlock = css.slice(css.indexOf('body.theme-fbep'), css.indexOf('* {'));
+    expect(ffbBlock).toContain('--c-primary: #0066CC');
+    expect(ffbBlock).toContain('--c-ambiance: #0066CC');
+    expect(fbepBlock).toContain('--c-primary: #007879');
+    expect(fbepBlock).toContain('--c-ambiance: #007879');
+    expect(css).toContain('border-color: #007879');
+    expect(css).toContain('border-color: #0066CC');
+  });
+});
+
+describe('computeTimerFontSize', () => {
+  it('uses a larger default than the previous 0.55 width ratio', () => {
+    expect(TIMER_DIGIT_WIDTH_RATIO).toBeGreaterThan(0.55);
+    expect(computeTimerFontSize(400, 400, 100)).toBe(300);
+    expect(computeTimerFontSize(400, 400, 100)).toBeGreaterThan(400 * 0.55);
+  });
+
+  it('scales with the configured digit size and respects the height cap', () => {
+    expect(computeTimerFontSize(400, 400, 80)).toBe(240);
+    expect(computeTimerFontSize(400, 200, 100)).toBe(190);
+    expect(computeTimerFontSize(400, 400, 200)).toBe(computeTimerFontSize(400, 400, 140));
   });
 });
 
@@ -144,7 +222,7 @@ describe('shot clock engine', () => {
     state = useExtension(state, config, 1_000);
     expect(state.isExtensionUsedForShot).toBe(true);
     expect(state.extensionsUsedInGame[1]).toBe(true);
-    expect(state.remainingTime).toBe(45_000 + 45_000);
+    expect(state.remainingTime).toBe(45_000 + 15_000);
     expect(canUseExtension(state)).toBe(false);
 
     state = setupNewShot(state, config);

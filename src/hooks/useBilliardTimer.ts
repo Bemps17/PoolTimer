@@ -58,7 +58,7 @@ export function useBilliardTimer() {
 
   useEffect(() => {
     const className = themeBodyClass(config.theme);
-    document.body.classList.remove('theme-light', 'theme-cyberpunk');
+    document.body.classList.remove('theme-light', 'theme-cyberpunk', 'theme-ffb', 'theme-fbep');
     if (className) document.body.classList.add(className);
   }, [config.theme]);
 

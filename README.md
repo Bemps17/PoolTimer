@@ -2,17 +2,19 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.2.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.3.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
 - Temps de base configurable (`tempsBase`, 45 s par défaut)
 - **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche
-- Extension configurable (`tempsExtension`, +45 s par défaut, preset FFB) : **une fois par joueur et par manche**
+- Extension configurable (`tempsExtension`, +15 s par défaut FFB / FBEP) : **une fois par joueur et par manche**
+- Presets **FFB Blackball** (ambiance bleue) et **Ultimate FBEP** (vert canard)
 - Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
-- Modes boutons visibles ou tout tactile
+- Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
+- Taille des chiffres du chrono réglable
 - Alertes visuelles, sonores (Tone.js) et vibration
-- Plein écran, sauvegarde automatique dans `localStorage`
+- Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
 - **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; durées via +/− dans les réglages ; noms éditables uniquement après un appui explicite « modifier »
 
 ## Lancer en local
@@ -69,4 +71,5 @@ Projet Vite : build `npm run build`, sortie `dist/`. Aucune variable d'environne
 | APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
 | P1 / P2 | Change de joueur, temps de base (option : relance aussi le chrono) |
 | EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
-| NEW | Nouvelle manche, extensions réinitialisées |
+| NEW | Nouvelle manche ; appui long : active / désactive Minions |
+| ⚙️ (pied de page) | Ouvre la configuration (reste visible en boutons invisibles) |

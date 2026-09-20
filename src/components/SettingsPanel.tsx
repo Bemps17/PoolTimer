@@ -1,9 +1,9 @@
 import { useRef, type TouchEvent } from 'react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
-import { applyFfbPreset, CONFIG_LIMITS } from '../timer/config';
+import { applyCompetitionPreset, CONFIG_LIMITS } from '../timer/config';
 import { formatSecondsClock } from '../timer/format';
-import type { InterfaceMode, Theme, TimerConfig } from '../timer/types';
+import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
 import { PlayerNameField } from './PlayerNameField';
@@ -11,10 +11,12 @@ import { PlayerNameField } from './PlayerNameField';
 interface SettingsPanelProps {
   open: boolean;
   config: TimerConfig;
+  isFullscreen: boolean;
   onClose: () => void;
   onChange: (next: TimerConfig, options?: { resetShot?: boolean }) => void;
   onShowHelp: () => void;
   onShowChangelog: () => void;
+  onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
 }
@@ -23,11 +25,13 @@ const THEME_OPTIONS = [
   { value: 'sombre', label: 'Sombre' },
   { value: 'light', label: 'Clair' },
   { value: 'cyberpunk', label: 'Cyberpunk' },
+  { value: 'ffb', label: 'FFB Blackball (bleu)' },
+  { value: 'fbep', label: 'Ultimate FBEP (vert canard)' },
 ];
 
 const INTERFACE_OPTIONS = [
   { value: 'boutons', label: 'Boutons Visibles' },
-  { value: 'tactile', label: 'Mode Tactile Complet' },
+  { value: 'tactile', label: 'Boutons invisibles' },
 ];
 
 const YES_NO = [
@@ -48,10 +52,12 @@ const VIBRATION = [
 export function SettingsPanel({
   open,
   config,
+  isFullscreen,
   onClose,
   onChange,
   onShowHelp,
   onShowChangelog,
+  onToggleFullscreen,
   installStatus,
   onInstall,
 }: SettingsPanelProps) {
@@ -61,6 +67,10 @@ export function SettingsPanel({
 
   const patch = (partial: Partial<TimerConfig>, resetShot = false) => {
     onChange({ ...config, ...partial }, { resetShot });
+  };
+
+  const applyMode = (mode: CompetitionMode) => {
+    onChange(applyCompetitionPreset(config, mode), { resetShot: true });
   };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
@@ -158,6 +168,33 @@ export function SettingsPanel({
           </div>
 
           <div className="section-panel">
+            <h3>Modes de compétition</h3>
+            <div className="preset-row" role="group" aria-label="Presets de compétition">
+              <button
+                type="button"
+                className={`preset-card preset-ffb${config.theme === 'ffb' ? ' active' : ''}`}
+                aria-pressed={config.theme === 'ffb'}
+                onClick={() => applyMode('ffb')}
+              >
+                FFB Blackball
+                <small>45s · +15s · bleu</small>
+              </button>
+              <button
+                type="button"
+                className={`preset-card preset-fbep${config.theme === 'fbep' ? ' active' : ''}`}
+                aria-pressed={config.theme === 'fbep'}
+                onClick={() => applyMode('fbep')}
+              >
+                Ultimate FBEP
+                <small>45s · +15s · vert canard</small>
+              </button>
+            </div>
+            <p className="install-hint">
+              Même chrono (45s, extension +15s, alertes 15s / 5s). L’après casse n’est pas modifié.
+            </p>
+          </div>
+
+          <div className="section-panel">
             <h3>Paramètres de Jeu</h3>
             <NumberStepper
               label="Temps de base (sec)"
@@ -204,13 +241,6 @@ export function SettingsPanel({
               suffix="s"
               onChange={(seuilCritique) => patch({ seuilCritique })}
             />
-            <button
-              type="button"
-              className="bouton-menu"
-              onClick={() => onChange(applyFfbPreset(config), { resetShot: true })}
-            >
-              Preset FFB Blackball (45s / 1:30 / +45s)
-            </button>
           </div>
 
           <div className="section-panel">
@@ -228,6 +258,16 @@ export function SettingsPanel({
               value={config.modeInterface}
               options={INTERFACE_OPTIONS}
               onChange={(modeInterface) => patch({ modeInterface: modeInterface as InterfaceMode })}
+            />
+            <NumberStepper
+              label="Taille des chiffres"
+              htmlId="tailleChiffres"
+              value={config.tailleChiffres}
+              min={CONFIG_LIMITS.tailleChiffres.min}
+              max={CONFIG_LIMITS.tailleChiffres.max}
+              step={10}
+              suffix="%"
+              onChange={(tailleChiffres) => patch({ tailleChiffres })}
             />
             <SelectField
               label="Affichage millisecondes (sous 10s)"
@@ -263,6 +303,18 @@ export function SettingsPanel({
               options={VIBRATION}
               onChange={(value) => patch({ vibration: parseBooleanSelect(value) })}
             />
+            <button
+              type="button"
+              className="bouton-menu"
+              id="btnFullScreen"
+              aria-pressed={isFullscreen}
+              onClick={onToggleFullscreen}
+            >
+              {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
+            </button>
+            <p className="install-hint">
+              Utile dans le navigateur. En application installée, l’affichage est déjà plein écran.
+            </p>
           </div>
 
           <div className="section-panel">
