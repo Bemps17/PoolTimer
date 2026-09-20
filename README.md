@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.4.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.5.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -16,6 +16,7 @@ Version actuelle : **2.4.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 - Alertes visuelles, sonores (Tone.js) et vibration
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
 - **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; durées via +/− dans les réglages ; noms éditables uniquement après un appui explicite « modifier »
+- **Miroir télécommande (bêta)** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet
 
 ## Lancer en local
 
@@ -60,7 +61,39 @@ npm run icons
 
 ## Déploiement Vercel
 
-Projet Vite : build `npm run build`, sortie `dist/`. Aucune variable d'environnement n'est requise.
+Projet Vite : build `npm run build`, sortie `dist/`.
+
+### Variable d’environnement (miroir bêta)
+
+| Variable | Exemple | Rôle |
+| --- | --- | --- |
+| `VITE_MIRROR_WS_URL` | `wss://h8timer-mirror.<compte>.workers.dev` | Relais WebSocket (Cloudflare Worker + Durable Object). Sans cette variable, l’UI miroir s’affiche mais « Ouvrir une salle » reste inactif. |
+
+À définir dans Vercel (Production / Preview) **avant** le build Vite (`VITE_*` est inliné au build).
+
+Local :
+
+```bash
+# terminal 1
+npm run mirror:dev
+
+# terminal 2 — .env.development pointe déjà sur ws://localhost:8787
+npm run dev
+```
+
+### Relais Cloudflare (gratuit Workers / Durable Objects)
+
+Le Worker est dans `worker/` (pas de base de données). Déploiement :
+
+```bash
+cd worker
+npx wrangler login
+npx wrangler deploy
+```
+
+Puis copier l’URL `https://h8timer-mirror.<compte>.workers.dev` dans `VITE_MIRROR_WS_URL` (le client ajoute `/ws`).
+
+Salles éphémères : une télécommande par code, écrans en lecture seule, snapshot renvoyé aux retards / reconnexions, expiration ~2 h d’inactivité.
 
 ## Contrôles
 

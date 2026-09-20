@@ -20,5 +20,10 @@ npm-debug.log*
 .env.*.local
 .vercel
 
+# Cloudflare Worker local state
+worker/.wrangler
+.wrangler
+.dev.vars
+
 # TypeScript
 *.tsbuildinfo

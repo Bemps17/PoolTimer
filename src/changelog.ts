@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.4.0';
+export const APP_VERSION = '2.5.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.0',
+    date: '2026-09-20',
+    title: 'Miroir télécommande (bêta)',
+    notes: [
+      'Section « Bêta / Work in progress » : miroir télécommande (code salle + QR).',
+      'Écran lecture seule sur /d/CODE, thèmes FFB / FBEP synchronisés, sync Internet via Worker Cloudflare.',
+    ],
+  },
   {
     version: '2.4.0',
     date: '2026-09-20',
