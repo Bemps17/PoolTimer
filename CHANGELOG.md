@@ -5,6 +5,7 @@ Toutes les dates sont en UTC.
 ## 2.5.4 — 2026-09-20
 
 - **Simple vs double appui** : la pause (ou le départ) n’est confirmée que si aucun second tap n’arrive dans la fenêtre — le double appui n’est plus volé par la pause.
+- Le délai de confirmation survit au tick du chrono (plus de pause « avalée » tant que le temps défile).
 - Double appui sur l’écran (chrono en cours ou à l’arrêt) : **nouveau coup**.
 - Après reset / double appui, le chrono **reste figé par défaut**. Option « Redémarrage auto après nouveau coup » (désactivée par défaut).
 

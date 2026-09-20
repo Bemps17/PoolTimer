@@ -65,10 +65,16 @@ export function Scoreboard({
       observer.disconnect();
       window.removeEventListener('resize', resizeTimer);
       document.removeEventListener('fullscreenchange', resizeTimer);
+    };
+  }, [resizeTimer, state.remainingTime, config.affichageMs]);
+
+  // Pending single-tap confirmation must survive remainingTime ticks (every 50ms while running).
+  useEffect(() => {
+    return () => {
       if (pendingTapTimeoutRef.current) window.clearTimeout(pendingTapTimeoutRef.current);
       if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
     };
-  }, [resizeTimer, state.remainingTime, config.affichageMs]);
+  }, []);
 
   const clearNewGameHold = () => {
     if (newGameHoldRef.current.timer !== null) {
