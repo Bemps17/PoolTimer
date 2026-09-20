@@ -1,3 +1,4 @@
+import { sanitizePlayerName } from './playerName';
 import type { CompetitionMode, TimerConfig } from './types';
 
 export const CONFIG_STORAGE_KEY = 'billiardTimerConfig';
@@ -145,8 +146,8 @@ export function mergeConfig(saved: unknown): TimerConfig {
   if (!saved || typeof saved !== 'object') return defaults;
   const s = saved as Partial<TimerConfig>;
 
-  const p1Name = typeof s.p1Name === 'string' && s.p1Name.trim() ? s.p1Name.substring(0, 5) : defaults.p1Name;
-  const p2Name = typeof s.p2Name === 'string' && s.p2Name.trim() ? s.p2Name.substring(0, 5) : defaults.p2Name;
+  const p1Name = sanitizePlayerName(s.p1Name, defaults.p1Name);
+  const p2Name = sanitizePlayerName(s.p2Name, defaults.p2Name);
 
   return {
     tempsBase: clampInt(s.tempsBase, defaults.tempsBase, CONFIG_LIMITS.tempsBase.min, CONFIG_LIMITS.tempsBase.max),

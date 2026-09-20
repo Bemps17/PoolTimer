@@ -70,7 +70,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           </p>
           <ul>
             <li>
-              <strong>Les noms et couleurs</strong> des joueurs.
+              <strong>Les noms et couleurs</strong> des joueurs (prénom / nom, jusqu’à 32 caractères ;
+              la taille de police s’adapte sur le tableau).
             </li>
             <li>
               <strong>Les temps</strong> de base, après casse et d'extension. Presets de compétition

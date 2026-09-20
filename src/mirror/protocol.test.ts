@@ -16,6 +16,7 @@ import {
   remainingAtSend,
   remainingFromSnapshot,
   seqFromWelcome,
+  toDisplayConfig,
 } from './protocol';
 import { EphemeralRoom } from './room';
 
@@ -96,6 +97,33 @@ describe('mirror protocol', () => {
     expect(message).toEqual(expect.objectContaining({ type: 'welcome', seq: 7 }));
     expect(seqFromWelcome(7)).toBe(7);
     expect(nextPushSeq(seqFromWelcome(7))).toBe(8);
+  });
+
+  it('keeps full player names on the display snapshot and caps the wire length', () => {
+    const config = { ...getDefaultConfig(), p1Name: 'Jean-Baptiste Moreau', p2Name: 'Anne Dupont' };
+    const display = toDisplayConfig(config);
+    expect(display.p1Name).toBe('Jean-Baptiste Moreau');
+    expect(display.p2Name).toBe('Anne Dupont');
+
+    const snapshot = buildSnapshot(createInitialState(config), config, 1_000);
+    const parsed = parseServerMessage({
+      type: 'welcome',
+      room: 'AB3K7Q',
+      role: 'display',
+      displayCount: 1,
+      controllerConnected: true,
+      serverTime: 100,
+      snapshot,
+      seq: 1,
+    });
+    expect(parsed).toEqual(
+      expect.objectContaining({
+        type: 'welcome',
+        snapshot: expect.objectContaining({
+          config: expect.objectContaining({ p1Name: 'Jean-Baptiste Moreau', p2Name: 'Anne Dupont' }),
+        }),
+      }),
+    );
   });
 
   it('rejects malformed client pushes', () => {
