@@ -2,6 +2,10 @@
 
 Toutes les dates sont en UTC.
 
+## 2.2.0 — 2026-09-20
+
+- Notification **Nouvelle version disponible** avec bouton **Mettre à jour** (le match n’est pas rechargé tout seul).
+
 ## 2.1.0 — 2026-09-20
 
 - Nom affiché de l’application : **H8timer**.

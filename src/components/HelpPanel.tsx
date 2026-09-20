@@ -87,6 +87,10 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>
               <strong>Historique des versions</strong> pour voir les nouveautés.
             </li>
+            <li>
+              <strong>Nouvelle version disponible :</strong> un bandeau propose « Mettre à jour » sans
+              recharger le match tout seul.
+            </li>
           </ul>
           <p>
             <strong>Note :</strong> pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre

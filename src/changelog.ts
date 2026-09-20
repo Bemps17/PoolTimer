@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.2.0',
+    date: '2026-09-20',
+    title: 'Mise à jour PWA',
+    notes: [
+      'Notification « Nouvelle version disponible » avec bouton Mettre à jour (sans rechargement forcé).',
+    ],
+  },
   {
     version: '2.1.0',
     date: '2026-09-20',

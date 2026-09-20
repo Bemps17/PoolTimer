@@ -467,6 +467,37 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     height: 24px;
 }
 
+.update-banner {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2100;
+    max-width: calc(100vw - 24px);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: var(--c-panel-bg);
+    color: var(--c-panel-text-primary);
+    border: 1px solid var(--c-primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.update-banner-button {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    background: var(--c-primary);
+    color: #fff;
+    font-weight: 700;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
 @media (max-width: 500px), (max-height: 750px) {
     .scoreboard-body { padding: 1rem; border-radius: 20px; }
     .timer-screen { margin: 0.5rem 0; }

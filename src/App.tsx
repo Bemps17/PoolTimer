@@ -4,15 +4,18 @@ import { HelpPanel } from './components/HelpPanel';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Toast } from './components/Toast';
+import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { usePwaUpdate } from './hooks/usePwaUpdate';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
   const timer = useBilliardTimer();
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
+  const pwaUpdate = usePwaUpdate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
@@ -76,6 +79,11 @@ export default function App() {
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <Toast visible={toastVisible} message={toastMessage} />
+      <UpdateBanner
+        visible={pwaUpdate.needRefresh}
+        incomingVersion={pwaUpdate.incomingVersion}
+        onUpdate={pwaUpdate.applyUpdate}
+      />
     </>
   );
 }
