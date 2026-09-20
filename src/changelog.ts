@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.0';
+export const APP_VERSION = '2.5.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.1',
+    date: '2026-09-20',
+    title: 'Relais miroir production',
+    notes: [
+      'URL du relais WebSocket Cloudflare configurée pour la production (VITE_MIRROR_WS_URL).',
+    ],
+  },
   {
     version: '2.5.0',
     date: '2026-09-20',
