@@ -50,7 +50,6 @@ export default function App() {
         config={timer.config}
         state={timer.state}
         menuOpen={menuOpen}
-        isFullscreen={isFullscreen}
         onTogglePlayPause={timer.togglePlayPause}
         onResetShot={timer.resetShot}
         onApresCasse={timer.triggerApresCasse}
@@ -61,16 +60,17 @@ export default function App() {
           void timer.playClick();
           setMenuOpen(true);
         }}
-        onToggleFullscreen={toggle}
         onUnlockMinions={handleUnlockMinions}
       />
       <SettingsPanel
         open={menuOpen}
         config={timer.config}
+        isFullscreen={isFullscreen}
         onClose={() => setMenuOpen(false)}
         onChange={handleConfigChange}
         onShowHelp={() => setHelpOpen(true)}
         onShowChangelog={() => setChangelogOpen(true)}
+        onToggleFullscreen={toggle}
         installStatus={pwaInstall.status}
         onInstall={() => {
           void pwaInstall.install();

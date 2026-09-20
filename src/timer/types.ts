@@ -17,6 +17,7 @@ export interface TimerConfig {
   vibration: boolean;
   affichageMs: boolean;
   modeInterface: InterfaceMode;
+  tailleChiffres: number;
   autoStartOnReset: boolean;
   autoStartOnPlayerSelect: boolean;
   minionsUnlocked: boolean;

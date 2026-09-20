@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.2.0';
+export const APP_VERSION = '2.3.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.3.0',
+    date: '2026-09-20',
+    title: 'Interface de jeu',
+    notes: [
+      'Indicateurs P1 et P2 sur toute la largeur.',
+      'Bouton réglages dans le pied de page, toujours visible en mode boutons invisibles.',
+      'Plein écran déplacé dans la configuration (l’app installée est déjà plein écran).',
+      'Chiffres du chrono plus grands, taille réglable et mémorisée.',
+    ],
+  },
   {
     version: '2.2.0',
     date: '2026-09-20',

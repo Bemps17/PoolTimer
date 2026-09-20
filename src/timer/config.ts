@@ -14,7 +14,29 @@ export const CONFIG_LIMITS = {
   tempsExtension: { min: 5, max: 90 },
   seuilAlerte: { min: 1, max: 179 },
   seuilCritique: { min: 1, max: 179 },
+  tailleChiffres: { min: 60, max: 140 },
 } as const;
+
+/** Baseline plus grande que l’ancien ratio 0.55 de la largeur d’écran. */
+export const TIMER_DIGIT_WIDTH_RATIO = 0.75;
+export const TIMER_DIGIT_HEIGHT_RATIO = 0.95;
+
+export function computeTimerFontSize(
+  screenWidth: number,
+  screenHeight: number,
+  tailleChiffres: number,
+): number {
+  const scale =
+    clampInt(
+      tailleChiffres,
+      100,
+      CONFIG_LIMITS.tailleChiffres.min,
+      CONFIG_LIMITS.tailleChiffres.max,
+    ) / 100;
+  const widthBased = Math.max(0, screenWidth) * TIMER_DIGIT_WIDTH_RATIO * scale;
+  const heightBased = Math.max(0, screenHeight) * TIMER_DIGIT_HEIGHT_RATIO;
+  return Math.min(widthBased, heightBased);
+}
 
 export function getDefaultConfig(): TimerConfig {
   return {
@@ -29,6 +51,7 @@ export function getDefaultConfig(): TimerConfig {
     vibration: true,
     affichageMs: true,
     modeInterface: 'boutons',
+    tailleChiffres: 100,
     autoStartOnReset: true,
     autoStartOnPlayerSelect: false,
     minionsUnlocked: false,
@@ -110,6 +133,12 @@ export function mergeConfig(saved: unknown): TimerConfig {
     vibration: asBoolean(s.vibration, defaults.vibration),
     affichageMs: asBoolean(s.affichageMs, defaults.affichageMs),
     modeInterface: asInterfaceMode(s.modeInterface),
+    tailleChiffres: clampInt(
+      s.tailleChiffres,
+      defaults.tailleChiffres,
+      CONFIG_LIMITS.tailleChiffres.min,
+      CONFIG_LIMITS.tailleChiffres.max,
+    ),
     autoStartOnReset: asBoolean(s.autoStartOnReset, defaults.autoStartOnReset),
     autoStartOnPlayerSelect: asBoolean(s.autoStartOnPlayerSelect, defaults.autoStartOnPlayerSelect),
     minionsUnlocked:

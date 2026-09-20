@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { applyFfbPreset, getDefaultConfig, mergeConfig } from './config';
+import {
+  applyFfbPreset,
+  computeTimerFontSize,
+  getDefaultConfig,
+  mergeConfig,
+  TIMER_DIGIT_WIDTH_RATIO,
+} from './config';
 import {
   canUseExtension,
   createInitialState,
@@ -44,11 +50,18 @@ describe('mergeConfig', () => {
     expect(merged.tempsApresCasse).toBe(90);
     expect(merged.theme).toBe('cyberpunk');
     expect(merged.autoStartOnPlayerSelect).toBe(false);
+    expect(merged.tailleChiffres).toBe(100);
   });
 
   it('persists autoStartOnPlayerSelect when present', () => {
     const merged = mergeConfig({ autoStartOnPlayerSelect: true });
     expect(merged.autoStartOnPlayerSelect).toBe(true);
+  });
+
+  it('persists and clamps the timer digit size', () => {
+    expect(mergeConfig({ tailleChiffres: 120 }).tailleChiffres).toBe(120);
+    expect(mergeConfig({ tailleChiffres: 20 }).tailleChiffres).toBe(60);
+    expect(mergeConfig({ tailleChiffres: 200 }).tailleChiffres).toBe(140);
   });
 
   it('keeps Minions mode hidden until unlocked', () => {
@@ -68,6 +81,20 @@ describe('mergeConfig', () => {
     expect(preset.tempsBase).toBe(45);
     expect(preset.tempsApresCasse).toBe(90);
     expect(preset.tempsExtension).toBe(45);
+  });
+});
+
+describe('computeTimerFontSize', () => {
+  it('uses a larger default than the previous 0.55 width ratio', () => {
+    expect(TIMER_DIGIT_WIDTH_RATIO).toBeGreaterThan(0.55);
+    expect(computeTimerFontSize(400, 400, 100)).toBe(300);
+    expect(computeTimerFontSize(400, 400, 100)).toBeGreaterThan(400 * 0.55);
+  });
+
+  it('scales with the configured digit size and respects the height cap', () => {
+    expect(computeTimerFontSize(400, 400, 80)).toBe(240);
+    expect(computeTimerFontSize(400, 200, 100)).toBe(190);
+    expect(computeTimerFontSize(400, 400, 200)).toBe(computeTimerFontSize(400, 400, 140));
   });
 });
 

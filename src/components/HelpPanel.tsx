@@ -43,7 +43,8 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               tourne.
             </li>
             <li>
-              <strong>Icône plein écran :</strong> affiche le timer en immersion totale.
+              <strong>Plein écran :</strong> à activer depuis la configuration (dans le navigateur).
+              En application installée, l'affichage est déjà plein écran.
             </li>
           </ul>
 
@@ -55,7 +56,10 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           </p>
 
           <h3>Accéder aux Paramètres (⚙️)</h3>
-          <p>Cliquez sur l'icône roue crantée en haut à droite pour personnaliser :</p>
+          <p>
+            Cliquez sur l'icône roue crantée en bas, avec les autres boutons. Elle reste visible
+            même en mode « Boutons invisibles ».
+          </p>
           <ul>
             <li>
               <strong>Les noms et couleurs</strong> des joueurs.
@@ -71,10 +75,16 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               <strong>Le thème visuel</strong> (Sombre, Clair, Cyberpunk).
             </li>
             <li>
+              <strong>La taille des chiffres</strong> du chronomètre.
+            </li>
+            <li>
               <strong>Les sons</strong> (volume, activation des alertes/clics).
             </li>
             <li>
-              <strong>Le mode d'interface</strong> (boutons ou tout tactile).
+              <strong>Le mode d'interface</strong> (boutons visibles ou boutons invisibles).
+            </li>
+            <li>
+              <strong>Le plein écran</strong> pour une utilisation dans le navigateur.
             </li>
             <li>
               <strong>L'automatisation</strong> : redémarrage après nouveau coup, et relance du chrono

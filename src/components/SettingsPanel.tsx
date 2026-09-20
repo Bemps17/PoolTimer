@@ -11,10 +11,12 @@ import { PlayerNameField } from './PlayerNameField';
 interface SettingsPanelProps {
   open: boolean;
   config: TimerConfig;
+  isFullscreen: boolean;
   onClose: () => void;
   onChange: (next: TimerConfig, options?: { resetShot?: boolean }) => void;
   onShowHelp: () => void;
   onShowChangelog: () => void;
+  onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
 }
@@ -27,7 +29,7 @@ const THEME_OPTIONS = [
 
 const INTERFACE_OPTIONS = [
   { value: 'boutons', label: 'Boutons Visibles' },
-  { value: 'tactile', label: 'Mode Tactile Complet' },
+  { value: 'tactile', label: 'Boutons invisibles' },
 ];
 
 const YES_NO = [
@@ -48,10 +50,12 @@ const VIBRATION = [
 export function SettingsPanel({
   open,
   config,
+  isFullscreen,
   onClose,
   onChange,
   onShowHelp,
   onShowChangelog,
+  onToggleFullscreen,
   installStatus,
   onInstall,
 }: SettingsPanelProps) {
@@ -229,6 +233,16 @@ export function SettingsPanel({
               options={INTERFACE_OPTIONS}
               onChange={(modeInterface) => patch({ modeInterface: modeInterface as InterfaceMode })}
             />
+            <NumberStepper
+              label="Taille des chiffres"
+              htmlId="tailleChiffres"
+              value={config.tailleChiffres}
+              min={CONFIG_LIMITS.tailleChiffres.min}
+              max={CONFIG_LIMITS.tailleChiffres.max}
+              step={10}
+              suffix="%"
+              onChange={(tailleChiffres) => patch({ tailleChiffres })}
+            />
             <SelectField
               label="Affichage millisecondes (sous 10s)"
               htmlId="affichageMs"
@@ -263,6 +277,18 @@ export function SettingsPanel({
               options={VIBRATION}
               onChange={(value) => patch({ vibration: parseBooleanSelect(value) })}
             />
+            <button
+              type="button"
+              className="bouton-menu"
+              id="btnFullScreen"
+              aria-pressed={isFullscreen}
+              onClick={onToggleFullscreen}
+            >
+              {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
+            </button>
+            <p className="install-hint">
+              Utile dans le navigateur. En application installée, l’affichage est déjà plein écran.
+            </p>
           </div>
 
           <div className="section-panel">

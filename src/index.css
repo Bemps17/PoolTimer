@@ -108,13 +108,17 @@ body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.
 .top-bar {
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 0.5rem;
+    justify-content: stretch;
+    align-items: stretch;
+    padding: 0;
 }
 
-.top-bar-players { display: flex; gap: 0.5rem; flex-grow: 1; }
-.top-bar-controls { display: flex; align-items: center; gap: 0.5rem; }
+.top-bar-players {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    flex: 1 1 auto;
+}
 
 .player-status {
     font-family: var(--font-body);
@@ -122,20 +126,26 @@ body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.
     font-size: 1.2rem;
     color: var(--c-text-primary);
     background: rgba(0, 0, 0, 0.4);
-    padding: 0.5rem 1rem;
+    padding: 0.65rem 1rem;
     border-radius: 8px;
     text-align: center;
     border: 2px solid transparent;
     opacity: 0.5;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
     cursor: pointer;
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
 }
 .player-status:not(.active):hover {
     opacity: 0.75;
-    transform: translateY(-2px);
 }
 body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333; }
-.player-status.active { opacity: 1; transform: scale(1.05); cursor: default; }
+.player-status.active { opacity: 1; cursor: default; }
 .ext-status.ext-available { color: var(--c-ext-available); }
 .ext-status.ext-used { color: var(--c-ext-used); }
 
@@ -159,9 +169,7 @@ body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333
 }
 #menuArbitre:hover svg { transform: rotate(45deg); }
 #menuArbitre.active svg { transform: rotate(135deg); color: var(--c-primary); }
-#btnFullScreen .compress-icon { display: none; }
-:fullscreen #btnFullScreen .expand-icon { display: none; }
-:fullscreen #btnFullScreen .compress-icon { display: block; }
+#menuArbitre.active { color: var(--c-primary); }
 
 .timer-screen {
     width: 100%;
@@ -194,7 +202,7 @@ body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333
 .timer-officiel {
     font-family: var(--font-timer);
     font-weight: 700;
-    font-size: 10rem;
+    font-size: 12rem;
     line-height: 1;
     color: var(--c-digit-default);
     text-shadow: 0 0 2px var(--c-digit-default), 0 0 8px rgba(224, 224, 224, 0.5);
@@ -271,12 +279,26 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.1rem;
     flex-shrink: 0;
-    transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.4s ease;
+    position: relative;
+    z-index: 2;
+    transition: background-color 0.4s ease;
 }
 
-.scoreboard-body.tactile-mode .control-panel { opacity: 0; visibility: hidden; }
+.scoreboard-body.tactile-mode .control-panel {
+    justify-content: flex-end;
+}
+
+.scoreboard-body.tactile-mode .control-game-btn {
+    display: none;
+}
+
+.scoreboard-body.tactile-mode #menuArbitre {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
 
 .bouton-sport {
     width: 70px; height: 70px; border-radius: 50%; border: 2px solid #000;
@@ -501,7 +523,7 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 @media (max-width: 500px), (max-height: 750px) {
     .scoreboard-body { padding: 1rem; border-radius: 20px; }
     .timer-screen { margin: 0.5rem 0; }
-    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 1rem; }
+    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 0.75rem; }
     .bouton-sport { width: 60px; height: 60px; }
     .bouton-sport svg { width: 26px; height: 26px; }
     .bouton-carré { font-size: 1rem; }
