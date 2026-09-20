@@ -2,13 +2,14 @@ import { CheckIcon } from './Icons';
 
 interface ToastProps {
   visible: boolean;
+  message: string;
 }
 
-export function Toast({ visible }: ToastProps) {
+export function Toast({ visible, message }: ToastProps) {
   return (
     <div id="saveToast" className={`save-toast${visible ? ' show' : ''}`} role="status">
       <CheckIcon />
-      <span>Paramètres sauvegardés !</span>
+      <span>{message}</span>
     </div>
   );
 }

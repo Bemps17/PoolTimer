@@ -16,6 +16,7 @@ export default defineConfig({
         'icon-512.png',
         'icon-512-maskable.png',
         'apple-touch-icon.png',
+        'sound/minions-arghh.mp3',
       ],
       manifest: {
         name: 'Timer de Billard Pro',
@@ -49,7 +50,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

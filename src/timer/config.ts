@@ -31,6 +31,8 @@ export function getDefaultConfig(): TimerConfig {
     modeInterface: 'boutons',
     autoStartOnReset: true,
     autoStartOnPlayerSelect: false,
+    minionsUnlocked: false,
+    minionsMode: false,
     p1Name: 'P1',
     p1Color: '#3498db',
     p2Name: 'P2',
@@ -110,6 +112,9 @@ export function mergeConfig(saved: unknown): TimerConfig {
     modeInterface: asInterfaceMode(s.modeInterface),
     autoStartOnReset: asBoolean(s.autoStartOnReset, defaults.autoStartOnReset),
     autoStartOnPlayerSelect: asBoolean(s.autoStartOnPlayerSelect, defaults.autoStartOnPlayerSelect),
+    minionsUnlocked:
+      asBoolean(s.minionsUnlocked, defaults.minionsUnlocked) || asBoolean(s.minionsMode, defaults.minionsMode),
+    minionsMode: asBoolean(s.minionsMode, defaults.minionsMode),
     p1Name,
     p1Color: typeof s.p1Color === 'string' ? s.p1Color : defaults.p1Color,
     p2Name,

@@ -13,20 +13,29 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('Paramètres sauvegardés !');
 
   useEffect(() => {
     if (!toastVisible) return undefined;
-    const id = window.setTimeout(() => setToastVisible(false), 2000);
+    const id = window.setTimeout(() => setToastVisible(false), 2200);
     return () => window.clearTimeout(id);
   }, [toastVisible]);
 
   const handleConfigChange = useCallback(
     (next: TimerConfig, options?: { resetShot?: boolean }) => {
       timer.updateConfig(next, options);
+      setToastMessage('Paramètres sauvegardés !');
       setToastVisible(true);
     },
     [timer.updateConfig],
   );
+
+  const handleUnlockMinions = useCallback(() => {
+    if (timer.config.minionsUnlocked) return;
+    timer.updateConfig({ ...timer.config, minionsUnlocked: true, minionsMode: true });
+    setToastMessage('Mode Minions débloqué');
+    setToastVisible(true);
+  }, [timer.config, timer.updateConfig]);
 
   return (
     <>
@@ -46,6 +55,7 @@ export default function App() {
           setMenuOpen(true);
         }}
         onToggleFullscreen={toggle}
+        onUnlockMinions={handleUnlockMinions}
       />
       <SettingsPanel
         open={menuOpen}
@@ -55,7 +65,7 @@ export default function App() {
         onShowHelp={() => setHelpOpen(true)}
       />
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
-      <Toast visible={toastVisible} />
+      <Toast visible={toastVisible} message={toastMessage} />
     </>
   );
 }

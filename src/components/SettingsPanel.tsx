@@ -265,6 +265,15 @@ export function SettingsPanel({ open, config, onClose, onChange, onShowHelp }: S
               options={YES_NO}
               onChange={(value) => patch({ autoStartOnPlayerSelect: parseBooleanSelect(value) })}
             />
+            {config.minionsUnlocked ? (
+              <SelectField
+                label="Mode Minions"
+                htmlId="minionsMode"
+                value={String(config.minionsMode)}
+                options={YES_NO}
+                onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
+              />
+            ) : null}
           </div>
 
           <div className="section-panel">

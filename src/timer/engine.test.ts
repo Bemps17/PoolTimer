@@ -51,6 +51,18 @@ describe('mergeConfig', () => {
     expect(merged.autoStartOnPlayerSelect).toBe(true);
   });
 
+  it('keeps Minions mode hidden until unlocked', () => {
+    const merged = mergeConfig({ tempsBase: 45 });
+    expect(merged.minionsUnlocked).toBe(false);
+    expect(merged.minionsMode).toBe(false);
+  });
+
+  it('restores an unlocked Minions preference from storage', () => {
+    const merged = mergeConfig({ minionsMode: true });
+    expect(merged.minionsMode).toBe(true);
+    expect(merged.minionsUnlocked).toBe(true);
+  });
+
   it('applies the FFB Blackball preset', () => {
     const preset = applyFfbPreset({ ...getDefaultConfig(), tempsBase: 30, tempsExtension: 15, tempsApresCasse: 60 });
     expect(preset.tempsBase).toBe(45);

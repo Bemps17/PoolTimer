@@ -19,6 +19,8 @@ export interface TimerConfig {
   modeInterface: InterfaceMode;
   autoStartOnReset: boolean;
   autoStartOnPlayerSelect: boolean;
+  minionsUnlocked: boolean;
+  minionsMode: boolean;
   p1Name: string;
   p1Color: string;
   p2Name: string;
