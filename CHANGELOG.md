@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.6 — 2026-09-20
+
+- **Surface plus large** : moins de marge latérale ; le tableau occupe presque toute la largeur téléphone / tablette.
+- Le `max-width` 500 px et le `95vw` sont remplacés par un remplissage du viewport (plafond 72 rem / ~1152 px sur grand écran).
+- Padding du cadre, des bandeaux P1/P2 et de la rangée de boutons réduit ; les insets d’encoche (`safe-area`) restent.
+- Plein écran et écran miroir Visuel inchangés dans le principe, avec des gouttières décoratives plus petites.
+
 ## 2.5.5 — 2026-09-20
 
 - **Noms de joueurs** : prénom + nom jusqu’à 32 caractères (plus de limite à 5 lettres).

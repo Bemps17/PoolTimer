@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.5';
+export const APP_VERSION = '2.5.6';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.6',
+    date: '2026-09-20',
+    title: 'Surface plus large',
+    notes: [
+      'Moins de marge latérale : le tableau utilise presque toute la largeur du téléphone et de la tablette (safe-area / encoche conservée).',
+      'Les bandeaux P1/P2, le cadre et la rangée de boutons s’élargissent ; les noms longs ont plus de place (police auto 2.5.5 inchangée).',
+      'Plein écran et écran miroir Visuel conservent leurs insets, sans bande décorative excessive.',
+    ],
+  },
   {
     version: '2.5.5',
     date: '2026-09-20',

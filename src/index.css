@@ -21,6 +21,16 @@
     --c-panel-input-border: #333;
     --c-panel-text-primary: #e1e3e8;
     --c-panel-text-secondary: #8b949e;
+
+    /* Fill phones/tablets; keep notch insets. Decorative gutter is tiny. */
+    --app-gutter-top: max(0.3rem, env(safe-area-inset-top, 0px));
+    --app-gutter-right: max(0.3rem, env(safe-area-inset-right, 0px));
+    --app-gutter-bottom: max(0.3rem, env(safe-area-inset-bottom, 0px));
+    --app-gutter-left: max(0.3rem, env(safe-area-inset-left, 0px));
+    --scoreboard-pad-x: 0.45rem;
+    --scoreboard-pad-y: 0.6rem;
+    /* 72rem ≈ 1152px: full width on phone + tablet, column only on large desktops. */
+    --scoreboard-max-width: 72rem;
 }
 
 body.theme-light {
@@ -100,7 +110,14 @@ body.theme-fbep {
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body, #root { height: 100%; overflow: hidden; background-color: var(--c-background); transition: background-color 0.4s ease; }
+html, body, #root {
+    height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    background-color: var(--c-background);
+    transition: background-color 0.4s ease;
+}
 
 body {
     font-family: var(--font-body);
@@ -112,25 +129,25 @@ body {
 #root {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 5vh;
+    align-items: stretch;
+    padding: var(--app-gutter-top) var(--app-gutter-right) var(--app-gutter-bottom) var(--app-gutter-left);
 }
 
 .scoreboard-body {
     background-color: var(--c-bezel);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5);
-    width: 95vw;
-    max-width: 500px;
-    height: 85vh;
-    max-height: 900px;
+    width: 100%;
+    max-width: var(--scoreboard-max-width);
+    height: 100%;
+    max-height: none;
     position: relative;
     border: 4px solid var(--c-border);
     border-radius: 30px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
+    align-items: stretch;
+    padding: var(--scoreboard-pad-y) var(--scoreboard-pad-x);
     transition: box-shadow 0.5s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
 body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px #7b2cbf80; }
@@ -168,7 +185,7 @@ body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb,
     font-size: 1.2rem;
     color: var(--c-text-primary);
     background: rgba(0, 0, 0, 0.4);
-    padding: 0.65rem 1rem;
+    padding: 0.55rem 0.45rem;
     border-radius: 8px;
     text-align: center;
     border: 2px solid transparent;
@@ -235,8 +252,8 @@ body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333
     background: var(--c-screen);
     border-radius: 10px;
     box-shadow: inset 0 3px 10px rgba(0,0,0,0.7);
-    padding: 1rem;
-    margin: 1rem 0;
+    padding: 0.7rem 0.55rem;
+    margin: 0.55rem 0;
     position: relative;
     cursor: pointer;
     touch-action: manipulation;
@@ -271,7 +288,7 @@ body.theme-cyberpunk .timer-officiel.state-warning { text-shadow: 0 0 5px var(--
 body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(--c-digit-critical), 0 0 15px var(--c-digit-critical); }
 
 .timer-action-row {
-    width: 80%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -326,15 +343,15 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
 
 .control-panel {
     width: 100%;
-    max-width: 500px;
-    padding: 0.5rem;
+    max-width: none;
+    padding: 0.35rem 0;
     background: var(--c-bezel);
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
-    gap: 1.1rem;
+    gap: 0.5rem;
     flex-shrink: 0;
     position: relative;
     z-index: 2;
@@ -750,7 +767,10 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+    padding-top: max(0.65rem, env(safe-area-inset-top, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
     background: var(--c-background);
     color: var(--c-text-primary);
 }
@@ -792,9 +812,9 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
 }
 
 @media (max-width: 500px), (max-height: 750px) {
-    .scoreboard-body { padding: 1rem; border-radius: 20px; }
+    .scoreboard-body { padding: var(--scoreboard-pad-y) var(--scoreboard-pad-x); border-radius: 20px; }
     .timer-screen { margin: 0.5rem 0; }
-    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: -15px; gap: 0.75rem; }
+    .control-panel { transform: perspective(350px) rotateX(20deg); margin-bottom: 0; gap: 0.5rem; }
     .bouton-sport { width: 60px; height: 60px; }
     .bouton-sport svg { width: 26px; height: 26px; }
     .bouton-carré { font-size: 1rem; }
