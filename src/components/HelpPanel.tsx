@@ -16,7 +16,7 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
         </div>
         <div className="help-content">
           <p>
-            Bienvenue sur le Timer de Billard Pro ! Cette application est conçue pour arbitrer vos parties
+            Bienvenue sur H8timer ! Cette application est conçue pour arbitrer vos parties
             avec précision, simplicité et style.
           </p>
 

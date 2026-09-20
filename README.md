@@ -1,4 +1,4 @@
-# Timer de Billard Pro
+# H8timer
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 

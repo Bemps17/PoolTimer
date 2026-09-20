@@ -19,8 +19,8 @@ export default defineConfig({
         'sound/minions-arghh.mp3',
       ],
       manifest: {
-        name: 'Timer de Billard Pro',
-        short_name: 'Billard Pro',
+        name: 'H8timer',
+        short_name: 'H8timer',
         description:
           'Chronomètre de tir Blackball / billard, configurable et installable.',
         lang: 'fr',
