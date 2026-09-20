@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.5.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.5.1** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -67,9 +67,9 @@ Projet Vite : build `npm run build`, sortie `dist/`.
 
 | Variable | Exemple | Rôle |
 | --- | --- | --- |
-| `VITE_MIRROR_WS_URL` | `wss://h8timer-mirror.<compte>.workers.dev` | Relais WebSocket (Cloudflare Worker + Durable Object). Sans cette variable, l’UI miroir s’affiche mais « Ouvrir une salle » reste inactif. |
+| `VITE_MIRROR_WS_URL` | `wss://h8timer-mirror.h8timer.workers.dev` | Relais WebSocket (Cloudflare Worker + Durable Object). Sans cette variable, l’UI miroir s’affiche mais « Ouvrir une salle » reste inactif. |
 
-À définir dans Vercel (Production / Preview) **avant** le build Vite (`VITE_*` est inliné au build).
+Production : l’URL est dans `.env.production` (fichier versionné). Vite l’inline au build — inutile de la poser dans le dashboard Vercel.
 
 Local :
 

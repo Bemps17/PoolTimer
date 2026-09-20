@@ -14,7 +14,7 @@ npm-debug.log*
 .idea
 *.swp
 
-# Env & deploy
+# Env & deploy (.env.production is committed so Vite can bake non-secret VITE_* at build)
 .env
 .env.local
 .env.*.local

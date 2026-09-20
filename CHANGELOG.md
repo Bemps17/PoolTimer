@@ -2,6 +2,10 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.1 — 2026-09-20
+
+- URL du **relais miroir** configurée pour la production (`VITE_MIRROR_WS_URL` dans `.env.production`).
+
 ## 2.5.0 — 2026-09-20
 
 - **Miroir télécommande (bêta)** : code salle + QR, écran lecture seule (`/d/CODE`).
