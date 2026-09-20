@@ -110,6 +110,11 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>
               <strong>Vérifier les mises à jour</strong> dans l’application force la même vérification.
             </li>
+            <li>
+              <strong>Miroir télécommande (bêta) :</strong> dans « Bêta / Work in progress », ouvrez une
+              salle, scannez le QR avec une tablette / un autre téléphone. L’écran suit le chrono via
+              Internet (code à 6 caractères). Une seule télécommande par salle.
+            </li>
           </ul>
           <p>
             <strong>Note :</strong> pour que la <strong>vibration</strong> fonctionne, assurez-vous que votre

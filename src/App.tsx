@@ -2,18 +2,31 @@ import { useCallback, useEffect, useState } from 'react';
 import { minionsToggleMessage, toggleMinionsMode } from './audio/minions';
 import { APP_VERSION } from './changelog';
 import { ChangelogPanel } from './components/ChangelogPanel';
+import { DisplayView } from './components/DisplayView';
 import { HelpPanel } from './components/HelpPanel';
+import { MirrorSettings } from './components/MirrorSettings';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Toast } from './components/Toast';
 import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
+import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
+import { displayUrl, parseDisplayRoom } from './mirror/protocol';
+import { loadBetaMirrorEnabled, saveBetaMirrorEnabled } from './mirror/storage';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
+  const [displayRoom] = useState(() => parseDisplayRoom(window.location.pathname, window.location.search));
+  if (displayRoom) {
+    return <DisplayView room={displayRoom} />;
+  }
+  return <ControllerApp />;
+}
+
+function ControllerApp() {
   const timer = useBilliardTimer();
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
@@ -23,6 +36,12 @@ export default function App() {
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('Paramètres sauvegardés !');
+  const [betaMirror, setBetaMirror] = useState(() => loadBetaMirrorEnabled());
+  const mirror = useControllerMirror({
+    enabled: betaMirror,
+    state: timer.state,
+    config: timer.config,
+  });
 
   useEffect(() => {
     if (!toastVisible) return undefined;
@@ -66,8 +85,31 @@ export default function App() {
     setToastVisible(true);
   }, [pwaUpdate.checkForUpdate]);
 
+  const handleBetaMirror = useCallback((enabled: boolean) => {
+    saveBetaMirrorEnabled(enabled);
+    setBetaMirror(enabled);
+  }, []);
+
+  const displayLink = mirror.room ? displayUrl(window.location.origin, mirror.room) : null;
+
+  const handleCopyLink = useCallback(async () => {
+    if (!displayLink) return;
+    try {
+      await navigator.clipboard.writeText(displayLink);
+      setToastMessage('Lien de l’écran copié');
+    } catch {
+      setToastMessage(displayLink);
+    }
+    setToastVisible(true);
+  }, [displayLink]);
+
   return (
     <>
+      {mirror.room ? (
+        <div className="mirror-live-chip" aria-live="polite">
+          Bêta · {mirror.room}
+        </div>
+      ) : null}
       <Scoreboard
         config={timer.config}
         state={timer.state}
@@ -100,6 +142,22 @@ export default function App() {
         onCheckUpdates={() => {
           void handleCheckUpdates();
         }}
+        extraSections={
+          <MirrorSettings
+            betaEnabled={betaMirror}
+            onBetaChange={handleBetaMirror}
+            room={mirror.room}
+            status={mirror.status}
+            error={mirror.error}
+            displayCount={mirror.displayCount}
+            displayLink={displayLink}
+            onCreateRoom={mirror.createRoom}
+            onCloseRoom={mirror.closeRoom}
+            onCopyLink={() => {
+              void handleCopyLink();
+            }}
+          />
+        }
       />
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />

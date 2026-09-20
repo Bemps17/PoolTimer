@@ -1,4 +1,4 @@
-import { useRef, type TouchEvent } from 'react';
+import { useRef, type ReactNode, type TouchEvent } from 'react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
 import { applyCompetitionPreset, CONFIG_LIMITS } from '../timer/config';
@@ -20,6 +20,7 @@ interface SettingsPanelProps {
   installStatus: PwaInstallStatus;
   onInstall: () => void;
   onCheckUpdates: () => void;
+  extraSections?: ReactNode;
 }
 
 const THEME_OPTIONS = [
@@ -62,6 +63,7 @@ export function SettingsPanel({
   installStatus,
   onInstall,
   onCheckUpdates,
+  extraSections,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -345,6 +347,8 @@ export function SettingsPanel({
               />
             ) : null}
           </div>
+
+          {extraSections}
 
           <div className="section-panel">
             <h3>Application</h3>
