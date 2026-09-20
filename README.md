@@ -1,82 +1,66 @@
-🎱 Timer de Billard Pro
-Un chronomètre de tir ("shot clock") moderne, entièrement personnalisable et conçu pour l'arbitrage de parties de billard. Cette application web est pensée pour être utilisée sur n'importe quel appareil (mobile, tablette, ordinateur) et offre une expérience immersive et fiable pour les joueurs et les arbitres.
+# Timer de Billard Pro
 
-(Aperçu de l'application en thème Cyberpunk)
+Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-✨ Fonctionnalités Clés
-Chronomètre de Haute Précision : Basé sur Date.now() pour une fiabilité à toute épreuve, sans dérive de temps.
+## Fonctionnalités
 
-Gestion Complète des Joueurs :
+- Temps de base configurable (`tempsBase`, 45 s par défaut)
+- **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche
+- Extension configurable (`tempsExtension`, +45 s par défaut, preset FFB) : **une fois par joueur et par manche**
+- Deux joueurs, noms et couleurs, thèmes Sombre / Clair / Cyberpunk
+- Modes boutons visibles ou tout tactile
+- Alertes visuelles, sonores (Tone.js) et vibration
+- Plein écran, sauvegarde automatique dans `localStorage`
+- **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; durées via +/− dans les réglages ; noms éditables uniquement après un appui explicite « modifier »
 
-Support pour deux joueurs avec noms et couleurs personnalisables.
+## Lancer en local
 
-Indicateur visuel clair du joueur actif.
+```bash
+npm install
+npm run dev
+```
 
-Système d'Extensions : Chaque joueur dispose d'une extension de temps par partie, avec un statut visuel (disponible/utilisée).
+Puis ouvrir l'URL affichée (en général `http://localhost:5173`).
 
-Personnalisation Poussée : Un menu de configuration complet permet de régler :
+### Build de production
 
-Thèmes Visuels : Sombre, Clair et Cyberpunk.
+```bash
+npm install
+npm run build
+npm run preview
+```
 
-Temps : Durée de base par coup et durée de l'extension.
+Le dossier `dist/` est le livrable statique, prêt pour Vercel (SPA Vite).
 
-Alertes : Seuils d'avertissement (orange) et critique (rouge).
+## Tests
 
-Audio : Volume général et activation/désactivation séparée des sons d'alerte et des clics d'interface.
+```bash
+npm test
+```
 
-Interface : Mode "tout tactile" (sans boutons) ou mode classique.
+## Installation PWA (mobile)
 
-Automatisation : Passage automatique au joueur suivant après un temps écoulé.
+1. Ouvrir l'app dans Chrome (Android) ou Safari (iOS).
+2. Android : menu → **Installer l'application**.
+3. iOS : Partager → **Sur l'écran d'accueil**.
 
-Alertes Audio et Visuelles :
+Les icônes 192 / 512 sont générées à partir de `billard_ball_8.svg`. Pour les régénérer :
 
-Changement de couleur du compteur aux seuils d'alerte.
+```bash
+npm run icons
+```
 
-Effet de "flash" sur le cadre pour attirer l'attention.
+## Déploiement Vercel
 
-Sons distincts pour l'avertissement (cloche), le décompte final, et la fin du temps (buzzer).
+Projet Vite : build `npm run build`, sortie `dist/`. Aucune variable d'environnement n'est requise.
 
-Expérience Utilisateur Soignée (QoL) :
+## Contrôles
 
-Mode Plein Écran pour une immersion totale.
-
-Sauvegarde Automatique des paramètres dans le localStorage.
-
-Fermeture du menu par balayage (swipe to close) sur mobile.
-
-Design Responsive avec un compteur qui s'ajuste parfaitement à la taille de l'écran.
-
-Gestion des "Safe Areas" sur mobile pour éviter que l'interface soit masquée par les barres de navigation natives.
-
-🚀 Comment l'utiliser
-Ouvrez le fichier index.html dans n'importe quel navigateur web moderne.
-
-Configuration (Optionnel) : Cliquez sur l'icône roue crantée (⚙️) pour ajuster les paramètres à votre convenance. Les changements sont sauvegardés instantanément.
-
-Lancer la partie :
-
-Un clic simple sur l'écran du timer démarre ou met en pause le chronomètre.
-
-Un double clic passe au joueur suivant et réinitialise le temps pour son tour.
-
-Utiliser une extension : Lorsque le timer est en cours, le joueur actif peut cliquer sur la barre "EXTENSION" pour ajouter le temps supplémentaire défini.
-
-Nouvelle Partie : Le bouton "NEW" réinitialise le jeu, y compris les extensions utilisées par les joueurs.
-
-🛠️ Technologies
-HTML5
-
-CSS3 (avec variables CSS pour les thèmes et gestion Flexbox/Grid)
-
-JavaScript (ES6+) : L'application est codée en une seule classe BilliardTimer pour une logique claire et structurée.
-
-Tone.js : Une librairie puissante pour la génération de sons directement dans le navigateur, garantissant des alertes audio fiables sans dépendre de fichiers externes.
-
-💻 Lancement en local
-Aucune installation n'est requise. Il suffit de cloner ce dépôt et d'ouvrir le fichier index.html dans votre navigateur.
-
-git clone https://votre-depot/timer-billard-pro.git
-cd timer-billard-pro
-# Ouvrez le fichier index.html
-
-Ce projet est entièrement contenu dans un seul fichier, le rendant facile à déployer sur n'importe quel service d'hébergement statique (Netlify, Vercel, GitHub Pages, etc.).
+| Action | Effet |
+| --- | --- |
+| Clic simple sur l'écran | Démarrer / Pause |
+| Double-clic ou bouton reset | Nouveau coup (temps de base) |
+| APRÈS CASSE | Charge `tempsApresCasse` pour ce coup (sans démarrer — à lancer une fois les billes arrêtées) |
+| P1 / P2 | Change de joueur, temps de base |
+| EXTENSION | Ajoute `tempsExtension` (1× / joueur / manche, chrono en cours) |
+| NEW | Nouvelle manche, extensions réinitialisées |
