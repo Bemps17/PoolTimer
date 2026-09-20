@@ -1,7 +1,7 @@
 {
   "name": "pool-timer",
   "private": true,
-  "version": "2.5.2",
+  "version": "2.5.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:mirror": "node scripts/mirror-probe.mjs",
     "icons": "node scripts/generate-icons.mjs",
     "mirror:dev": "wrangler dev --config worker/wrangler.jsonc --port 8787"
   },

@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.5.3 — 2026-09-20
+
+- **Miroir** : le relais transmet les `push` de la télécommande vers l’écran (chrono plus bloqué à 00:00).
+- Accusé `push_ok` + erreurs explicites (`bad_push`, `unauthorized`, `stale_seq`) au lieu d’un drop silencieux.
+- Indicateur de connexion / sync (télécommande et écran) et probe `npm run test:mirror`.
+- **Worker Cloudflare à redéployer** (`cd worker && npx wrangler deploy`).
+
 ## 2.5.2 — 2026-09-20
 
 - **Miroir** : l’écran `/d/CODE` recompte bien quand la télécommande lance le chrono, même après une reconnexion.

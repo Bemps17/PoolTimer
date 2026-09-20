@@ -106,8 +106,11 @@ function ControllerApp() {
   return (
     <>
       {mirror.room ? (
-        <div className="mirror-live-chip" aria-live="polite">
-          Bêta · {mirror.room}
+        <div
+          className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
+          aria-live="polite"
+        >
+          {mirror.sync.chip || `Bêta · ${mirror.room}`}
         </div>
       ) : null}
       <Scoreboard
@@ -150,6 +153,7 @@ function ControllerApp() {
             status={mirror.status}
             error={mirror.error}
             displayCount={mirror.displayCount}
+            sync={mirror.sync}
             displayLink={displayLink}
             onCreateRoom={mirror.createRoom}
             onCloseRoom={mirror.closeRoom}

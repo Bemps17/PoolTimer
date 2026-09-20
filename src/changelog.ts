@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.2';
+export const APP_VERSION = '2.5.3';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.3',
+    date: '2026-09-20',
+    title: 'Miroir : relais push + indicateur de sync',
+    notes: [
+      'Le relais Cloudflare transmet bien les pushes télécommande → écran (plus de chrono bloqué à 00:00).',
+      'Erreur explicite si push refusé (bad_push, unauthorized, stale_seq) au lieu d’un drop silencieux.',
+      'Indicateur de connexion / sync sur la télécommande (« Écran lié · sync OK ») et sur l’écran.',
+      'Redéployer le Worker Cloudflare (`cd worker && npx wrangler deploy`) : le correctif relais n’est actif qu’après ce deploy.',
+    ],
+  },
   {
     version: '2.5.2',
     date: '2026-09-20',

@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.5.2** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.5.3** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -41,6 +41,14 @@ Le dossier `dist/` est le livrable statique, prêt pour Vercel (SPA Vite).
 
 ```bash
 npm test
+npm run test:mirror
+```
+
+`test:mirror` démarre `wrangler dev` (port 8787) puis vérifie le relais WebSocket : ping→pong, push télécommande → snapshot écran, erreurs `stale_seq` / `bad_push`, second contrôleur `room_busy`. Pour viser un Worker déjà lancé :
+
+```bash
+MIRROR_WS_URL=ws://127.0.0.1:8787 npm run test:mirror
+MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror
 ```
 
 ## Installation PWA (mobile)
@@ -94,6 +102,8 @@ npx wrangler deploy
 Puis copier l’URL `https://h8timer-mirror.<compte>.workers.dev` dans `VITE_MIRROR_WS_URL` (le client ajoute `/ws`).
 
 Salles éphémères : une télécommande par code, écrans en lecture seule, snapshot renvoyé aux retards / reconnexions, expiration ~2 h d’inactivité.
+
+Après un correctif du Worker (ex. 2.5.3, relais `push`), **redéployer** est obligatoire : l’app Vercel ne suffit pas, le Durable Object tourne sur Cloudflare.
 
 ## Contrôles
 

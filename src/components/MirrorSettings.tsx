@@ -1,6 +1,7 @@
 import { parseBooleanSelect, SelectField } from './NumberStepper';
 import { QrCodeSvg } from '../mirror/QrCodeSvg';
 import { formatRoomCode } from '../mirror/protocol';
+import type { ControllerSyncView } from '../mirror/syncStatus';
 import { isMirrorRelayConfigured } from '../mirror/wsUrl';
 import type { MirrorConnectionStatus } from '../hooks/useMirror';
 
@@ -11,6 +12,7 @@ interface MirrorSettingsProps {
   status: MirrorConnectionStatus;
   error: string | null;
   displayCount: number;
+  sync: ControllerSyncView;
   displayLink: string | null;
   onCreateRoom: () => void;
   onCloseRoom: () => void;
@@ -29,6 +31,7 @@ export function MirrorSettings({
   status,
   error,
   displayCount,
+  sync,
   displayLink,
   onCreateRoom,
   onCloseRoom,
@@ -39,11 +42,10 @@ export function MirrorSettings({
 
   const statusText = (() => {
     if (!configured) return 'Relais non configuré.';
+    if (status === 'live') {
+      return displayCount > 0 ? sync.detail : 'Salle active · en attente d’un écran';
+    }
     switch (status) {
-      case 'live':
-        return displayCount > 0
-          ? `Salle active · ${displayCount} écran${displayCount > 1 ? 's' : ''}`
-          : 'Salle active · en attente d’un écran';
       case 'connecting':
         return 'Connexion au relais…';
       case 'error':
@@ -85,7 +87,7 @@ export function MirrorSettings({
               <p className="mirror-room-code" aria-label="Code salle">
                 {formatRoomCode(room)}
               </p>
-              <p className="install-hint">{statusText}</p>
+              <p className={`install-hint mirror-sync mirror-sync-${sync.health}`}>{statusText}</p>
               <QrCodeSvg value={displayLink} title="QR code de l’écran miroir" />
               <p className="mirror-link">{displayLink}</p>
               <button type="button" className="bouton-menu" onClick={onCopyLink}>

@@ -49,11 +49,20 @@ export type ServerMessage =
       seq: number;
     }
   | { type: 'snapshot'; seq: number; snapshot: MirrorSnapshot; serverTime: number }
+  | { type: 'push_ok'; seq: number }
   | { type: 'peers'; displayCount: number; controllerConnected: boolean }
   | { type: 'error'; code: MirrorErrorCode; message: string }
   | { type: 'pong'; serverTime: number };
 
-export type MirrorErrorCode = 'room_busy' | 'invalid_room' | 'unauthorized' | 'unknown';
+export type MirrorErrorCode =
+  | 'room_busy'
+  | 'invalid_room'
+  | 'unauthorized'
+  | 'bad_push'
+  | 'stale_seq'
+  | 'unknown';
+
+export const WS_CLOSE_ROOM_BUSY = 4009;
 
 export function generateRoomCode(
   randomBytes: (size: number) => Uint8Array = (size) => crypto.getRandomValues(new Uint8Array(size)),
@@ -293,6 +302,11 @@ export function parseServerMessage(raw: unknown): ServerMessage | undefined {
       const code = asErrorCode(value.code);
       return { type: 'error', code, message: value.message };
     }
+    case 'push_ok': {
+      const value = raw as { seq?: unknown };
+      if (typeof value.seq !== 'number' || !Number.isFinite(value.seq)) return undefined;
+      return { type: 'push_ok', seq: value.seq };
+    }
     case 'pong': {
       const value = raw as { serverTime?: unknown };
       if (typeof value.serverTime !== 'number') return undefined;
@@ -308,6 +322,8 @@ function asErrorCode(value: unknown): MirrorErrorCode {
     case 'room_busy':
     case 'invalid_room':
     case 'unauthorized':
+    case 'bad_push':
+    case 'stale_seq':
     case 'unknown':
       return value;
     default:

@@ -11,7 +11,7 @@ interface DisplayViewProps {
 }
 
 export function DisplayView({ room }: DisplayViewProps) {
-  const { status, error, snapshot, remainingTime, controllerConnected } = useDisplayMirror(room);
+  const { snapshot, remainingTime, status, sync } = useDisplayMirror(room);
   const { isFullscreen, toggle } = useFullscreen();
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -61,22 +61,8 @@ export function DisplayView({ room }: DisplayViewProps) {
     }
   })();
 
-  const statusLabel = (() => {
-    switch (status) {
-      case 'live':
-        return controllerConnected ? 'Salle active' : 'En attente de la télécommande';
-      case 'connecting':
-        return 'Connexion…';
-      case 'error':
-        return error ?? 'Erreur de connexion';
-      case 'idle':
-        return 'Inactif';
-      default: {
-        const exhaustive: never = status;
-        return exhaustive;
-      }
-    }
-  })();
+  const statusLabel = sync.label;
+  const waiting = sync.waitingForSnapshot;
 
   return (
     <div
@@ -89,7 +75,11 @@ export function DisplayView({ room }: DisplayViewProps) {
       <div className="display-top">
         <span className="beta-badge">Bêta</span>
         <span className="display-room">{formatRoomCode(room)}</span>
-        <span className={`display-status display-status-${status}`}>{statusLabel}</span>
+        <span
+          className={`display-status display-status-${status === 'error' ? 'error' : waiting ? 'wait' : 'live'}`}
+        >
+          {statusLabel}
+        </span>
       </div>
       {config ? (
         <div className="display-players">
@@ -122,9 +112,15 @@ export function DisplayView({ room }: DisplayViewProps) {
         </div>
       ) : null}
       <div className="display-screen" ref={screenRef}>
-        <div className={`timer-officiel ${digitClass}`} ref={timerRef}>
-          {formatTime(remainingTime, config?.affichageMs ?? true)}
-        </div>
+        {waiting ? (
+          <p className="display-waiting" role="status">
+            {statusLabel}
+          </p>
+        ) : (
+          <div className={`timer-officiel ${digitClass}`} ref={timerRef}>
+            {formatTime(remainingTime, config?.affichageMs ?? true)}
+          </div>
+        )}
       </div>
       <p className="display-hint">
         {isFullscreen ? 'Affichage miroir — lecture seule' : 'Appui : plein écran — lecture seule'}
