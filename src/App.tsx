@@ -103,6 +103,16 @@ function ControllerApp() {
     setToastVisible(true);
   }, [displayLink]);
 
+  const handleCopyLogs = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setToastMessage('Logs miroir copiés');
+    } catch {
+      setToastMessage('Impossible de copier les logs');
+    }
+    setToastVisible(true);
+  }, []);
+
   return (
     <>
       {mirror.room ? (
@@ -159,6 +169,9 @@ function ControllerApp() {
             onCloseRoom={mirror.closeRoom}
             onCopyLink={() => {
               void handleCopyLink();
+            }}
+            onCopyLogs={(text) => {
+              void handleCopyLogs(text);
             }}
           />
         }

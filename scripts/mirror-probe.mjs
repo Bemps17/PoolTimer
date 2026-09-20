@@ -22,7 +22,8 @@ const SNAPSHOT = {
   currentPlayer: 1,
   extensionsUsedInGame: { 1: false, 2: false },
   isExtensionUsedForShot: false,
-  shotKind: 'base',
+    isextensionUsedForShot: false,
+    shotKind: 'base',
   config: {
     tempsBase: 45,
     tempsApresCasse: 90,

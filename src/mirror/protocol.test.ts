@@ -13,6 +13,8 @@ import {
   parseClientMessage,
   parseDisplayRoom,
   parseServerMessage,
+  parseSnapshot,
+  toWireSnapshot,
   remainingAtSend,
   remainingFromSnapshot,
   seqFromWelcome,
@@ -102,6 +104,26 @@ describe('mirror protocol', () => {
     expect(parseClientMessage({ type: 'ping' })).toEqual({ type: 'ping' });
     expect(parseClientMessage({ type: 'push', seq: 1 })).toBeUndefined();
     expect(parseClientMessage({ type: 'nope' })).toBeUndefined();
+  });
+
+  it('sends both isExtensionUsedForShot casings so a corrupted Worker parse still accepts the push', () => {
+    const config = getDefaultConfig();
+    const snapshot = buildSnapshot(createInitialState(config), config, 10);
+    const wire = toWireSnapshot(snapshot);
+    expect(wire.isExtensionUsedForShot).toBe(false);
+    expect(wire.isextensionUsedForShot).toBe(false);
+    expect(parseClientMessage({ type: 'push', seq: 1, snapshot: wire })).toEqual({
+      type: 'push',
+      seq: 1,
+      snapshot,
+    });
+    expect(
+      parseSnapshot({
+        ...snapshot,
+        isExtensionUsedForShot: undefined,
+        isextensionUsedForShot: true,
+      }),
+    ).toEqual({ ...snapshot, isExtensionUsedForShot: true });
   });
 
   it('parses push_ok and protocol error codes', () => {

@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef } from 'react';
 import { computeTimerFontSize } from '../timer/config';
 import { getDigitState, getFlashClass } from '../timer/engine';
 import { formatTime } from '../timer/format';
-import { useDisplayMirror } from '../hooks/useMirror';
+import { useDisplayMirror, useMirrorDiagnostics } from '../hooks/useMirror';
 import { useFullscreen } from '../hooks/useFullscreen';
+import { formatMirrorDiagnostics } from '../mirror/diagnostics';
 import { formatRoomCode } from '../mirror/protocol';
+import { MirrorLogCopyButton } from './MirrorSettings';
 
 interface DisplayViewProps {
   room: string;
@@ -12,6 +14,7 @@ interface DisplayViewProps {
 
 export function DisplayView({ room }: DisplayViewProps) {
   const { snapshot, remainingTime, status, sync } = useDisplayMirror(room);
+  const diagnostics = useMirrorDiagnostics();
   const { isFullscreen, toggle } = useFullscreen();
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -113,9 +116,16 @@ export function DisplayView({ room }: DisplayViewProps) {
       ) : null}
       <div className="display-screen" ref={screenRef}>
         {waiting ? (
-          <p className="display-waiting" role="status">
-            {statusLabel}
-          </p>
+          <div className="display-waiting-wrap">
+            <p className="display-waiting" role="status">
+              {statusLabel}
+            </p>
+            <p className="display-waiting-hint">Le chrono s’affichera dès qu’un snapshot arrivera — pas de 00:00 en attente.</p>
+            <pre className="mirror-diag-log display-diag-log" aria-label="Journaux miroir">
+              {formatMirrorDiagnostics(diagnostics)}
+            </pre>
+            <MirrorLogCopyButton />
+          </div>
         ) : (
           <div className={`timer-officiel ${digitClass}`} ref={timerRef}>
             {formatTime(remainingTime, config?.affichageMs ?? true)}

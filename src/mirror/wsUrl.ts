@@ -9,6 +9,15 @@ export function isMirrorRelayConfigured(): boolean {
   return Boolean(getMirrorWsBase());
 }
 
+export function getMirrorRelayHost(base = getMirrorWsBase()): string | null {
+  if (!base) return null;
+  try {
+    return new URL(base).host || null;
+  } catch {
+    return null;
+  }
+}
+
 export function buildMirrorWsUrl(
   room: string,
   role: 'controller' | 'display',

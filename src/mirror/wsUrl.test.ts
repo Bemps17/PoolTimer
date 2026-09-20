@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMirrorWsUrl } from './wsUrl';
+import { buildMirrorWsUrl, getMirrorRelayHost } from './wsUrl';
 
 describe('mirror websocket url', () => {
   it('appends /ws, room, role and secret', () => {
@@ -16,5 +16,12 @@ describe('mirror websocket url', () => {
 
   it('returns undefined without a base URL', () => {
     expect(buildMirrorWsUrl('AB3K7Q', 'display', undefined, undefined)).toBeUndefined();
+  });
+
+  it('exposes the relay host without path, query or secret', () => {
+    expect(getMirrorRelayHost('wss://h8timer-mirror.h8timer.workers.dev/ws?secret=s3cret')).toBe(
+      'h8timer-mirror.h8timer.workers.dev',
+    );
+    expect(getMirrorRelayHost(undefined)).toBeNull();
   });
 });
