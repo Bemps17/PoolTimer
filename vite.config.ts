@@ -56,9 +56,13 @@ export default defineConfig({
         globIgnores: ['**/version.json'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        // Activate the new SW even if an old install never calls skipWaiting
+        // (2.1.0 autoUpdate → 2.2+ prompt left a waiting worker forever).
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /\/version\.json$/i,
+            urlPattern: /\/version\.json/i,
             handler: 'NetworkOnly',
           },
           {

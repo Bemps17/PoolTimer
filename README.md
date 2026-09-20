@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.3.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.3.1** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 ## Fonctionnalités
 
@@ -46,7 +46,7 @@ npm test
 
 Depuis le menu ⚙️ → **Installer l’application** (Chrome / Edge). Sur iPhone / iPad : **Partager → Sur l’écran d’accueil**.
 
-Quand une nouvelle version est prête, un bandeau **Nouvelle version disponible** propose **Mettre à jour** (le chrono en cours n’est pas rechargé tout seul).
+Quand une version plus récente est publiée, un bandeau **Nouvelle version disponible** propose **Mettre à jour** (le chrono en cours n’est pas rechargé tout seul). L’app compare `public/version.json` (réseau, sans cache) à la version embarquée, en plus du service worker. Dans ⚙️ : **Vérifier les mises à jour**.
 
 1. Ouvrir l'app dans Chrome (Android) ou Safari (iOS).
 2. Android : bouton d’installation dans les réglages, ou menu → **Installer l'application**.

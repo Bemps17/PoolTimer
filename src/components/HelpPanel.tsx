@@ -103,8 +103,12 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               <strong>Historique des versions</strong> pour voir les nouveautés.
             </li>
             <li>
-              <strong>Nouvelle version disponible :</strong> un bandeau propose « Mettre à jour » sans
-              recharger le match tout seul.
+              <strong>Nouvelle version disponible :</strong> un bandeau propose « Mettre à jour » dès
+              qu’une version plus récente est détectée (fichier version.json), même si le service worker
+              n’a pas signalé de mise à jour. Le match n’est pas rechargé tout seul.
+            </li>
+            <li>
+              <strong>Vérifier les mises à jour</strong> dans l’application force la même vérification.
             </li>
           </ul>
           <p>

@@ -19,6 +19,7 @@ interface SettingsPanelProps {
   onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
+  onCheckUpdates: () => void;
 }
 
 const THEME_OPTIONS = [
@@ -60,6 +61,7 @@ export function SettingsPanel({
   onToggleFullscreen,
   installStatus,
   onInstall,
+  onCheckUpdates,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -356,6 +358,12 @@ export function SettingsPanel({
               {installCopy.label}
             </button>
             <p className="install-hint">{installCopy.hint}</p>
+            <button type="button" className="bouton-menu" onClick={onCheckUpdates}>
+              Vérifier les mises à jour
+            </button>
+            <p className="install-hint">
+              Compare la version installée avec le serveur. Utile si le bandeau de mise à jour n’apparaît pas.
+            </p>
             <button type="button" className="bouton-menu" onClick={onShowChangelog}>
               Historique des versions
             </button>
