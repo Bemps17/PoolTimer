@@ -121,12 +121,12 @@ function ControllerApp() {
   return (
     <>
       {mirror.room ? (
-        <div
+        <aside
           className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
           aria-live="polite"
         >
           {mirror.sync.chip || `Miroir · ${mirror.room}`}
-        </div>
+        </aside>
       ) : null}
       <Scoreboard
         config={timer.config}

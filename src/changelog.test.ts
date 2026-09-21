@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Apparence|thème|preset/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/couleur|zone/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/SEO|référencement|sitemap|robots/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/télécommande|miroir/i);
+
+    const appearance = CHANGELOG.find((entry) => entry.version === '2.7.0');
+    expect(appearance?.notes.join(' ')).toMatch(/Apparence|thème|preset/i);
+    expect(appearance?.notes.join(' ')).toMatch(/couleur|zone/i);
 
     const compact = CHANGELOG.find((entry) => entry.version === '2.6.2');
     expect(compact?.notes.join(' ')).toMatch(/Tutoriel/);

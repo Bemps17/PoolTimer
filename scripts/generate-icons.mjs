@@ -27,6 +27,25 @@ await writeIcon(512, 'icon-512.png', 0.08);
 await writeIcon(512, 'icon-512-maskable.png', 0.18);
 await writeIcon(180, 'apple-touch-icon.png', 0.08);
 
+const ogWidth = 1200;
+const ogHeight = 630;
+const ogBall = 380;
+const ogBallPng = await sharp(svg)
+  .resize(ogBall, ogBall, { fit: 'contain', background })
+  .png()
+  .toBuffer();
+await sharp({
+  create: {
+    width: ogWidth,
+    height: ogHeight,
+    channels: 4,
+    background,
+  },
+})
+  .composite([{ input: ogBallPng, gravity: 'centre' }])
+  .png()
+  .toFile(path.join(publicDir, 'og-image.png'));
+
 await writeFile(path.join(publicDir, 'favicon.svg'), svg);
 
 console.log('Icons generated in public/');
