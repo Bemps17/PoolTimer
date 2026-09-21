@@ -19,8 +19,11 @@ export function DisplayView({ room }: DisplayViewProps) {
   const config = snapshot?.config;
 
   useEffect(() => {
+    const previousTitle = document.title;
+    document.title = 'H8timer — Écran Visuel (miroir)';
     document.getElementById('root')?.classList.add('display-mode');
     return () => {
+      document.title = previousTitle;
       document.getElementById('root')?.classList.remove('display-mode');
     };
   }, []);
@@ -66,14 +69,16 @@ export function DisplayView({ room }: DisplayViewProps) {
   const waiting = sync.waitingForSnapshot;
 
   return (
-    <div
+    <main
+      id="app"
       className={`display-root${flashClass ? ` ${flashClass}` : ''}`}
       onClick={() => {
         void toggle();
       }}
-      role="presentation"
+      aria-label="H8timer — écran Visuel en miroir"
     >
-      <div className="display-top">
+      <h1 className="visually-hidden">H8timer — Écran Visuel (miroir de la télécommande)</h1>
+      <header className="display-top">
         <span className="display-role">Miroir</span>
         <span className="display-room">{formatRoomCode(room)}</span>
         <span
@@ -81,7 +86,7 @@ export function DisplayView({ room }: DisplayViewProps) {
         >
           {statusLabel}
         </span>
-      </div>
+      </header>
       {config ? (
         <div className="display-players">
           <PlayerStatus
@@ -118,6 +123,6 @@ export function DisplayView({ room }: DisplayViewProps) {
             ? 'Affichage miroir — lecture seule'
             : 'Appui : plein écran — lecture seule'}
       </p>
-    </div>
+    </main>
   );
 }

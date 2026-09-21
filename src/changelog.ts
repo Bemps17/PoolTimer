@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.7.0';
+export const APP_VERSION = '2.7.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.7.1',
+    date: '2026-09-21',
+    title: 'Référencement : télécommande et écran miroir',
+    notes: [
+      'SEO on-page (FR) : titre, description et Open Graph centrés sur le contrôle à distance (télécommande + écran Visuel).',
+      'Canonical https://pooltimer.vercel.app, robots.txt, sitemap.xml et données structurées WebApplication.',
+      'Manifeste PWA H8timer aligné ; landmarks HTML (main, header, nav) pour l’accessibilité et les crawlers.',
+    ],
+  },
   {
     version: '2.7.0',
     date: '2026-09-20',

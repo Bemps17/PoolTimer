@@ -4,20 +4,97 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1a1a" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="application-name" content="H8timer" />
     <meta name="apple-mobile-web-app-title" content="H8timer" />
-    <title>H8timer</title>
+    <title>H8timer — Chronomètre billard avec télécommande et écran miroir</title>
+    <meta
+      name="description"
+      content="Contrôle à distance du shot clock : télécommande sur un téléphone, écran Visuel en miroir pour le public. Chronomètre billard / Blackball FFB — H8timer."
+    />
+    <meta
+      name="keywords"
+      content="timer billard, chronomètre blackball, shot clock FFB, télécommande, écran miroir, H8timer, chronomètre de tir, PoolTimer"
+    />
+    <link rel="canonical" href="https://pooltimer.vercel.app/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="H8timer" />
+    <meta property="og:url" content="https://pooltimer.vercel.app/" />
+    <meta property="og:title" content="H8timer — Chronomètre billard avec télécommande et écran miroir" />
+    <meta
+      property="og:description"
+      content="Contrôle à distance du shot clock : télécommande sur un téléphone, écran Visuel en miroir pour le public. Chronomètre billard / Blackball FFB — H8timer."
+    />
+    <meta property="og:image" content="https://pooltimer.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="H8timer — chronomètre de tir billard avec télécommande et écran miroir" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="H8timer — Chronomètre billard avec télécommande et écran miroir" />
+    <meta
+      name="twitter:description"
+      content="Contrôle à distance du shot clock : télécommande sur un téléphone, écran Visuel en miroir pour le public. Chronomètre billard / Blackball FFB — H8timer."
+    />
+    <meta name="twitter:image" content="https://pooltimer.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="H8timer — chronomètre de tir billard avec télécommande et écran miroir" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "H8timer",
+        "alternateName": ["PoolTimer", "H8 timer"],
+        "url": "https://pooltimer.vercel.app/",
+        "description": "Contrôle à distance du shot clock : télécommande sur un téléphone, écran Visuel en miroir pour le public. Chronomètre billard / Blackball FFB — H8timer.",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Any",
+        "inLanguage": "fr",
+        "isAccessibleForFree": true,
+        "image": "https://pooltimer.vercel.app/og-image.png",
+        "screenshot": "https://pooltimer.vercel.app/og-image.png",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "featureList": [
+          "Contrôle à distance : télécommande et écran Visuel en miroir",
+          "Chronomètre de tir / shot clock billard Blackball FFB",
+          "Presets FFB Blackball, FFB TD/TN, FFB Blackball Master, Ultimate FBEP",
+          "Application web installable (PWA)"
+        ]
+      }
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#app">Aller au chronomètre</a>
     <div id="root"></div>
+    <noscript>
+      <header>
+        <h1>H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
+      </header>
+      <main>
+        <p>
+          Contrôle à distance du shot clock : télécommande sur un téléphone, écran Visuel en miroir pour le public.
+          Chronomètre de tir billard / Blackball FFB, presets et application installable (PWA).
+        </p>
+        <p>
+          Ouvrez <a href="https://pooltimer.vercel.app/">https://pooltimer.vercel.app/</a> dans un navigateur moderne
+          avec JavaScript activé pour lancer le timer.
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

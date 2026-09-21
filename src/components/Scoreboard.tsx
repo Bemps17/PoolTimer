@@ -34,7 +34,7 @@ export function Scoreboard({
   onToggleMenu,
   onToggleMinions,
 }: ScoreboardProps) {
-  const screenRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const tapSessionRef = useRef(createScreenTapSession());
   const pendingTapTimeoutRef = useRef<number | null>(null);
@@ -189,12 +189,15 @@ export function Scoreboard({
   })();
 
   return (
-    <div
+    <main
+      id="app"
       className={`scoreboard-body${flashClass ? ` ${flashClass}` : ''}${
         config.modeInterface === 'tactile' ? ' tactile-mode' : ''
       }`}
+      aria-label="H8timer — chronomètre de tir billard"
     >
-      <div className="top-bar">
+      <h1 className="visually-hidden">H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
+      <header className="top-bar">
         <div className="top-bar-players">
           <PlayerStatus
             name={config.p1Name}
@@ -213,11 +216,12 @@ export function Scoreboard({
             onSelect={() => onSelectPlayer(2)}
           />
         </div>
-      </div>
+      </header>
 
-      <div
+      <section
         className="timer-screen"
         id="timerScreen"
+        aria-label="Chronomètre"
         ref={screenRef}
         onPointerUp={(event) => {
           if (event.pointerType !== 'mouse') event.preventDefault();
@@ -261,9 +265,9 @@ export function Scoreboard({
             EXTENSION
           </button>
         </div>
-      </div>
+      </section>
 
-      <div className="control-panel" id="controlPanel">
+      <nav className="control-panel" id="controlPanel" aria-label="Commandes du chronomètre">
         <button
           className="bouton-sport control-game-btn"
           id="btnResetShot"
@@ -314,8 +318,8 @@ export function Scoreboard({
         >
           <SettingsIcon />
         </button>
-      </div>
-    </div>
+      </nav>
+    </main>
   );
 }
 

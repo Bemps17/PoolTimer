@@ -1,6 +1,9 @@
 {
   "rewrites": [
-    { "source": "/((?!tutorial/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!tutorial/|robots\\.txt$|sitemap\\.xml$).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {

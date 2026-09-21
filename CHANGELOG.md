@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 2.7.1 — 2026-09-21
+
+- **SEO** : titre et description Google axés sur le **contrôle à distance** (télécommande + écran Visuel en miroir).
+- Canonical `https://pooltimer.vercel.app`, Open Graph / Twitter, `robots.txt`, `sitemap.xml`, JSON-LD WebApplication.
+- Manifeste PWA H8timer aligné ; landmarks HTML (`main` / `header` / `nav`).
+
 ## 2.7.0 — 2026-09-20
 
 - **Apparence indépendante des presets** : changer de thème ou de couleur ne réécrit plus FFB / TD/TN / Master / Ultimate.

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /d/
+
+Sitemap: https://pooltimer.vercel.app/sitemap.xml
