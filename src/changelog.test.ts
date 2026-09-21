@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Tutoriel/);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/BASE_URL|Vite|PWA/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Apparence|thème|preset/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/couleur|zone/i);
+
+    const compact = CHANGELOG.find((entry) => entry.version === '2.6.2');
+    expect(compact?.notes.join(' ')).toMatch(/Tutoriel/);
+    expect(compact?.notes.join(' ')).toMatch(/BASE_URL|Vite|PWA/i);
 
     const restored = CHANGELOG.find((entry) => entry.version === '2.6.1');
     expect(restored?.notes.join(' ')).toMatch(/alert-time\.mp3/);

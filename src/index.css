@@ -21,6 +21,9 @@
     --c-panel-input-border: #333;
     --c-panel-text-primary: #e1e3e8;
     --c-panel-text-secondary: #8b949e;
+    --c-ambiance: #3498db;
+    --c-player-chip-bg: #141414;
+    --c-control-footer: #1a1a1a;
 
     /* Fill phones/tablets; keep notch insets. Decorative gutter is tiny. */
     --app-gutter-top: max(0.3rem, env(safe-area-inset-top, 0px));
@@ -48,6 +51,9 @@ body.theme-light {
     --c-panel-input-border: #ccc;
     --c-panel-text-primary: #222;
     --c-panel-text-secondary: #666;
+    --c-ambiance: #3498db;
+    --c-player-chip-bg: #ffffff;
+    --c-control-footer: #dcdcdc;
 }
 
 body.theme-cyberpunk {
@@ -67,6 +73,9 @@ body.theme-cyberpunk {
     --c-panel-input-border: #3c096c;
     --c-panel-text-primary: #f0f0f0;
     --c-panel-text-secondary: #a992c1;
+    --c-ambiance: #7b2cbf;
+    --c-player-chip-bg: #10002b;
+    --c-control-footer: #240046;
 }
 
 body.theme-ffb {
@@ -87,6 +96,8 @@ body.theme-ffb {
     --c-panel-input-border: #0066CC;
     --c-panel-text-primary: #e8f3ff;
     --c-panel-text-secondary: #8fb4d4;
+    --c-player-chip-bg: color-mix(in srgb, #0066CC 22%, #000);
+    --c-control-footer: color-mix(in srgb, #0066CC 42%, #000);
 }
 
 body.theme-fbep {
@@ -107,6 +118,8 @@ body.theme-fbep {
     --c-panel-input-border: #007879;
     --c-panel-text-primary: #e5faf6;
     --c-panel-text-secondary: #8fc9bf;
+    --c-player-chip-bg: color-mix(in srgb, #007879 22%, #000);
+    --c-control-footer: color-mix(in srgb, #007879 42%, #000);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -135,7 +148,7 @@ body {
 
 .scoreboard-body {
     background-color: var(--c-bezel);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 14px color-mix(in srgb, var(--c-ambiance) 45%, transparent);
     width: 100%;
     max-width: var(--scoreboard-max-width);
     height: 100%;
@@ -150,9 +163,11 @@ body {
     padding: var(--scoreboard-pad-y) var(--scoreboard-pad-x);
     transition: box-shadow 0.5s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
-body.theme-cyberpunk .scoreboard-body { box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px #7b2cbf80; }
-body.theme-ffb .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #0066CC 55%, transparent), 0 0 18px #0066CC; }
-body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb, #007879 55%, transparent), 0 0 18px #007879; }
+body.theme-cyberpunk .scoreboard-body,
+body.theme-ffb .scoreboard-body,
+body.theme-fbep .scoreboard-body {
+    box-shadow: inset 0 0 24px color-mix(in srgb, var(--c-ambiance) 55%, transparent), 0 0 18px var(--c-ambiance);
+}
 
 .scoreboard-body.is-flashing-warning { animation: flash-warning 1.5s infinite; }
 .scoreboard-body.is-flashing-critical { animation: flash-critical 0.5s infinite; }
@@ -184,7 +199,7 @@ body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb,
     font-weight: 600;
     font-size: 1.2rem;
     color: var(--c-text-primary);
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--c-player-chip-bg);
     padding: 0.55rem 0.45rem;
     border-radius: 8px;
     text-align: center;
@@ -203,7 +218,7 @@ body.theme-fbep .scoreboard-body { box-shadow: inset 0 0 24px color-mix(in srgb,
 .player-status:not(.active):hover {
     opacity: 0.75;
 }
-body.theme-light .player-status { background: rgba(255,255,255,0.6); color: #333; }
+body.theme-light .player-status { color: var(--c-text-primary); }
 .player-status.active { opacity: 1; cursor: default; }
 .player-name {
     flex: 1 1 auto;
@@ -310,9 +325,9 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
     font-size: 1.5rem;
     letter-spacing: 2px;
     color: white;
-    background: rgba(52, 152, 219, 0.5);
-    border: 1px solid rgba(52, 152, 219, 0.8);
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+    background: color-mix(in srgb, var(--c-primary) 50%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c-primary) 80%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--c-primary) 70%, transparent);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -322,7 +337,7 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
     padding: 0.4rem;
 }
 .timer-casse-bar.active-shot {
-    box-shadow: 0 0 14px rgba(52, 152, 219, 0.95);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--c-primary) 95%, transparent);
     filter: brightness(1.15);
 }
 .timer-action-bar.disabled,
@@ -345,7 +360,7 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
     width: 100%;
     max-width: none;
     padding: 0.35rem 0;
-    background: var(--c-bezel);
+    background: var(--c-control-footer);
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     display: flex;
@@ -373,7 +388,7 @@ body.theme-cyberpunk .timer-officiel.state-critical { text-shadow: 0 0 5px var(-
 }
 
 .bouton-sport {
-    width: 70px; height: 70px; border-radius: 50%; border: 2px solid #000;
+    width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--c-border);
     background: var(--c-button-bg); box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 -2px 2px rgba(0,0,0,0.3);
     cursor: pointer; touch-action: manipulation; display: flex; justify-content: center; align-items: center;
     transition: all 0.1s ease-out; color: var(--c-text-secondary);
@@ -479,6 +494,39 @@ body.theme-cyberpunk #btnPlayPause.playing { box-shadow: 0 0 15px var(--c-play);
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--c-panel-text-primary);
+}
+
+.theme-color-editor { margin-top: 0.25rem; }
+.theme-color-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 0.65rem;
+}
+.theme-color-field { margin-bottom: 0; }
+.theme-color-field label { font-size: 0.78rem; }
+.theme-color-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.theme-color-inputs input[type="color"] {
+    flex-shrink: 0;
+    width: 42px;
+    height: 36px;
+    padding: 0.15rem;
+}
+.theme-color-hex {
+    flex: 1;
+    min-width: 0;
+    padding: 0.45rem 0.5rem;
+    border: 1px solid var(--c-panel-input-border);
+    border-radius: 8px;
+    background: var(--c-panel-input-bg);
+    color: var(--c-panel-text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 .panel .section-panel { margin-bottom: 0.85rem; }

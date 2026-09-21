@@ -83,13 +83,14 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>
               <strong>Les temps</strong> de base, après casse et d'extension — saisisables au clavier.
               Presets <strong>FFB Blackball</strong>, <strong>FFB TD/TN</strong>, <strong>FFB Blackball Master</strong>
-              et <strong>Ultimate FBEP</strong>.
+              et <strong>Ultimate FBEP</strong> (chronométrage seulement ; le thème ne les écrase pas).
             </li>
             <li>
               <strong>Les seuils d'alerte</strong> visuelle (orange et rouge).
             </li>
             <li>
-              <strong>Le thème visuel</strong> (Sombre, Clair, Cyberpunk, FFB, FBEP).
+              <strong>Le thème visuel</strong> (Sombre, Clair, Cyberpunk, FFB, FBEP) puis les couleurs par zone
+              (fond, cadre, chrono, boutons, réglages, ambiance). Indépendant des presets de compétition.
             </li>
             <li>
               <strong>La taille des chiffres</strong> du chronomètre.

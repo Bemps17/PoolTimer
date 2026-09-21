@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { themeBodyClass } from '../timer/engine';
+import { applyThemeToDocument } from '../timer/engine';
 import type { EngineState, TimerConfig } from '../timer/types';
 import {
   buildSnapshot,
@@ -362,9 +362,7 @@ export function useDisplayMirror(room: string) {
 
   useEffect(() => {
     if (!snapshot) return;
-    const className = themeBodyClass(snapshot.config.theme);
-    document.body.classList.remove('theme-light', 'theme-cyberpunk', 'theme-ffb', 'theme-fbep');
-    if (className) document.body.classList.add(className);
+    applyThemeToDocument(snapshot.config.theme, snapshot.config.colors);
   }, [snapshot]);
 
   const sync: DisplaySyncView = useMemo(

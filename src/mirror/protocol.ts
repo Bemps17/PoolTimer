@@ -1,5 +1,6 @@
 import { readStoredPlayerName } from '../timer/playerName';
-import type { EngineState, PlayerId, ShotKind, Theme, TimerConfig } from '../timer/types';
+import { colorsForTheme, parseThemeColors } from '../timer/theme';
+import type { EngineState, PlayerId, ShotKind, Theme, ThemeColors, TimerConfig } from '../timer/types';
 
 export const MIRROR_PROTOCOL = 1;
 export const ROOM_CODE_LENGTH = 6;
@@ -20,6 +21,7 @@ export interface MirrorDisplayConfig {
   p2Name: string;
   p2Color: string;
   theme: Theme;
+  colors: ThemeColors;
 }
 
 export interface MirrorSnapshot {
@@ -140,6 +142,7 @@ export function toDisplayConfig(config: TimerConfig): MirrorDisplayConfig {
     p2Name: readStoredPlayerName(config.p2Name, ''),
     p2Color: config.p2Color,
     theme: config.theme,
+    colors: config.colors,
   };
 }
 
@@ -257,6 +260,7 @@ function parseDisplayConfig(raw: unknown): MirrorDisplayConfig | undefined {
     p2Name: readStoredPlayerName(value.p2Name, ''),
     p2Color: value.p2Color,
     theme,
+    colors: parseThemeColors(value.colors, colorsForTheme(theme)),
   };
 }
 

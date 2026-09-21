@@ -202,21 +202,4 @@ export function maybeAutoStart(state: EngineState, config: TimerConfig, now: num
   return startTimer(state, now);
 }
 
-export function themeBodyClass(theme: TimerConfig['theme']): string {
-  switch (theme) {
-    case 'sombre':
-      return '';
-    case 'light':
-      return 'theme-light';
-    case 'cyberpunk':
-      return 'theme-cyberpunk';
-    case 'ffb':
-      return 'theme-ffb';
-    case 'fbep':
-      return 'theme-fbep';
-    default: {
-      const exhaustive: never = theme;
-      return exhaustive;
-    }
-  }
-}
+export { applyThemeToDocument, themeBodyClass } from './theme';
