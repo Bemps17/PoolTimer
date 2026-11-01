@@ -55,10 +55,10 @@ Match **1 contre 1** uniquement. Comportement repris de Scoreurv3 :
 - Les compteurs F sont conservés dans l'historique / le résumé de la partie.
 
 Ajouts demandés pour H8timer :
-- **Option « Tirage à la bande »** (désactivée par défaut, l'alternance reste la règle par défaut) : au début de la manche, un écran demande qui a gagné la bande (« J1 » / « J2 ») ; le gagnant reçoit la blanche. Le tirage remplace l'alternance automatique tant que l'option est active. La blanche reste modifiable à la main.
-- **Tout est visible sur l'écran Visuel** : score en grand, F en petit, blanche sur le casseur ; le tirage et les corrections se font uniquement sur la télécommande.
-
-À confirmer : (1) tirage à la bande **à chaque manche** ou **seulement à la première** (hypothèse : à chaque manche quand l'option est active) ; (2) une casse ferme doit-elle **aussi ajouter 1 au score** (comme une manche gagnée) ? Scoreurv3 les garde indépendants → **défaut = indépendants**, avec réglage « F compte aussi une manche » pour ceux qui le veulent.
+- **Option « Tirage à la bande »** (désactivée par défaut) : **une seule fois, au début du match**, pour déterminer qui casse en premier. Le gagnant de la bande reçoit la blanche, puis **l'alternance** reprend à chaque manche. La blanche reste corrigeable à la main. Sans l'option, le premier casseur est le joueur 1 (modifiable d'un appui sur la blanche).
+- **Match individuel ou par équipe** : même fonctionnement ; un « côté » est un joueur ou une équipe (seuls les libellés/noms changent, pas la logique).
+- **Deux compteurs strictement séparés** : le **score** (manches) et les **casses fermes F** n'agissent jamais l'un sur l'autre. Pas d'option de fusion.
+- **Tout est visible sur l'écran Visuel** : score en grand, F en petit, blanche sur le casseur ; tirage et corrections uniquement sur la télécommande.
 
 ### D4 — Où vit l'état de score ?
 
@@ -75,10 +75,10 @@ Ajouts demandés pour H8timer :
 - [ ] Test de non-régression du **contrat de protocole** : un snapshot v2.7.1 doit toujours être accepté (rétro-compat)
 
 ### Phase 1 — Score (v2.8.0) — *prioritaire*
-1. `timer/match.ts` (logique pure, tests) portée de Scoreurv3 : `MatchState { scores: {1,2}, fermes: {1,2}, breaker: 1|2, history }`, `scoreAfterDelta`, `breakerAfterScoreDelta`, `updateFerme`, `toggleBreaker`, `setBreakerFromLag(winner)`, `undo`, `shouldDeclareVictory` ; réglages `breakRule: 'alternate'|'lag'`, `targetScore`, `showFerme`, `fermeFontScale`, `showBreaker`, `fermeCountsAsFrame`.
+1. `timer/match.ts` (logique pure, tests) portée de Scoreurv3 : `MatchState { scores: {1,2}, fermes: {1,2}, breaker: 1|2, history }`, `scoreAfterDelta`, `breakerAfterScoreDelta`, `updateFerme`, `toggleBreaker`, `setFirstBreaker(winner)` (tirage à la bande), `undo`, `shouldDeclareVictory` ; réglages `breakRule: 'alternate'|'lag'`, `targetScore`, `showFerme`, `fermeFontScale`, `showBreaker`.
 2. Persistance + `mergeMatch` (validation, bornes).
 3. **Protocole** : `MirrorSnapshot.match?: MirrorMatch` optionnel ; `parseSnapshot` le parse explicitement (sinon le Worker le supprime) ; tests de rétro-compat ; **redéployer le Worker**.
-4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), **casses fermes en petit chiffre `F n`** sous/à côté du score, **blanche pulsante** sur le joueur qui casse (appui = inversion), écran « Tirage à la bande » si l'option est active, indicateur « manche N / course à N », bannière de victoire.
+4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), **casses fermes en petit chiffre `F n`** sous/à côté du score, **blanche pulsante** sur le joueur qui casse (appui = inversion), écran « Tirage à la bande » au début du match si l'option est active, indicateur « manche N / course à N », bannière de victoire.
 5. Réglage « Course à N » dans ⚙️ ; tutoriel + aide mis à jour.
 
 *Critère de fin* : un point marqué sur le téléphone apparaît < 1 s sur l'écran Visuel, survit à un rechargement et à une reconnexion WebSocket.
