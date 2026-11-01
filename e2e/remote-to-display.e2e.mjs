@@ -62,6 +62,20 @@ async function uncoveredTapTargets(page) {
   );
 }
 
+/** Boutons d'action (APRÈS CASSE, EXTENSION) et commandes : entiers à l'écran et non recouverts. */
+async function hiddenActions(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.timer-action-bar, .control-panel .bouton-sport')]
+      .filter((element) => getComputedStyle(element).display !== 'none')
+      .filter((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        return box.height < 44 || box.bottom > innerHeight || box.top < 0 || !(hit === element || element.contains(hit));
+      })
+      .map((element) => element.getAttribute('aria-label') ?? element.textContent?.trim()),
+  );
+}
+
 function assert(condition, message) {
   if (!condition) throw new Error(`ÉCHEC : ${message}`);
   console.log(`  ✓ ${message}`);
@@ -75,6 +89,23 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
+    // Petits écrans : score + blanche + casses fermes ne doivent jamais masquer EXTENSION ni les commandes.
+    for (const [width, height] of [[360, 640], [360, 780], [412, 915]]) {
+      const small = await (await browser.newContext({ viewport: { width, height } })).newPage();
+      await small.goto(APP);
+      await small.evaluate(() =>
+        localStorage.setItem(
+          'billiardTimerConfig',
+          JSON.stringify({ defaultsVersion: 2, matchOptions: { enabled: true, showFerme: true, showBreaker: true } }),
+        ),
+      );
+      await small.reload();
+      await small.locator('.match-bar').waitFor();
+      const hidden = await hiddenActions(small);
+      assert(hidden.length === 0, `${width}×${height}, score + blanche + F : EXTENSION et commandes visibles ${hidden.join(', ')}`);
+      await small.context().close();
+    }
+
     const remote = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
     await remote.goto(APP);
     await remote.evaluate(() => localStorage.clear());

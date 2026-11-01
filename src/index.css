@@ -1724,3 +1724,10 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 /* Voyant de la télécommande : coin haut-droit de la zone du chrono (vide), sans gêner les appuis. */
 .timer-screen { position: relative; }
 .timer-screen .remote-sync-dot { top: 0.5rem; right: 0.6rem; }
+
+/* Le score ne doit jamais repousser APRÈS CASSE / EXTENSION : seuls les chiffres rétrécissent. */
+.scoreboard-body .timer-screen { min-height: 0; grid-template-rows: minmax(0, 1fr) auto; }
+.scoreboard-body .timer-content { min-height: 0; width: 100%; height: 100%; overflow: hidden; }
+.scoreboard-body .timer-action-row { flex-shrink: 0; }
+.scoreboard-body .top-bar, .scoreboard-body .control-panel { flex-shrink: 0; }
+.scoreboard-body .timer-action-bar { min-height: 2.75rem; }

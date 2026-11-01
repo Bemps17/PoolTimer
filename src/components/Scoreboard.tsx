@@ -44,6 +44,7 @@ export function Scoreboard({
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const tapSessionRef = useRef(createScreenTapSession());
   const pendingTapTimeoutRef = useRef<number | null>(null);
   const playButtonPointerAtRef = useRef(0);
@@ -54,20 +55,22 @@ export function Scoreboard({
     unlockedThisPress: false,
   });
 
+  // Taille des chiffres = place réellement libre pour eux (hors APRÈS CASSE / EXTENSION), sinon ils repoussent
+  // les boutons d'action sous la barre de commandes quand le score occupe de la hauteur.
   const resizeTimer = useCallback(() => {
-    const screen = screenRef.current;
+    const area = contentRef.current;
     const timer = timerRef.current;
-    if (!screen || !timer) return;
-    const screenWidth = screen.clientWidth - 16;
-    const screenHeight = screen.clientHeight - 16;
-    timer.style.fontSize = `${computeTimerFontSize(screenWidth, screenHeight, config.tailleChiffres)}px`;
+    if (!area || !timer) return;
+    const width = area.clientWidth - 8;
+    const height = area.clientHeight - 8;
+    timer.style.fontSize = `${computeTimerFontSize(width, height, config.tailleChiffres)}px`;
   }, [config.tailleChiffres]);
 
   useEffect(() => {
     resizeTimer();
-    const screen = screenRef.current;
+    const area = contentRef.current;
     const observer = new ResizeObserver(resizeTimer);
-    if (screen) observer.observe(screen);
+    if (area) observer.observe(area);
     window.addEventListener('resize', resizeTimer);
     document.addEventListener('fullscreenchange', resizeTimer);
     return () => {
@@ -245,7 +248,7 @@ export function Scoreboard({
             <SyncDot level={remote.level} />
           </span>
         ) : null}
-        <div className="timer-content">
+        <div className="timer-content" ref={contentRef}>
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>
             {displayText}
           </div>
