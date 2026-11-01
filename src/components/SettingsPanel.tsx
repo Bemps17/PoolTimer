@@ -54,6 +54,7 @@ interface SettingsPanelProps {
   onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
   streamSection?: ReactNode;
+  diagnosticsSection?: ReactNode;
   presetsController: PresetsController;
   themesController: ThemesController;
   onNotify: (message: string) => void;
@@ -160,6 +161,7 @@ export function SettingsPanel({
   onSnoozeUpdate,
   extraSections,
   streamSection,
+  diagnosticsSection,
   presetsController,
   themesController,
   onNotify,
@@ -667,6 +669,8 @@ export function SettingsPanel({
             <SettingsSection title="Partage & import">
               <ImportPanel onImport={onImportEnvelope} />
             </SettingsSection>
+
+            {diagnosticsSection ? <SettingsSection title="Diagnostic">{diagnosticsSection}</SettingsSection> : null}
 
             <SettingsSection title="Application">
               <p className="app-version">H8timer v{APP_VERSION}</p>

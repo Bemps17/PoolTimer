@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **3.1.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **3.2.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -12,6 +12,7 @@ Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL c
 - **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche. Masqué en **Ultimate FBEP** (pas de temps supplémentaire après la casse).
 - Extension configurable (`tempsExtension`, +15 s par défaut FFB / FBEP) : **une fois par joueur et par manche**
 - Presets **FFB Blackball** (45s / 1:30 / +15s), **FFB TD/TN** (45s / 1:30 / +45s), **FFB Blackball Master** (30s / 1:00 / +30s) et **Ultimate FBEP** (45s / +15s, sans après casse)
+- **Vision allégée** : le chrono seul par défaut (score activable, casses fermes masquées par défaut). **Voyant de synchro** sans texte (vert / orange / rouge) et **diagnostic** avec journal `.log` (⚙️ → Appareil & partage → Diagnostic, ou appui sur le voyant de l'écran Visuel).
 - **Partage** de presets / thèmes par lien, QR ou fichier (aperçu et confirmation à l'import). **Écran toujours allumé** sur la télécommande et l'écran Visuel (Wake Lock + repli vidéo).
 - **Presets personnalisés** : créez vos propres presets de chronométrage (⚙️ → Compétition & temps → Mes presets), en plus des presets FFB / FBEP intégrés.
 - Deux joueurs, noms et couleurs ; thèmes Sombre / Clair / Cyberpunk / FFB / Ultimate et couleurs par zone (indépendants des presets de compétition)

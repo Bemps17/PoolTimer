@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { effectiveVolumeDb } from '../audio/loudness';
 import { initializeAudio, playSound, preloadAlertPack, syncMasterLevel, vibrate } from '../audio/toneAudio';
 import { loadConfig, saveConfig } from '../timer/config';
+import { nextTickDelay } from '../timer/tickSchedule';
 import {
   canUseExtension,
   createInitialState,
@@ -71,13 +72,21 @@ export function useBilliardTimer() {
 
   useEffect(() => {
     if (!state.isRunning) return undefined;
-    const id = window.setInterval(() => {
-      const { state: next, effects } = tick(stateRef.current, configRef.current, Date.now());
-      stateRef.current = next;
-      setState(next);
-      if (effects.length > 0) runEffects(effects);
-    }, 50);
-    return () => window.clearInterval(id);
+    // Réveil uniquement quand le chiffre affiché change (1/s, 10/s sous 10 s avec dixièmes) au lieu de 20/s.
+    let id: number | null = null;
+    const schedule = () => {
+      id = window.setTimeout(() => {
+        const { state: next, effects } = tick(stateRef.current, configRef.current, Date.now());
+        stateRef.current = next;
+        setState(next);
+        if (effects.length > 0) runEffects(effects);
+        if (next.isRunning) schedule();
+      }, nextTickDelay(stateRef.current.remainingTime, configRef.current.affichageMs));
+    };
+    schedule();
+    return () => {
+      if (id !== null) window.clearTimeout(id);
+    };
   }, [state.isRunning, runEffects]);
 
   const ensureAudio = useCallback(async () => {

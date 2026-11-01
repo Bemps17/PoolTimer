@@ -33,6 +33,7 @@ function renderPanel() {
       onImportEnvelope={noop}
       extraSections={<p>miroir</p>}
       streamSection={<p>stream</p>}
+      diagnosticsSection={<p>diagnostic</p>}
     />,
   );
 }
@@ -64,6 +65,7 @@ describe('menu ⚙️ en 3 onglets', () => {
       'Miroir télécommande',
       'Streaming (OBS / Streamlabs)',
       'Partage & import',
+      'Diagnostic',
       'Application',
     ]);
     expect(screen.getByRole('tabpanel').getAttribute('aria-labelledby')).toBe(

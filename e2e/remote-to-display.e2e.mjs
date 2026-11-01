@@ -49,6 +49,8 @@ function stopAll() {
 }
 
 async function uncoveredTapTargets(page) {
+  const count = await page.locator('.match-bar button').count();
+  if (count < 6) return [`seulement ${count} bouton(s) de score trouvé(s)`];
   return page.evaluate(() =>
     [...document.querySelectorAll('.match-bar button')]
       .filter((button) => {
@@ -75,12 +77,21 @@ async function main() {
   try {
     const remote = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
     await remote.goto(APP);
+    await remote.evaluate(() => localStorage.clear());
+    await remote.reload();
+    await remote.locator('#timerDisplay').waitFor();
+    assert((await remote.locator('.match-bar').count()) === 0, 'installation neuve : le chrono seul, pas de score');
     await remote.evaluate(() => {
       localStorage.clear();
       localStorage.setItem('h8timer.beta.mirror', '1');
       localStorage.setItem(
         'billiardTimerConfig',
-        JSON.stringify({ p1Name: 'Dupont', p2Name: 'Martin', matchOptions: { enabled: true, frameRestartsTimer: true, targetScore: 2 } }),
+        JSON.stringify({
+          defaultsVersion: 2,
+          p1Name: 'Dupont',
+          p2Name: 'Martin',
+          matchOptions: { enabled: true, showFerme: true, frameRestartsTimer: true, targetScore: 2 },
+        }),
       );
     });
     await remote.reload();
@@ -101,12 +112,18 @@ async function main() {
 
     const display = await (await browser.newContext({ viewport: { width: 1000, height: 560 } })).newPage();
     await display.goto(`${APP}/d/${room}`);
-    await display.getByText('Sync OK').first().waitFor({ timeout: 15_000 });
-    assert(true, 'écran Visuel synchronisé');
+    await display.getByRole('img', { name: /Synchronisation OK/ }).waitFor({ timeout: 15_000 });
+    assert(true, 'écran Visuel : voyant vert');
+    const displayText = await display.locator('.display-top').textContent();
+    assert(!/Miroir|Sync|lecture seule/.test(displayText ?? ''), 'écran Visuel : aucun texte de statut, juste le voyant');
+    await remote.getByRole('img', { name: /Synchronisation OK/ }).waitFor({ timeout: 10_000 });
+    assert(true, 'télécommande : voyant vert');
 
+    const t0 = Date.now();
     await remote.getByLabel('Ajouter une manche à Dupont').click();
     await display.getByLabel('Score Dupont').filter({ hasText: '1' }).waitFor({ timeout: 10_000 });
-    assert(true, 'le score marqué sur la télécommande arrive sur l’écran Visuel');
+    const latency = Date.now() - t0;
+    assert(latency < 1_000, `le score marqué arrive sur l’écran Visuel en ${latency} ms (relais local)`);
     const active = (await remote.locator('.player-status.active').textContent()) ?? '';
     assert(active.includes('Martin'), 'marquer la manche relance le chrono avec le joueur qui casse (Martin)');
 
@@ -132,6 +149,23 @@ async function main() {
     const end = remote.getByRole('dialog', { name: /Victoire de Dupont/ });
     await end.waitFor({ timeout: 5_000 });
     assert(((await end.textContent()) ?? '').includes('Dupont 2 – 0 Martin'), 'fin de match : victoire et résumé partageable');
+    await end.getByRole('button', { name: /Fermer/ }).click();
+    await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    await remote.getByRole('tab', { name: 'Appareil & partage' }).click();
+    await remote.getByText('Diagnostic', { exact: true }).first().click();
+    const median = await remote.locator('.diagnostics-row', { hasText: 'Aller-retour médiane' }).locator('dd').textContent();
+    assert(/\d+ ms/.test(median ?? ''), `diagnostic : aller-retour médian mesuré (${median})`);
+    const [download] = await Promise.all([
+      remote.waitForEvent('download'),
+      remote.getByRole('button', { name: /Télécharger le journal/ }).click(),
+    ]);
+    const file = await download.path();
+    const { readFile } = await import('node:fs/promises');
+    const log = await readFile(file, 'utf8');
+    const secret = await remote.evaluate(() => localStorage.getItem('h8timer.mirror.secret'));
+    assert(download.suggestedFilename().endsWith('.log'), `journal téléchargé : ${download.suggestedFilename()}`);
+    assert(log.includes('rôle: télécommande') && /synchro/.test(log), 'journal : en-tête et événements de synchro');
+    assert(Boolean(secret) && !log.includes(secret), 'journal : le secret de salle n’y figure pas');
     console.log('e2e OK');
   } finally {
     await browser.close();

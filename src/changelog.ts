@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.1.0';
+export const APP_VERSION = '3.2.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.2.0',
+    date: '2026-11-01',
+    title: 'Vision allégée, voyant de synchro et diagnostic',
+    notes: [
+      'Par défaut, le chrono seul : le score est désactivé et, quand on l’active, les casses fermes restent masquées. Appliqué une fois aux configurations existantes.',
+      'Voyant de synchro, sans texte : vert = OK, orange = latence, rouge = interrompu, sur la télécommande et sur l’écran Visuel. L’écran Visuel n’affiche plus que le chrono (plus le score s’il est activé).',
+      'Diagnostic dans ⚙️ → Appareil & partage → Diagnostic (et en touchant le voyant de l’écran Visuel) : aller-retour médian / p95 / max, écrans liés, reconnexions, journal téléchargeable (.log) sans secret.',
+      'Batterie : le chrono ne se recalcule plus que quand le chiffre change (environ 135 réveils pour 45 s au lieu de 900), rien chrono arrêté sur l’écran Visuel, renvois de rattrapage toutes les 5 s au lieu de 2 s.',
+      'Latence : le relais diffuse l’état avant d’écrire en stockage et sans attendre la confirmation ; environ 100 ms mesurés de bout en bout en local.',
+    ],
+  },
   {
     version: '3.1.0',
     date: '2026-11-01',

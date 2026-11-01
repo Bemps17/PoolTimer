@@ -54,10 +54,11 @@ export interface MatchState extends MatchCounters {
 
 export function getDefaultMatchOptions(): MatchOptions {
   return {
-    enabled: true,
+    // v3.2 : affichage minimal — chrono seul par défaut ; si le score est activé, sans les casses fermes.
+    enabled: false,
     lagAtStart: false,
     targetScore: 0,
-    showFerme: true,
+    showFerme: false,
     showBreaker: true,
     sides: 'players',
     frameRestartsTimer: true,

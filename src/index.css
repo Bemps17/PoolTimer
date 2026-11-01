@@ -1655,3 +1655,72 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 /* La blanche inactive est atténuée par son pseudo-élément ; la zone de tap, elle, garde 44 px et reste opaque. */
 .match-bar-controller button.match-ball:not(.active) { transform: none; opacity: 1; }
 .match-ferme { white-space: nowrap; }
+
+/* ---------- Voyant de synchro (aucun texte) et diagnostic ---------- */
+.sync-dot {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+.sync-dot-ok { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.sync-dot-slow { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+.sync-dot-down { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.sync-dot-button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+.diagnostics { display: flex; flex-direction: column; gap: 0.5rem; }
+.diagnostics-level { margin: 0; }
+.diagnostics-rows { margin: 0; display: grid; gap: 0.25rem; }
+.diagnostics-row { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; }
+.diagnostics-row dt { color: var(--c-panel-text-secondary); }
+.diagnostics-row dd { margin: 0; color: var(--c-panel-text-primary); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ---------- Écran Visuel allégé ---------- */
+.display-minimal .display-top {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    z-index: 3;
+    gap: 0;
+    opacity: 0.55;
+}
+.display-minimal .display-top:hover, .display-minimal .display-top:focus-within { opacity: 1; }
+.display-minimal .display-fullscreen-btn {
+    width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    margin: 0;
+    font-size: 1.2rem;
+    border: 0;
+    background: transparent;
+    color: var(--c-text-secondary);
+}
+.display-minimal .display-waiting {
+    font-family: var(--font-timer);
+    letter-spacing: 0.1em;
+    font-size: clamp(1.5rem, 6vw, 3rem);
+    opacity: 0.6;
+}
+.display-minimal { position: relative; }
+.remote-sync-dot, .mirror-live-dot {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.45rem;
+    z-index: 5;
+    line-height: 0;
+    pointer-events: none;
+}
+.mirror-live-dot { position: fixed; top: 0.6rem; right: 0.6rem; }
+.top-bar { position: relative; }
+/* Voyant de la télécommande : coin haut-droit de la zone du chrono (vide), sans gêner les appuis. */
+.timer-screen { position: relative; }
+.timer-screen .remote-sync-dot { top: 0.5rem; right: 0.6rem; }

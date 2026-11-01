@@ -6,6 +6,8 @@ import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcc
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
 import { PlayerStatus } from './PlayerStatus';
+import { SyncDot } from './SyncDot';
+import type { SyncLevel } from '../mirror/syncLevel';
 
 interface ScoreboardProps {
   config: TimerConfig;
@@ -22,7 +24,7 @@ interface ScoreboardProps {
   /** Scoreur 1v1 (score, F, blanche), affiché sous les bandeaux joueurs. */
   matchBar?: ReactNode;
   /** Vue télécommande (salle miroir ouverte) : chrono en vedette, grosses commandes. */
-  remote?: { label: string; health: string; scorePlacement: 'compact' | 'full' | 'hidden' };
+  remote?: { level: SyncLevel; scorePlacement: 'compact' | 'full' | 'hidden' };
 }
 
 export function Scoreboard({
@@ -204,12 +206,6 @@ export function Scoreboard({
     >
       <h1 className="visually-hidden">H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
       <header className="top-bar">
-        {remote ? (
-          <p className={`remote-badge remote-badge-${remote.health}`} aria-live="polite">
-            <span className="remote-badge-dot" aria-hidden />
-            {remote.label}
-          </p>
-        ) : null}
         <div className="top-bar-players">
           <PlayerStatus
             name={config.p1Name}
@@ -244,6 +240,11 @@ export function Scoreboard({
         }}
         onClick={(event) => handleTimerScreenTap('click', event)}
       >
+        {remote ? (
+          <span className="remote-sync-dot">
+            <SyncDot level={remote.level} />
+          </span>
+        ) : null}
         <div className="timer-content">
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>
             {displayText}

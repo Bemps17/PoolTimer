@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/fin de match/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/équipe/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/voyant/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/diagnostic/i);
+
+    const end = CHANGELOG.find((entry) => entry.version === '3.1.0');
+    expect(end?.notes.join(' ')).toMatch(/fin de match/i);
+    expect(end?.notes.join(' ')).toMatch(/équipe/i);
 
     const relay = CHANGELOG.find((entry) => entry.version === '3.0.1');
     expect(relay?.notes.join(' ')).toMatch(/quota/i);

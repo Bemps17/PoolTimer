@@ -73,6 +73,8 @@ export interface TimerConfig {
   competitionMode: CompetitionMode | null;
   matchOptions: MatchOptions;
   viewOptions: ViewOptions;
+  /** Version des valeurs par défaut appliquées (migration ponctuelle des anciennes configs). */
+  defaultsVersion: number;
 }
 
 export interface AlertsFired {

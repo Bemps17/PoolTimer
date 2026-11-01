@@ -16,6 +16,9 @@ vi.mock('../hooks/useMirror', async () => {
       remainingTime: 45_000,
       status: 'live',
       sync: { label: 'Sync OK', waitingForSnapshot: false },
+      level: 'ok',
+      diagnostics: () => ({ rows: [['Synchro', 'OK']], buildLog: () => 'log' }),
+      clearLog: () => undefined,
     }),
   };
 });
@@ -44,5 +47,22 @@ describe('DisplayView — plein écran', () => {
     render(<DisplayView room="AB3K7Q" />);
     fireEvent.click(screen.getByRole('button', { name: /plein écran/i }));
     expect(toggle).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('DisplayView — vision allégée', () => {
+  it('shows no status text, no room code, no hint: only the timer and a sync dot', async () => {
+    const { DisplayView } = await import('./DisplayView');
+    const { container } = render(<DisplayView room="AB3K7Q" />);
+    expect(container.textContent).not.toMatch(/Miroir|AB3|Sync OK|lecture seule|Touchez/);
+    expect(screen.getByRole('img', { name: /Synchronisation OK/ })).toBeTruthy();
+    expect(container.querySelector('.timer-officiel')?.textContent).toBe('45');
+  });
+
+  it('opens the diagnostics when the dot is tapped', async () => {
+    const { DisplayView } = await import('./DisplayView');
+    render(<DisplayView room="AB3K7Q" />);
+    fireEvent.click(screen.getByRole('button', { name: /diagnostic/i }));
+    expect(screen.getByRole('dialog', { name: /Diagnostic/ })).toBeTruthy();
   });
 });

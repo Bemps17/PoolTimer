@@ -6,6 +6,8 @@ import { StreamSettings } from './components/StreamSettings';
 import { HelpPanel } from './components/HelpPanel';
 import { LagPrompt } from './components/LagPrompt';
 import { MatchEndDialog } from './components/MatchEndDialog';
+import { DiagnosticsPanel } from './components/DiagnosticsPanel';
+import { SyncDot } from './components/SyncDot';
 import { breakerAfterScoreDelta, MATCH_LIMITS, matchSummary, matchWinner } from './timer/match';
 import { displayPlayerName } from './timer/playerName';
 import type { PlayerId } from './timer/types';
@@ -27,7 +29,6 @@ import { decodeShareText, SHARE_HASH_KEY, type ShareEnvelope } from './share/env
 import { applyPreset, type CustomPreset } from './timer/presets';
 import { applyCustomTheme } from './timer/themes';
 import { useKeepAwake } from './hooks/useKeepAwake';
-import { keepAwakeLabel } from './pwa/keepAwake';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
@@ -168,7 +169,7 @@ export default function ControllerApp() {
   const viewOptions = timer.config.viewOptions;
   const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
   // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
-  const keepAwake = useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
+  useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
   const matchOptions = timer.config.matchOptions;
   const mirrorMatch = toMirrorMatch(matchControl.match, matchOptions);
   const lagPrompt = matchOptions.enabled && matchOptions.lagAtStart && matchControl.match.lagPending;
@@ -227,11 +228,8 @@ export default function ControllerApp() {
   return (
     <>
       {mirror.room && !remoteActive ? (
-        <aside
-          className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
-          aria-live="polite"
-        >
-          {mirror.sync.chip || `Miroir · ${mirror.room}`}
+        <aside className="mirror-live-dot">
+          <SyncDot level={mirror.level} />
         </aside>
       ) : null}
       <Scoreboard
@@ -249,17 +247,7 @@ export default function ControllerApp() {
           setMenuOpen(true);
         }}
         onToggleMinions={handleToggleMinions}
-        remote={
-          remoteActive
-            ? {
-                label: [mirror.sync.chip || `Télécommande · ${mirror.room}`, keepAwakeLabel(keepAwake) && keepAwake !== 'active' ? keepAwakeLabel(keepAwake) : '']
-                  .filter(Boolean)
-                  .join(' · '),
-                health: mirror.sync.health,
-                scorePlacement: viewOptions.remoteScore,
-              }
-            : undefined
-        }
+        remote={remoteActive ? { level: mirror.level, scorePlacement: viewOptions.remoteScore } : undefined}
         matchBar={
           matchOptions.enabled && !(remoteActive && viewOptions.remoteScore === 'hidden') ? (
             <MatchScore
@@ -336,6 +324,28 @@ export default function ControllerApp() {
         updateSnoozed={pwaUpdate.snoozed}
         onApplyUpdate={pwaUpdate.applyUpdate}
         onSnoozeUpdate={handleSnoozeUpdate}
+        diagnosticsSection={
+          menuOpen ? (
+            mirror.room ? (
+              <DiagnosticsPanel
+                level={mirror.level}
+                rows={mirror.diagnostics().rows}
+                buildLog={mirror.diagnostics().buildLog}
+                fileName={`h8timer-telecommande-${mirror.room}.log`}
+                onClear={() => {
+                  mirror.clearLog();
+                  setToastMessage('Journal effacé');
+                  setToastVisible(true);
+                }}
+              />
+            ) : (
+              <p className="install-hint">
+                Ouvrez une salle (Miroir télécommande) pour mesurer la synchro. Voyant : vert = OK, orange = latence,
+                rouge = interrompu.
+              </p>
+            )
+          ) : null
+        }
         streamSection={
           <StreamSettings
             room={mirror.room}

@@ -243,7 +243,8 @@ describe('ephemeral room', () => {
 });
 
 describe('mirror protocol — scoreur (match)', () => {
-  const config = getDefaultConfig();
+  const base = getDefaultConfig();
+  const config = { ...base, matchOptions: { ...base.matchOptions, enabled: true, showFerme: true } };
   const state = createInitialState(config);
 
   it('carries score, F (separate counter), breaker and options in the snapshot', () => {
@@ -317,7 +318,8 @@ describe('mirror protocol — mise en page de l’écran Visuel', () => {
 });
 
 describe('mirror protocol — mode équipe', () => {
-  const config = getDefaultConfig();
+  const base = getDefaultConfig();
+  const config = { ...base, matchOptions: { ...base.matchOptions, enabled: true } };
   const state = createInitialState(config);
 
   it('carries "teams" to the Visual screen and through the relay; players stays implicit', () => {

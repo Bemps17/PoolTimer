@@ -55,6 +55,18 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
           </ul>
 
+          <h3>Voyant de synchro et diagnostic</h3>
+          <ul>
+            <li>
+              Un point de couleur, sans texte : <strong>vert</strong> = synchro OK, <strong>orange</strong> = latence,{' '}
+              <strong>rouge</strong> = interrompu (relais coupé, aucun écran ou aucune télécommande).
+            </li>
+            <li>
+              Détails et journal (.log) : ⚙️ → Appareil &amp; partage → <strong>Diagnostic</strong>, ou appui sur le
+              voyant de l’écran Visuel.
+            </li>
+          </ul>
+
           <h3>Salle permanente</h3>
           <ul>
             <li>
