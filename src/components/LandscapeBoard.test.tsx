@@ -30,7 +30,13 @@ const match: MirrorMatch = {
 };
 
 function setup(
-  overrides: { config?: Partial<TimerConfig>; state?: Partial<EngineState>; match?: MirrorMatch; remote?: boolean } = {},
+  overrides: {
+    config?: Partial<TimerConfig>;
+    state?: Partial<EngineState>;
+    match?: MirrorMatch;
+    remote?: boolean;
+    scoreOnSides?: boolean;
+  } = {},
 ) {
   const config = { ...getDefaultConfig(), p1Name: 'Puilboreau', p2Name: 'Delacroix', ...overrides.config };
   const state = { ...createInitialState(config), remainingTime: 38_000, ...overrides.state };
@@ -50,6 +56,7 @@ function setup(
       state={state}
       match={overrides.match}
       remoteLevel={overrides.remote ? 'ok' : undefined}
+      scoreOnSides={overrides.scoreOnSides ?? true}
       menuOpen={false}
       {...actions}
     />,
@@ -121,6 +128,13 @@ describe('LandscapeBoard — paysage : joueur 1 à gauche, chrono au centre, jou
     setup({ remote: true });
     expect(screen.getByRole('group', { name: 'Aperçu de l’écran distant' }).textContent).toContain('38');
     expect(screen.getByRole('img', { name: /Synchronisation OK/ })).toBeTruthy();
+  });
+
+  it('score hidden on the phone: sides show names only, the remote preview keeps the score', () => {
+    const { container } = setup({ match, remote: true, scoreOnSides: false });
+    expect(screen.queryByLabelText('Score Puilboreau')).toBeNull();
+    expect(screen.queryByLabelText(/Ajouter une manche/)).toBeNull();
+    expect(container.querySelector('.remote-preview-score')?.textContent).toMatch(/3/);
   });
 
   it('without a room there is no sync dot', () => {

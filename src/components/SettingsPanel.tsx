@@ -12,7 +12,7 @@ import {
   withSyncedCompetitionMode,
 } from '../timer/config';
 import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
-import type { DisplayLayout, RemoteLayout, ViewOptions } from '../timer/viewOptions';
+import type { DisplayLayout, LandscapeMode, RemoteLayout, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
 import { colorsForTheme } from '../timer/theme';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
@@ -117,6 +117,18 @@ const REMOTE_LAYOUT_OPTIONS: Array<{ value: RemoteLayout; label: string }> = [
   { value: 'remote', label: 'Télécommande' },
   { value: 'classic', label: 'Classique' },
 ];
+
+const LANDSCAPE_OPTIONS: Array<{ value: LandscapeMode; label: string }> = [
+  { value: 'off', label: 'Non' },
+  { value: 'auto', label: 'Auto' },
+  { value: 'force', label: 'Forcé' },
+];
+
+const LANDSCAPE_HINTS: Record<LandscapeMode, string | undefined> = {
+  off: undefined,
+  auto: 'Tournez le téléphone : joueur 1 à gauche, chrono au centre, joueur 2 à droite.',
+  force: 'L’écran passe en paysage tout seul (application installée), même rotation automatique coupée.',
+};
 
 const DISPLAY_LAYOUT_OPTIONS: Array<{ value: DisplayLayout; label: string }> = [
   { value: 'timer', label: 'Chrono' },
@@ -423,12 +435,22 @@ export function SettingsPanel({
 
                 <SettingsCard title="Score">
                   <ToggleField
-                    label="Afficher le score"
+                    label="Activer le score"
                     checked={config.matchOptions.enabled}
                     onChange={(enabled) => patchMatch({ enabled })}
+                    hint={
+                      config.matchOptions.enabled
+                        ? 'Réglé ici (Score en cours) ; affiché sur l’écran distant et l’overlay.'
+                        : undefined
+                    }
                   />
                   {config.matchOptions.enabled ? (
                     <>
+                      <ToggleField
+                        label="Score sur l’écran du téléphone"
+                        checked={config.matchOptions.showOnPhone}
+                        onChange={(showOnPhone) => patchMatch({ showOnPhone })}
+                      />
                       <SegmentedField
                         label="Qui joue"
                         value={config.matchOptions.sides}
@@ -503,15 +525,12 @@ export function SettingsPanel({
                     suffix="%"
                     onChange={(tailleChiffres) => patch({ tailleChiffres })}
                   />
-                  <ToggleField
-                    label="Disposition paysage (téléphone tourné)"
-                    checked={config.viewOptions.landscape}
+                  <SegmentedField
+                    label="Disposition paysage"
+                    value={config.viewOptions.landscape}
+                    options={LANDSCAPE_OPTIONS}
                     onChange={(landscape) => patchView({ landscape })}
-                    hint={
-                      config.viewOptions.landscape
-                        ? 'Tournez le téléphone : joueur 1 à gauche, chrono au centre, joueur 2 à droite. La rotation automatique du téléphone doit être activée.'
-                        : undefined
-                    }
+                    hint={LANDSCAPE_HINTS[config.viewOptions.landscape]}
                   />
                   <ToggleField
                     label="Dixièmes sous 10 s"

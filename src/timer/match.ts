@@ -29,6 +29,8 @@ export interface MatchOptions {
   sides: Sides;
   /** Marquer une manche relance le chrono (nouvelle manche, casseur suivant, extensions remises à zéro). */
   frameRestartsTimer: boolean;
+  /** Score visible sur l'écran du téléphone ; sinon il reste dans ⚙️ → Match et sur l'écran distant. */
+  showOnPhone: boolean;
 }
 
 export interface FrameRecord {
@@ -62,6 +64,7 @@ export function getDefaultMatchOptions(): MatchOptions {
     showBreaker: true,
     sides: 'players',
     frameRestartsTimer: true,
+    showOnPhone: true,
   };
 }
 
@@ -237,7 +240,13 @@ export function mergeMatchOptions(raw: unknown): MatchOptions {
     showBreaker: asBool(value.showBreaker, defaults.showBreaker),
     sides: value.sides === 'teams' ? 'teams' : 'players',
     frameRestartsTimer: asBool(value.frameRestartsTimer, defaults.frameRestartsTimer),
+    showOnPhone: asBool(value.showOnPhone, defaults.showOnPhone),
   };
+}
+
+/** Score affiché sur l'écran de jeu du téléphone (l'écran distant et ⚙️ ne dépendent que de `enabled`). */
+export function scoreOnPhone(options: Pick<MatchOptions, 'enabled' | 'showOnPhone'>): boolean {
+  return options.enabled && options.showOnPhone;
 }
 
 /** Valide un état de match venant du stockage local. Jamais de confiance au JSON entrant. */

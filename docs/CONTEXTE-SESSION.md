@@ -35,6 +35,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
 - **Blanche** = indique qui casse ; appui dessus = inverser. **Alternance** de la casse à chaque manche marquée.
 - **Tirage à la bande** (option) : **une seule fois, au début du match**, désigne le premier casseur.
 - Option (activée) : marquer une manche relance le chrono (nouvelle manche, extensions remises à zéro, au tour du casseur).
+- **Score** : « Activer le score » = compté dans ⚙️ et affiché sur l'écran distant ; « Score sur l'écran du téléphone » peut le masquer sur le téléphone seulement (demande de l'utilisateur, v3.5.0).
 - **Télécommande** : le contrôle du temps d'abord ; pas de score sur l'écran de la télécommande (il se règle dans ⚙️ → Match) ; voir clairement ce qu'affiche l'écran distant (aperçu en direct). Paysage = option, jamais par défaut (défaut portrait).
 - Le bouton « annuler » a été **retiré de la barre de score** à la demande de l'utilisateur (reste dans ⚙️ → Match → Score).
 - Référence fonctionnelle du scoreur : dépôt `Bemps17/Scoreurv3` (comportement repris, pas le code).
@@ -55,7 +56,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
 - **Réseau du conteneur** : `workers.dev`, `api.cuescore.com` et `developers.cloudflare.com` étaient bloqués → impossible de sonder le vrai relais depuis la session ; la sonde réelle se lance sur le poste de l'utilisateur : `MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror`.
 - **Playwright** : `playwright@1.63.0` en devDependency (navigateurs dans `/opt/pw-browsers`, ne pas réinstaller). Scripts de capture ad hoc : `NODE_PATH=$PWD/node_modules node script.cjs`.
 - CI : les polices y sont rendues ~3 % plus larges qu'en local ; un texte ajusté au minimum de `FitText` peut passer en local et être tronqué en CI → garder une marge (éléments voisins en px/vw, pas en rem).
-- PWA : le manifeste est en `orientation: 'any'` ; le portrait par défaut est demandé à l'exécution (`useOrientationLock`). Ne jamais remettre `orientation: 'portrait'` (bloquait le paysage sur Android installé). Les e2e tournent en navigateur, pas en PWA installée : vérifier sur un vrai téléphone ce qui dépend du manifeste. L'utilisateur teste sur **Android, PWA installée**.
+- PWA : le manifeste est en `orientation: 'any'`, mais **Chrome Android garde le manifeste d'installation** (ancien `portrait`) : `screen.orientation.unlock()` y revient. On demande donc toujours explicitement l'orientation (`useOrientationLock` : `portrait` / `any` / `landscape` selon Non · Auto · Forcé). Ne jamais remettre `orientation: 'portrait'`. Les e2e tournent en navigateur, pas en PWA installée : vérifier sur un vrai téléphone ce qui dépend du manifeste. L'utilisateur teste sur **Android, PWA installée**.
 - Piège shell : `pkill -f "vite …"` peut tuer le shell courant → utiliser des motifs `"[v]ite --port 5199"`.
 
 ## 6. Commandes de vérification (avant tout push)

@@ -106,7 +106,7 @@ describe('menu ⚙️ : 5 onglets, une fonction par onglet', () => {
 describe('Score : un interrupteur, options seulement si activé', () => {
   it('shows only the master switch when the score is off', () => {
     const onChange = renderPanel();
-    const master = screen.getByRole('switch', { name: 'Afficher le score' });
+    const master = screen.getByRole('switch', { name: 'Activer le score' });
     expect(master.getAttribute('aria-checked')).toBe('false');
     expect(screen.queryByRole('switch', { name: 'Casses fermes (F)' })).toBeNull();
     fireEvent.click(master);
@@ -135,6 +135,20 @@ describe('Score en cours : réglé dans ⚙️ (+/−), plus sur l’écran de l
     expect(within(card as HTMLElement).getByText('score en cours +/−')).toBeTruthy();
   });
 
+  it('the score can be hidden on the phone screen while staying in ⚙️ and on the remote screen', () => {
+    const base = getDefaultConfig();
+    const onChange = renderPanel({ ...base, matchOptions: { ...base.matchOptions, enabled: true } }, vi.fn(), <p>score en cours +/−</p>);
+    const onPhone = screen.getByRole('switch', { name: 'Score sur l’écran du téléphone' });
+    expect(onPhone.getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(onPhone);
+    const next = onChange.mock.calls.at(-1)![0];
+    expect(next.matchOptions.showOnPhone).toBe(false);
+    expect(next.matchOptions.enabled).toBe(true);
+    cleanup();
+    renderPanel({ ...base, matchOptions: { ...base.matchOptions, enabled: true, showOnPhone: false } }, vi.fn(), <p>score en cours +/−</p>);
+    expect(screen.getByText('score en cours +/−')).toBeTruthy();
+  });
+
   it('hides them when the score is off', () => {
     renderPanel(getDefaultConfig(), vi.fn(), <p>score en cours +/−</p>);
     expect(screen.queryByText('score en cours +/−')).toBeNull();
@@ -142,14 +156,15 @@ describe('Score en cours : réglé dans ⚙️ (+/−), plus sur l’écran de l
 });
 
 describe('Écran : disposition paysage en option', () => {
-  it('offers the landscape layout, off by default, and no more remote score choice', () => {
+  it('offers the landscape layout as Non / Auto / Forcé, off by default, and no more remote score choice', () => {
     const onChange = renderPanel();
     openTab('Écran');
-    const landscape = screen.getByRole('switch', { name: 'Disposition paysage (téléphone tourné)' });
-    expect(landscape.getAttribute('aria-checked')).toBe('false');
+    expect(screen.getByRole('radio', { name: 'Non' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.queryByText('Score sur la télécommande')).toBeNull();
-    fireEvent.click(landscape);
-    expect(onChange.mock.calls.at(-1)![0].viewOptions.landscape).toBe(true);
+    fireEvent.click(screen.getByRole('radio', { name: 'Auto' }));
+    expect(onChange.mock.calls.at(-1)![0].viewOptions.landscape).toBe('auto');
+    fireEvent.click(screen.getByRole('radio', { name: 'Forcé' }));
+    expect(onChange.mock.calls.at(-1)![0].viewOptions.landscape).toBe('force');
   });
 });
 

@@ -278,7 +278,7 @@ async function main() {
     assert((await remote.locator('.landscape-board').count()) === 0, 'paysage désactivé par défaut : le téléphone tourné reste en portrait');
     await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
     await remote.getByRole('tab', { name: 'Écran' }).click();
-    await remote.getByRole('switch', { name: 'Disposition paysage (téléphone tourné)' }).click();
+    await remote.getByRole('radio', { name: 'Auto' }).click();
     await remote.getByRole('button', { name: 'Fermer le menu' }).click();
     await remote.locator('.landscape-board').waitFor({ timeout: 3_000 });
     const zones = await remote.evaluate(() =>

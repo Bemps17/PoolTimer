@@ -7,6 +7,7 @@ import {
   matchWinner,
   mergeMatch,
   mergeMatchOptions,
+  scoreOnPhone,
   resetMatch,
   setFirstBreaker,
   skipLag,
@@ -164,6 +165,23 @@ describe('validation des données stockées', () => {
       showBreaker: false,
       sides: 'players',
       frameRestartsTimer: true,
+      showOnPhone: true,
     });
+    expect(mergeMatchOptions({ showOnPhone: false }).showOnPhone).toBe(false);
+  });
+});
+
+describe('score affiché sur le téléphone (indépendant de l’écran distant et de ⚙️)', () => {
+  it('is on by default once the score is enabled', () => {
+    expect(getDefaultMatchOptions().showOnPhone).toBe(true);
+    expect(scoreOnPhone({ ...getDefaultMatchOptions(), enabled: true })).toBe(true);
+  });
+
+  it('can be hidden on the phone while the score keeps running (settings + remote screen)', () => {
+    expect(scoreOnPhone({ ...getDefaultMatchOptions(), enabled: true, showOnPhone: false })).toBe(false);
+  });
+
+  it('never shows when the score is off', () => {
+    expect(scoreOnPhone({ ...getDefaultMatchOptions(), enabled: false, showOnPhone: true })).toBe(false);
   });
 });

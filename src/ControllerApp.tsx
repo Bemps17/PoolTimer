@@ -8,7 +8,7 @@ import { LagPrompt } from './components/LagPrompt';
 import { MatchEndDialog } from './components/MatchEndDialog';
 import { DiagnosticsPanel } from './components/DiagnosticsPanel';
 import { SyncDot } from './components/SyncDot';
-import { breakerAfterScoreDelta, MATCH_LIMITS, matchSummary, matchWinner } from './timer/match';
+import { breakerAfterScoreDelta, MATCH_LIMITS, matchSummary, matchWinner, scoreOnPhone } from './timer/match';
 import { displayPlayerName } from './timer/playerName';
 import type { PlayerId } from './timer/types';
 import { MatchScore } from './components/MatchScore';
@@ -172,7 +172,18 @@ export default function ControllerApp() {
   const viewOptions = timer.config.viewOptions;
   const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
   const isLandscape = useIsLandscape();
-  useOrientationLock(orientationLockTarget(viewOptions.landscape));
+  useOrientationLock(
+    orientationLockTarget(viewOptions.landscape),
+    useCallback(
+      (target: string) => {
+        // Seul le paysage forcé a besoin du verrou : on prévient si le téléphone le refuse.
+        if (target !== 'landscape') return;
+        setToastMessage('Paysage forcé : installez l’application (le navigateur refuse), ou utilisez Auto');
+        setToastVisible(true);
+      },
+      [],
+    ),
+  );
   const layout = boardLayout({ remoteActive, landscapeOption: viewOptions.landscape, isLandscape });
   // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
   useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
@@ -273,6 +284,7 @@ export default function ControllerApp() {
           state={timer.state}
           match={matchOptions.enabled ? mirrorMatch : undefined}
           remoteLevel={mirror.room ? mirror.level : undefined}
+          scoreOnSides={scoreOnPhone(matchOptions)}
           menuOpen={menuOpen}
           onScore={handleScore}
         />
@@ -285,7 +297,7 @@ export default function ControllerApp() {
           menuOpen={menuOpen}
           onToggleMinions={handleToggleMinions}
           matchBar={
-            matchOptions.enabled ? (
+            scoreOnPhone(matchOptions) ? (
               <MatchScore
                 match={mirrorMatch}
                 p1Name={timer.config.p1Name}
