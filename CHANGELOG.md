@@ -2,6 +2,21 @@
 
 Toutes les dates sont en UTC.
 
+## 3.3.0 — 2026-11-01
+
+- **Menu ⚙️ repensé** (QoL d’abord) : 5 onglets — Match (joueurs, chrono, score), Affichage (mode d’interface, écran distant), Apparence (thème, couleurs repliées, mes thèmes), Son, Plus (miroir, streaming, diagnostic, partage, application). Dernier onglet mémorisé.
+- **Mode d’interface séparé de l’apparence** : boutons visibles / invisibles d’un côté, thème et couleurs de l’autre.
+- **Contrôles** : `ToggleField` (interrupteurs, rôle `switch`), `SegmentedField` (choix segmentés), `SettingsCard` (sections toujours ouvertes), `SettingsDisclosure` (avancé replié). Options du score affichées seulement si le score est activé. Miroir et streaming convertis.
+- **Correctif** : chiffres dimensionnés sur la place libre (`.timer-content`) — EXTENSION et APRÈS CASSE ne sont plus masqués quand le score et la blanche sont visibles ; boutons d’action ≥ 44 px. Couvert en e2e (360×640, 360×780, 412×915).
+
+## 3.2.0 — 2026-11-01
+
+- **Chrono seul par défaut** : `matchOptions.enabled = false`, `showFerme = false` ; migration ponctuelle des configs ≤ 3.1 (`defaultsVersion = 2`).
+- **Voyant de synchro sans texte** (`SyncDot`, `mirror/syncLevel.ts`) : vert / orange (aller-retour > 300 ms, accusé > 3 s, état en course > 12 s) / rouge (relais coupé, pas d’écran ou de télécommande, accusé > 10 s). Écran Visuel épuré : chrono, score si activé, voyant, icône plein écran.
+- **Diagnostic** (`diagnostics/log.ts`) : mesures d’aller-retour (accusés de la télécommande, pings de l’écran), compteurs, journal borné persistant exportable en `.log`, secret masqué. ⚙️ → Appareil & partage → Diagnostic ; appui sur le voyant de l’écran Visuel.
+- **Batterie** (`timer/tickSchedule.ts`) : réveils alignés sur les changements d’affichage au lieu de 50 ms ; écran Visuel inactif chrono arrêté ; renvoi périodique 5 s ; voyant réévalué toutes les 2 s sans re-rendu inutile.
+- **Latence** : le Worker diffuse avant d’écrire, écritures et alarme en `allowUnconfirmed`. **Worker à redéployer.** E2E : ~100 ms télécommande → écran (local).
+
 ## 3.1.0 — 2026-11-01
 
 Suite de l’audit (TDD, scénario de bout en bout en CI).

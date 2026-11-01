@@ -126,7 +126,7 @@ export const TUTORIAL_SLIDES: TutorialSlide[] = [
   {
     id: 'streaming',
     title: 'Streaming OBS / Streamlabs',
-    caption: 'Ouvrez une salle, puis ⚙️ → Streaming : copiez le lien overlay dans une source Navigateur d’OBS ou Streamlabs. Fond transparent, chrono et score au choix.',
+    caption: 'Ouvrez une salle, puis ⚙️ → Plus → Streaming : copiez le lien overlay dans une source Navigateur d’OBS ou Streamlabs. Fond transparent, chrono et score au choix.',
     alt: 'Lien overlay collé dans OBS avec chrono et score sur fond transparent',
     ...slideImages('streaming'),
   },

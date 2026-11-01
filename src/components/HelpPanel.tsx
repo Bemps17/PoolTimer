@@ -37,7 +37,7 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               manche marquée.
             </li>
             <li>
-              <strong>Tirage à la bande :</strong> option dans ⚙️ → Score ; désigne le premier casseur une seule fois,
+              <strong>Tirage à la bande :</strong> option dans ⚙️ → Match → Score ; désigne le premier casseur une seule fois,
               au début du match. <strong>Nouveau match</strong> remet tout à zéro.
             </li>
             <li>L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche.</li>
@@ -47,11 +47,23 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           <ul>
             <li>
               Sur un preset ou un thème personnalisé : <strong>Partager</strong> → lien, QR code ou fichier. Le
-              destinataire ouvre le lien (ou ⚙️ → Partage &amp; import) et confirme après un aperçu.
+              destinataire ouvre le lien (ou ⚙️ → Plus → Partage &amp; import) et confirme après un aperçu.
             </li>
             <li>
               <strong>Écran toujours allumé</strong> : automatique sur l’écran Visuel et sur la télécommande quand une
               salle est ouverte. Si le message « Touchez l’écran » apparaît, un appui suffit.
+            </li>
+          </ul>
+
+          <h3>Voyant de synchro et diagnostic</h3>
+          <ul>
+            <li>
+              Un point de couleur, sans texte : <strong>vert</strong> = synchro OK, <strong>orange</strong> = latence,{' '}
+              <strong>rouge</strong> = interrompu (relais coupé, aucun écran ou aucune télécommande).
+            </li>
+            <li>
+              Détails et journal (.log) : ⚙️ → Plus → <strong>Diagnostic</strong>, ou appui sur le
+              voyant de l’écran Visuel.
             </li>
           </ul>
 
@@ -66,7 +78,7 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
           <h3>Streaming (OBS / Streamlabs)</h3>
           <ul>
             <li>
-              Ouvrez une salle, puis ⚙️ → <strong>Streaming</strong> : copiez le lien overlay et collez-le dans une
+              Ouvrez une salle, puis ⚙️ → Plus → <strong>Streaming</strong> : copiez le lien overlay et collez-le dans une
               source <strong>Navigateur</strong> d’OBS ou Streamlabs. Fond transparent, lecture seule.
             </li>
             <li>Choisissez chrono seul, score seul ou les deux, la disposition, la taille et le fond.</li>
@@ -144,7 +156,7 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>
               <strong>Les sons</strong> : pack classique (alertes d’origine du dépôt + cloche Tone.js), Pack Crétins et
               Pack Minions-like (originaux H8timer), tirage fixe ou aléatoire, bips 1 s ou alerte ~5 s. Pour des extraits
-              Voicemod « funny » : téléchargez-les vous-même puis ⚙️ → Bibliothèque d’alertes → Importer (l’app ne les
+              Voicemod « funny » : téléchargez-les vous-même puis ⚙️ → Son → Bibliothèque d’alertes → Importer (l’app ne les
               récupère pas).
             </li>
             <li>

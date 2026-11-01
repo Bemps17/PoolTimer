@@ -9,31 +9,27 @@ import {
   type OverlayOptions,
   type OverlayParts,
 } from '../mirror/overlay';
-import { NumberStepper, parseBooleanSelect, SelectField } from './NumberStepper';
+import { NumberStepper } from './NumberStepper';
+import { SegmentedField, ToggleField } from './SettingsControls';
 
 interface StreamSettingsProps {
   room: string | null;
   onCopied: (message: string) => void;
 }
 
-const YES_NO = [
-  { value: 'true', label: 'Oui' },
-  { value: 'false', label: 'Non' },
-];
-
-const PARTS = [
+const PARTS: Array<{ value: OverlayParts; label: string }> = [
+  { value: 'timer', label: 'Chrono' },
   { value: 'both', label: 'Chrono + score' },
-  { value: 'timer', label: 'Chrono seul' },
-  { value: 'score', label: 'Score seul' },
+  { value: 'score', label: 'Score' },
 ];
-const LAYOUTS = [
+const LAYOUTS: Array<{ value: OverlayLayout; label: string }> = [
   { value: 'row', label: 'Côte à côte' },
   { value: 'column', label: 'Empilés' },
 ];
-const BACKGROUNDS = [
-  { value: 'transparent', label: 'Transparent (recommandé)' },
-  { value: 'dark', label: 'Fond sombre semi-opaque' },
-  { value: 'chroma', label: 'Vert chroma (#00FF00)' },
+const BACKGROUNDS: Array<{ value: OverlayBackground; label: string }> = [
+  { value: 'transparent', label: 'Transparent' },
+  { value: 'dark', label: 'Sombre' },
+  { value: 'chroma', label: 'Vert chroma' },
 ];
 
 export function StreamSettings({ room, onCopied }: StreamSettingsProps) {
@@ -58,25 +54,13 @@ export function StreamSettings({ room, onCopied }: StreamSettingsProps) {
 
   return (
     <>
-      <p className="install-hint">
-        Affichez le chrono et/ou le score dans OBS Studio ou Streamlabs : ajoutez une source <strong>Navigateur</strong>{' '}
-        avec le lien ci-dessous (largeur 1280, hauteur 300 pour une bande ; décochez « Contrôler l’audio »). Lecture
-        seule, fond transparent. Le chrono tourne même si l’écran Visuel est fermé.
+      <p className="settings-hint">
+        Dans OBS ou Streamlabs : source <strong>Navigateur</strong> avec le lien ci-dessous (fond transparent, lecture seule).
       </p>
-      <SelectField
-        label="Contenu"
-        htmlId="overlayParts"
-        value={options.parts}
-        options={PARTS}
-        onChange={(parts) => patch({ parts: parts as OverlayParts })}
-      />
-      <SelectField
-        label="Disposition"
-        htmlId="overlayLayout"
-        value={options.layout}
-        options={LAYOUTS}
-        onChange={(layout) => patch({ layout: layout as OverlayLayout })}
-      />
+      <SegmentedField label="Contenu" value={options.parts} options={PARTS} onChange={(parts) => patch({ parts })} />
+      {options.parts === 'both' ? (
+        <SegmentedField label="Disposition" value={options.layout} options={LAYOUTS} onChange={(layout) => patch({ layout })} />
+      ) : null}
       <NumberStepper
         label="Taille des chiffres du chrono"
         htmlId="overlayScale"
@@ -87,34 +71,19 @@ export function StreamSettings({ room, onCopied }: StreamSettingsProps) {
         suffix="%"
         onChange={(scale) => patch({ scale })}
       />
-      <SelectField
+      <SegmentedField
         label="Fond"
-        htmlId="overlayBackground"
         value={options.background}
         options={BACKGROUNDS}
-        onChange={(background) => patch({ background: background as OverlayBackground })}
+        onChange={(background) => patch({ background })}
       />
-      <SelectField
-        label="Noms sur le score"
-        htmlId="overlayNames"
-        value={String(options.showNames)}
-        options={YES_NO}
-        onChange={(value) => patch({ showNames: parseBooleanSelect(value) })}
-      />
-      <SelectField
-        label="Casses fermes (F)"
-        htmlId="overlayFerme"
-        value={String(options.showFerme)}
-        options={YES_NO}
-        onChange={(value) => patch({ showFerme: parseBooleanSelect(value) })}
-      />
-      <SelectField
-        label="Blanche (qui casse)"
-        htmlId="overlayBreaker"
-        value={String(options.showBreaker)}
-        options={YES_NO}
-        onChange={(value) => patch({ showBreaker: parseBooleanSelect(value) })}
-      />
+      {options.parts !== 'timer' ? (
+        <>
+          <ToggleField label="Noms" checked={options.showNames} onChange={(showNames) => patch({ showNames })} />
+          <ToggleField label="Casses fermes (F)" checked={options.showFerme} onChange={(showFerme) => patch({ showFerme })} />
+          <ToggleField label="Blanche (qui casse)" checked={options.showBreaker} onChange={(showBreaker) => patch({ showBreaker })} />
+        </>
+      ) : null}
       {url ? (
         <>
           <p className="mirror-link">{url}</p>

@@ -160,7 +160,7 @@ describe('validation des données stockées', () => {
       enabled: false,
       lagAtStart: true,
       targetScore: 500,
-      showFerme: true,
+      showFerme: false, // valeur invalide -> défaut (masqué depuis v3.2)
       showBreaker: false,
       sides: 'players',
       frameRestartsTimer: true,

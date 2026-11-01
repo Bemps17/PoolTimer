@@ -186,10 +186,9 @@ export class TimerRoom extends DurableObject<Env> {
     }
 
     const step = this.writes.onPush({ isRunning: clientMessage.snapshot.isRunning, now: Date.now() });
-    if (step.persist) {
-      await this.ctx.storage.put('state', { seq: clientMessage.seq, snapshot: clientMessage.snapshot });
-    }
 
+    // Latence : diffuser AVANT d'écrire, et sans attendre la confirmation du stockage (allowUnconfirmed) —
+    // sinon la « porte de sortie » du Durable Object retient les messages jusqu'à la fin de l'écriture.
     const payload = JSON.stringify({
       type: 'snapshot',
       seq: clientMessage.seq,
@@ -200,6 +199,13 @@ export class TimerRoom extends DurableObject<Env> {
       this.sendRaw(peer, payload);
     }
     this.sendJson(ws, { type: 'push_ok', seq: clientMessage.seq });
+    if (step.persist) {
+      await this.ctx.storage.put(
+        'state',
+        { seq: clientMessage.seq, snapshot: clientMessage.snapshot },
+        { allowUnconfirmed: true },
+      );
+    }
     if (step.refreshAlarm) await this.touchAlarm();
   }
 
@@ -310,7 +316,7 @@ export class TimerRoom extends DurableObject<Env> {
   }
 
   private async touchAlarm(): Promise<void> {
-    await this.ctx.storage.setAlarm(Date.now() + ROOM_TTL_MS);
+    await this.ctx.storage.setAlarm(Date.now() + ROOM_TTL_MS, { allowUnconfirmed: true });
   }
 }
 

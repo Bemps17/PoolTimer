@@ -13,11 +13,13 @@ import {
 import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
 import type { DisplayLayout, RemoteLayout, RemoteScoreMode, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
+import { colorsForTheme } from '../timer/theme';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { previewAlertSound } from '../audio/toneAudio';
 import type { VolumeMode } from '../audio/loudness';
 import { dbToGain, gainToDb } from '../timer/volume';
-import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
+import { NumberStepper, VolumeSlider } from './NumberStepper';
+import { SegmentedField, SettingsCard, SettingsDisclosure, ToggleField } from './SettingsControls';
 import { ImportPanel } from './ImportPanel';
 import { PresetManager } from './PresetManager';
 import { ThemeLibrary } from './ThemeLibrary';
@@ -27,7 +29,6 @@ import type { CustomPreset } from '../timer/presets';
 import type { CustomTheme } from '../timer/themes';
 import type { PresetsController } from '../hooks/usePresets';
 import { PlayerNameField } from './PlayerNameField';
-import { SettingsSection } from './SettingsSection';
 import { SoundLibrarySettings } from './SoundLibrarySettings';
 import { ThemeColorEditor } from './ThemeColorEditor';
 
@@ -54,6 +55,7 @@ interface SettingsPanelProps {
   onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
   streamSection?: ReactNode;
+  diagnosticsSection?: ReactNode;
   presetsController: PresetsController;
   themesController: ThemesController;
   onNotify: (message: string) => void;
@@ -62,67 +64,65 @@ interface SettingsPanelProps {
   onImportEnvelope: (envelope: ShareEnvelope) => void;
 }
 
-const THEME_OPTIONS = [
+const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
   { value: 'sombre', label: 'Sombre' },
   { value: 'light', label: 'Clair' },
   { value: 'cyberpunk', label: 'Cyberpunk' },
-  { value: 'ffb', label: 'FFB Blackball (bleu)' },
-  { value: 'fbep', label: 'Ultimate FBEP (vert canard)' },
+  { value: 'ffb', label: 'FFB' },
+  { value: 'fbep', label: 'Ultimate' },
 ];
 
-const INTERFACE_OPTIONS = [
-  { value: 'boutons', label: 'Boutons Visibles' },
+const INTERFACE_OPTIONS: Array<{ value: InterfaceMode; label: string }> = [
+  { value: 'boutons', label: 'Boutons visibles' },
   { value: 'tactile', label: 'Boutons invisibles' },
 ];
 
-type SettingsTab = 'match' | 'apparence' | 'appareil';
+type SettingsTab = 'match' | 'affichage' | 'apparence' | 'son' | 'plus';
 
-const SETTINGS_TABS: Array<{ id: SettingsTab; label: string }> = [
-  { id: 'match', label: 'Match' },
-  { id: 'apparence', label: 'Apparence' },
-  { id: 'appareil', label: 'Appareil & partage' },
+const SETTINGS_TABS: Array<{ id: SettingsTab; label: string; icon: string }> = [
+  { id: 'match', label: 'Match', icon: '🎱' },
+  { id: 'affichage', label: 'Affichage', icon: '📱' },
+  { id: 'apparence', label: 'Apparence', icon: '🎨' },
+  { id: 'son', label: 'Son', icon: '🔊' },
+  { id: 'plus', label: 'Plus', icon: '⋯' },
 ];
 
-const SIDES_OPTIONS = [
-  { value: 'players', label: 'Joueurs (1 contre 1)' },
-  { value: 'teams', label: 'Équipes (A contre B)' },
+const TAB_STORAGE_KEY = 'h8timer.settings.tab';
+
+function loadTab(): SettingsTab {
+  try {
+    const saved = localStorage.getItem(TAB_STORAGE_KEY);
+    return SETTINGS_TABS.some((entry) => entry.id === saved) ? (saved as SettingsTab) : 'match';
+  } catch {
+    return 'match';
+  }
+}
+
+const SIDES_OPTIONS: Array<{ value: MatchOptions['sides']; label: string }> = [
+  { value: 'players', label: 'Joueurs' },
+  { value: 'teams', label: 'Équipes' },
 ];
 
-const VOLUME_MODE_OPTIONS = [
-  { value: 'max', label: 'Maximum (recommandé)' },
+const VOLUME_MODE_OPTIONS: Array<{ value: VolumeMode; label: string }> = [
+  { value: 'max', label: 'Maximum' },
   { value: 'custom', label: 'Réglable' },
 ];
 
-const YES_NO = [
-  { value: 'true', label: 'Oui' },
-  { value: 'false', label: 'Non' },
-];
-
-const ON_OFF = [
-  { value: 'true', label: 'Activés' },
-  { value: 'false', label: 'Désactivés' },
-];
-
-const VIBRATION = [
-  { value: 'true', label: 'Activée' },
-  { value: 'false', label: 'Désactivée' },
-];
-
-const REMOTE_LAYOUT_OPTIONS = [
-  { value: 'remote', label: 'Télécommande (chrono en vedette)' },
+const REMOTE_LAYOUT_OPTIONS: Array<{ value: RemoteLayout; label: string }> = [
+  { value: 'remote', label: 'Télécommande' },
   { value: 'classic', label: 'Classique' },
 ];
 
-const REMOTE_SCORE_OPTIONS = [
-  { value: 'compact', label: 'Bandeau compact' },
+const REMOTE_SCORE_OPTIONS: Array<{ value: RemoteScoreMode; label: string }> = [
+  { value: 'compact', label: 'Compact' },
   { value: 'full', label: 'Grand' },
   { value: 'hidden', label: 'Masqué' },
 ];
 
-const DISPLAY_LAYOUT_OPTIONS = [
-  { value: 'timer', label: 'Chrono en grand (score discret)' },
+const DISPLAY_LAYOUT_OPTIONS: Array<{ value: DisplayLayout; label: string }> = [
+  { value: 'timer', label: 'Chrono' },
   { value: 'balanced', label: 'Équilibré' },
-  { value: 'score', label: 'Score en grand' },
+  { value: 'score', label: 'Score' },
 ];
 
 const COMPETITION_PRESET_CARDS: Array<{
@@ -160,6 +160,7 @@ export function SettingsPanel({
   onSnoozeUpdate,
   extraSections,
   streamSection,
+  diagnosticsSection,
   presetsController,
   themesController,
   onNotify,
@@ -167,7 +168,15 @@ export function SettingsPanel({
   onShareTheme,
   onImportEnvelope,
 }: SettingsPanelProps) {
-  const [tab, setTab] = useState<SettingsTab>('match');
+  const [tab, setTab] = useState<SettingsTab>(() => loadTab());
+  const selectTab = (next: SettingsTab) => {
+    setTab(next);
+    try {
+      localStorage.setItem(TAB_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
+  };
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef({ startX: 0, startY: 0, moveX: 0, moveY: 0, isDragging: false });
@@ -278,439 +287,405 @@ export function SettingsPanel({
                 type="button"
                 role="tab"
                 id={`settings-tab-${entry.id}`}
+                aria-label={entry.label}
                 aria-selected={tab === entry.id}
                 aria-controls="settings-tabpanel"
                 className={`settings-tab${tab === entry.id ? ' active' : ''}`}
-                onClick={() => setTab(entry.id)}
+                onClick={() => selectTab(entry.id)}
               >
-                {entry.label}
+                <span className="settings-tab-icon" aria-hidden>
+                  {entry.icon}
+                </span>
+                <span>{entry.label}</span>
               </button>
             ))}
           </div>
           <div role="tabpanel" id="settings-tabpanel" aria-labelledby={`settings-tab-${tab}`}>
-          {tab === 'match' ? (
-            <>
-            <SettingsSection title="Joueurs" defaultOpen>
-              <PlayerNameField
-                label="Joueur 1"
-                nameId="p1Name"
-                colorId="p1Color"
-                name={config.p1Name}
-                color={config.p1Color}
-                seat={1}
-                onNameChange={(p1Name) => patch({ p1Name })}
-                onColorChange={(p1Color) => patch({ p1Color })}
-              />
-              <PlayerNameField
-                label="Joueur 2"
-                nameId="p2Name"
-                colorId="p2Color"
-                name={config.p2Name}
-                color={config.p2Color}
-                seat={2}
-                onNameChange={(p2Name) => patch({ p2Name })}
-                onColorChange={(p2Color) => patch({ p2Color })}
-              />
-              <p className="install-hint">Nom vide autorisé (affichage « Joueur 1 / 2 » à l’écran, sans réécrire P1).</p>
-            </SettingsSection>
-
-            <SettingsSection title="Score" defaultOpen>
-              <SelectField
-                label="Scoreur (1 contre 1)"
-                htmlId="matchEnabled"
-                value={String(config.matchOptions.enabled)}
-                options={YES_NO}
-                onChange={(value) => patchMatch({ enabled: parseBooleanSelect(value) })}
-              />
-              <SelectField
-                label="Tirage à la bande au début du match"
-                htmlId="matchLagAtStart"
-                value={String(config.matchOptions.lagAtStart)}
-                options={YES_NO}
-                onChange={(value) => patchMatch({ lagAtStart: parseBooleanSelect(value) })}
-              />
-              <p className="install-hint">
-                Sert à désigner le premier casseur (joueur ou équipe), une seule fois par match. Ensuite la casse alterne
-                à chaque manche marquée. Désactivé : la casse commence au joueur 1.
-              </p>
-              <SelectField
-                label="Joueurs ou équipes"
-                htmlId="matchSides"
-                value={config.matchOptions.sides}
-                options={SIDES_OPTIONS}
-                onChange={(sides) => patchMatch({ sides: sides as MatchOptions['sides'] })}
-              />
-              <SelectField
-                label="Marquer une manche relance le chrono"
-                htmlId="matchFrameRestartsTimer"
-                value={String(config.matchOptions.frameRestartsTimer)}
-                options={YES_NO}
-                onChange={(value) => patchMatch({ frameRestartsTimer: parseBooleanSelect(value) })}
-              />
-              <p className="install-hint">
-                Oui : un + au score lance la nouvelle manche du chrono (temps de base, extensions remises à zéro) avec le
-                joueur qui casse.
-              </p>
-              <NumberStepper
-                label="Course à (0 = sans limite)"
-                htmlId="matchTargetScore"
-                value={config.matchOptions.targetScore}
-                min={MATCH_LIMITS.targetScore.min}
-                max={MATCH_LIMITS.targetScore.max}
-                suffix=""
-                onChange={(targetScore) => patchMatch({ targetScore })}
-              />
-              <SelectField
-                label="Afficher les casses fermes (F)"
-                htmlId="matchShowFerme"
-                value={String(config.matchOptions.showFerme)}
-                options={YES_NO}
-                onChange={(value) => patchMatch({ showFerme: parseBooleanSelect(value) })}
-              />
-              <SelectField
-                label="Afficher la blanche (qui casse)"
-                htmlId="matchShowBreaker"
-                value={String(config.matchOptions.showBreaker)}
-                options={YES_NO}
-                onChange={(value) => patchMatch({ showBreaker: parseBooleanSelect(value) })}
-              />
-              <p className="install-hint">
-                Score et casses fermes sont deux compteurs séparés. Appui sur la blanche : inverser le casseur.
-              </p>
-              <button type="button" className="bouton-menu" onClick={onUndoMatch} disabled={!canUndoMatch}>
-                Annuler la dernière action du score
-              </button>
-              <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onNewMatch}>
-                Nouveau match (tout remettre à zéro)
-              </button>
-            </SettingsSection>
-
-            <SettingsSection title="Compétition & temps" defaultOpen>
-              <div className="preset-row" role="group" aria-label="Presets de compétition">
-                {COMPETITION_PRESET_CARDS.map((preset) => {
-                  const active = matchesCompetitionPreset(config, preset.mode);
-                  return (
-                    <button
-                      key={preset.mode}
-                      type="button"
-                      className={`preset-card ${preset.cardClass}${active ? ' active' : ''}`}
-                      aria-pressed={active}
-                      onClick={() => applyMode(preset.mode)}
-                    >
-                      {preset.label}
-                      <small>{preset.detail}</small>
-                    </button>
-                  );
-                })}
-              </div>
-              <PresetManager
-                config={config}
-                controller={presetsController}
-                onApply={(next) => onChange(next, { resetShot: true })}
-                onNotify={onNotify}
-                onShare={onSharePreset}
-              />
-              <p className="install-hint">
-                Presets de chronométrage uniquement. Changer le thème ou les couleurs ne change pas le preset. Ultimate
-                FBEP : pas d’après casse. Les autres gardent le bouton si le temps post-casse est distinct.
-              </p>
-              <NumberStepper
-                label="Temps de base (sec)"
-                htmlId="tempsBase"
-                value={config.tempsBase}
-                min={CONFIG_LIMITS.tempsBase.min}
-                max={CONFIG_LIMITS.tempsBase.max}
-                suffix="s"
-                onChange={(tempsBase) =>
-                  patchTimings(hideApresCasse ? { tempsBase, tempsApresCasse: tempsBase } : { tempsBase }, true)
-                }
-              />
-              {hideApresCasse ? null : (
-                <NumberStepper
-                  label={`Temps après casse (${formatSecondsClock(config.tempsApresCasse)})`}
-                  htmlId="tempsApresCasse"
-                  value={config.tempsApresCasse}
-                  min={CONFIG_LIMITS.tempsApresCasse.min}
-                  max={CONFIG_LIMITS.tempsApresCasse.max}
-                  suffix="s"
-                  onChange={(tempsApresCasse) => patchTimings({ tempsApresCasse }, true)}
-                />
-              )}
-              <NumberStepper
-                label="Temps d'extension (sec)"
-                htmlId="tempsExtension"
-                value={config.tempsExtension}
-                min={CONFIG_LIMITS.tempsExtension.min}
-                max={CONFIG_LIMITS.tempsExtension.max}
-                suffix="s"
-                onChange={(tempsExtension) => patchTimings({ tempsExtension })}
-              />
-              <NumberStepper
-                label="Seuil Alerte Orange (sec)"
-                htmlId="seuilAlerte"
-                value={config.seuilAlerte}
-                min={CONFIG_LIMITS.seuilAlerte.min}
-                max={CONFIG_LIMITS.seuilAlerte.max}
-                suffix="s"
-                onChange={(seuilAlerte) => patchTimings({ seuilAlerte })}
-              />
-              <NumberStepper
-                label="Seuil Alerte Rouge (sec)"
-                htmlId="seuilCritique"
-                value={config.seuilCritique}
-                min={CONFIG_LIMITS.seuilCritique.min}
-                max={CONFIG_LIMITS.seuilCritique.max}
-                suffix="s"
-                onChange={(seuilCritique) => patchTimings({ seuilCritique })}
-              />
-              <p className="install-hint">+/− ou saisie au clavier (pavé numérique).</p>
-            </SettingsSection>
-
-            <SettingsSection title="Automatisation">
-              <SelectField
-                label="Redémarrage auto après nouveau coup"
-                htmlId="autoStartOnReset"
-                value={String(config.autoStartOnReset)}
-                options={YES_NO}
-                onChange={(value) => patch({ autoStartOnReset: parseBooleanSelect(value) })}
-              />
-              <p className="install-hint">
-                Après un nouveau coup (double appui ou reset). Désactivé : le chrono reste figé.
-              </p>
-              <SelectField
-                label="Relancer le chrono au clic joueur"
-                htmlId="autoStartOnPlayerSelect"
-                value={String(config.autoStartOnPlayerSelect)}
-                options={YES_NO}
-                onChange={(value) => patch({ autoStartOnPlayerSelect: parseBooleanSelect(value) })}
-              />
-              {config.minionsUnlocked ? (
-                <>
-                  <SelectField
-                    label="Mode Minions"
-                    htmlId="minionsMode"
-                    value={String(config.minionsMode)}
-                    options={YES_NO}
-                    onChange={(value) => patch({ minionsMode: parseBooleanSelect(value) })}
+            {tab === 'match' ? (
+              <>
+                <SettingsCard title="Joueurs">
+                  <PlayerNameField
+                    label="Joueur 1"
+                    nameId="p1Name"
+                    colorId="p1Color"
+                    name={config.p1Name}
+                    color={config.p1Color}
+                    seat={1}
+                    onNameChange={(p1Name) => patch({ p1Name })}
+                    onColorChange={(p1Color) => patch({ p1Color })}
                   />
-                  <p className="install-hint">
-                    Cri Arghh historique à la première alerte orange. Même raccourci : appui long sur NEW.
-                  </p>
-                </>
-              ) : null}
-            </SettingsSection>
+                  <PlayerNameField
+                    label="Joueur 2"
+                    nameId="p2Name"
+                    colorId="p2Color"
+                    name={config.p2Name}
+                    color={config.p2Color}
+                    seat={2}
+                    onNameChange={(p2Name) => patch({ p2Name })}
+                    onColorChange={(p2Color) => patch({ p2Color })}
+                  />
+                </SettingsCard>
 
-            </>
-          ) : null}
-          {tab === 'apparence' ? (
-            <>
-            <SettingsSection title="Apparence">
-              <SelectField
-                label="Thème visuel"
-                htmlId="themeVisuel"
-                value={config.theme}
-                options={THEME_OPTIONS}
-                onChange={(theme) => onChange(applyNamedTheme(config, theme as Theme))}
-              />
-              <p className="install-hint">
-                Un thème remplit toutes les couleurs de zone. Vous pouvez ensuite les modifier sans toucher au preset de
-                compétition (FFB, Ultimate, TD/TN, Master).
-              </p>
-              <ThemeColorEditor colors={config.colors} onChange={(colors) => patch({ colors })} />
-              <button
-                type="button"
-                className="bouton-menu bouton-menu-secondary"
-                onClick={() => onChange(applyNamedTheme(config, config.theme))}
-              >
-                Réinitialiser les couleurs du thème
-              </button>
-              <ThemeLibrary
-                config={config}
-                controller={themesController}
-                onApply={(next) => onChange(next)}
-                onShare={onShareTheme}
-                onNotify={onNotify}
-              />
-              <SelectField
-                label="Mode d'interface"
-                htmlId="modeInterface"
-                value={config.modeInterface}
-                options={INTERFACE_OPTIONS}
-                onChange={(modeInterface) => patch({ modeInterface: modeInterface as InterfaceMode })}
-              />
-              <NumberStepper
-                label="Taille des chiffres"
-                htmlId="tailleChiffres"
-                value={config.tailleChiffres}
-                min={CONFIG_LIMITS.tailleChiffres.min}
-                max={CONFIG_LIMITS.tailleChiffres.max}
-                step={10}
-                suffix="%"
-                onChange={(tailleChiffres) => patch({ tailleChiffres })}
-              />
-              <SelectField
-                label="Affichage millisecondes (sous 10s)"
-                htmlId="affichageMs"
-                value={String(config.affichageMs)}
-                options={YES_NO}
-                onChange={(value) => patch({ affichageMs: parseBooleanSelect(value) })}
-              />
-              <button
-                type="button"
-                className="bouton-menu"
-                id="btnFullScreen"
-                aria-pressed={isFullscreen}
-                onClick={onToggleFullscreen}
-              >
-                {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
-              </button>
-              <p className="install-hint">Utile dans le navigateur. En app installée, c’est déjà plein écran.</p>
-            </SettingsSection>
+                <SettingsCard title="Chrono">
+                  <div className="preset-row" role="group" aria-label="Presets de compétition">
+                    {COMPETITION_PRESET_CARDS.map((preset) => {
+                      const active = matchesCompetitionPreset(config, preset.mode);
+                      return (
+                        <button
+                          key={preset.mode}
+                          type="button"
+                          className={`preset-card ${preset.cardClass}${active ? ' active' : ''}`}
+                          aria-pressed={active}
+                          onClick={() => applyMode(preset.mode)}
+                        >
+                          {preset.label}
+                          <small>{preset.detail}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <NumberStepper
+                    label="Temps de base"
+                    htmlId="tempsBase"
+                    value={config.tempsBase}
+                    min={CONFIG_LIMITS.tempsBase.min}
+                    max={CONFIG_LIMITS.tempsBase.max}
+                    suffix="s"
+                    onChange={(tempsBase) =>
+                      patchTimings(hideApresCasse ? { tempsBase, tempsApresCasse: tempsBase } : { tempsBase }, true)
+                    }
+                  />
+                  {hideApresCasse ? null : (
+                    <NumberStepper
+                      label={`Après casse (${formatSecondsClock(config.tempsApresCasse)})`}
+                      htmlId="tempsApresCasse"
+                      value={config.tempsApresCasse}
+                      min={CONFIG_LIMITS.tempsApresCasse.min}
+                      max={CONFIG_LIMITS.tempsApresCasse.max}
+                      suffix="s"
+                      onChange={(tempsApresCasse) => patchTimings({ tempsApresCasse }, true)}
+                    />
+                  )}
+                  <NumberStepper
+                    label="Extension"
+                    htmlId="tempsExtension"
+                    value={config.tempsExtension}
+                    min={CONFIG_LIMITS.tempsExtension.min}
+                    max={CONFIG_LIMITS.tempsExtension.max}
+                    suffix="s"
+                    onChange={(tempsExtension) => patchTimings({ tempsExtension })}
+                  />
+                  <SettingsDisclosure title="Mes presets">
+                    <PresetManager
+                      config={config}
+                      controller={presetsController}
+                      onApply={(next) => onChange(next, { resetShot: true })}
+                      onNotify={onNotify}
+                      onShare={onSharePreset}
+                    />
+                  </SettingsDisclosure>
+                  <SettingsDisclosure title="Réglages avancés">
+                    <NumberStepper
+                      label="Seuil alerte orange"
+                      htmlId="seuilAlerte"
+                      value={config.seuilAlerte}
+                      min={CONFIG_LIMITS.seuilAlerte.min}
+                      max={CONFIG_LIMITS.seuilAlerte.max}
+                      suffix="s"
+                      onChange={(seuilAlerte) => patchTimings({ seuilAlerte })}
+                    />
+                    <NumberStepper
+                      label="Seuil alerte rouge"
+                      htmlId="seuilCritique"
+                      value={config.seuilCritique}
+                      min={CONFIG_LIMITS.seuilCritique.min}
+                      max={CONFIG_LIMITS.seuilCritique.max}
+                      suffix="s"
+                      onChange={(seuilCritique) => patchTimings({ seuilCritique })}
+                    />
+                    <ToggleField
+                      label="Redémarrage auto après nouveau coup"
+                      checked={config.autoStartOnReset}
+                      onChange={(autoStartOnReset) => patch({ autoStartOnReset })}
+                    />
+                    <ToggleField
+                      label="Relancer le chrono au clic joueur"
+                      checked={config.autoStartOnPlayerSelect}
+                      onChange={(autoStartOnPlayerSelect) => patch({ autoStartOnPlayerSelect })}
+                    />
+                  </SettingsDisclosure>
+                </SettingsCard>
 
-            <SettingsSection title="Affichage télécommande & écran">
-              <SelectField
-                label="Vue du téléphone quand une salle est ouverte"
-                htmlId="remoteLayout"
-                value={config.viewOptions.remoteLayout}
-                options={REMOTE_LAYOUT_OPTIONS}
-                onChange={(remoteLayout) => patchView({ remoteLayout: remoteLayout as RemoteLayout })}
-              />
-              <SelectField
-                label="Score sur la télécommande"
-                htmlId="remoteScore"
-                value={config.viewOptions.remoteScore}
-                options={REMOTE_SCORE_OPTIONS}
-                onChange={(remoteScore) => patchView({ remoteScore: remoteScore as RemoteScoreMode })}
-              />
-              <SelectField
-                label="Garder l’écran du téléphone allumé"
-                htmlId="remoteWakeLock"
-                value={String(config.viewOptions.remoteWakeLock)}
-                options={YES_NO}
-                onChange={(value) => patchView({ remoteWakeLock: parseBooleanSelect(value) })}
-              />
-              <SelectField
-                label="Mise en page de l’écran Visuel"
-                htmlId="displayLayout"
-                value={config.viewOptions.displayLayout}
-                options={DISPLAY_LAYOUT_OPTIONS}
-                onChange={(displayLayout) => patchView({ displayLayout: displayLayout as DisplayLayout })}
-              />
-              <p className="install-hint">
-                Le chrono reste toujours l’élément principal. « Chrono en grand » réduit le score à un bandeau discret ;
-                le choix s’applique à tous les écrans Visuel de la salle.
-              </p>
-            </SettingsSection>
-
-            </>
-          ) : null}
-          {tab === 'appareil' ? (
-            <>
-            <SettingsSection title="Sons & vibration">
-              <SelectField
-                label="Volume des alertes"
-                htmlId="volumeMode"
-                value={config.volumeMode}
-                options={VOLUME_MODE_OPTIONS}
-                onChange={(volumeMode) => patch({ volumeMode: volumeMode as VolumeMode })}
-              />
-              {config.volumeMode === 'custom' ? (
-                <VolumeSlider
-                  label="Niveau réglable"
-                  htmlId="volumeSonore"
-                  gain={dbToGain(config.volume)}
-                  onChange={(gain) => patch({ volume: gainToDb(gain) })}
-                />
-              ) : null}
-              <button
-                type="button"
-                className="bouton-menu"
-                onClick={() => previewAlertSound('classic-alert-time', { ...config, sonAlertes: true })}
-              >
-                Tester le volume
-              </button>
-              <p className="install-hint">
-                Maximum : l’application pousse le son au plus fort (gain + limiteur anti-saturation). Elle ne peut pas
-                dépasser le volume média du téléphone : montez-le au maximum avec les boutons de volume, et sur iPhone
-                désactivez le mode silencieux.
-              </p>
-              <SelectField
-                label="Sons d'alerte (timer)"
-                htmlId="sonAlertes"
-                value={String(config.sonAlertes)}
-                options={ON_OFF}
-                onChange={(value) => patch({ sonAlertes: parseBooleanSelect(value) })}
-              />
-              <SelectField
-                label="Sons des clics (interface)"
-                htmlId="sonClics"
-                value={String(config.sonClics)}
-                options={ON_OFF}
-                onChange={(value) => patch({ sonClics: parseBooleanSelect(value) })}
-              />
-              <SelectField
-                label="Vibration mobile"
-                htmlId="vibrationMobile"
-                value={String(config.vibration)}
-                options={VIBRATION}
-                onChange={(value) => patch({ vibration: parseBooleanSelect(value) })}
-              />
-              <SoundLibrarySettings config={config} onChange={(next) => onChange(next)} />
-            </SettingsSection>
-
-            {extraSections ? <SettingsSection title="Miroir télécommande">{extraSections}</SettingsSection> : null}
-
-            {streamSection ? (
-              <SettingsSection title="Streaming (OBS / Streamlabs)">{streamSection}</SettingsSection>
+                <SettingsCard title="Score">
+                  <ToggleField
+                    label="Afficher le score"
+                    checked={config.matchOptions.enabled}
+                    onChange={(enabled) => patchMatch({ enabled })}
+                  />
+                  {config.matchOptions.enabled ? (
+                    <>
+                      <SegmentedField
+                        label="Qui joue"
+                        value={config.matchOptions.sides}
+                        options={SIDES_OPTIONS}
+                        onChange={(sides) => patchMatch({ sides })}
+                      />
+                      <NumberStepper
+                        label="Course à (0 = sans limite)"
+                        htmlId="matchTargetScore"
+                        value={config.matchOptions.targetScore}
+                        min={MATCH_LIMITS.targetScore.min}
+                        max={MATCH_LIMITS.targetScore.max}
+                        suffix=""
+                        onChange={(targetScore) => patchMatch({ targetScore })}
+                      />
+                      <ToggleField
+                        label="Casses fermes (F)"
+                        checked={config.matchOptions.showFerme}
+                        onChange={(showFerme) => patchMatch({ showFerme })}
+                      />
+                      <ToggleField
+                        label="Blanche (qui casse)"
+                        checked={config.matchOptions.showBreaker}
+                        onChange={(showBreaker) => patchMatch({ showBreaker })}
+                        hint="Appui sur la blanche pour inverser le casseur."
+                      />
+                      <ToggleField
+                        label="Tirage à la bande au début du match"
+                        checked={config.matchOptions.lagAtStart}
+                        onChange={(lagAtStart) => patchMatch({ lagAtStart })}
+                      />
+                      <ToggleField
+                        label="Marquer une manche relance le chrono"
+                        checked={config.matchOptions.frameRestartsTimer}
+                        onChange={(frameRestartsTimer) => patchMatch({ frameRestartsTimer })}
+                      />
+                      <div className="settings-actions">
+                        <button type="button" className="bouton-menu" onClick={onUndoMatch} disabled={!canUndoMatch}>
+                          Annuler la dernière action
+                        </button>
+                        <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onNewMatch}>
+                          Nouveau match
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </SettingsCard>
+              </>
             ) : null}
 
-            <SettingsSection title="Partage & import">
-              <ImportPanel onImport={onImportEnvelope} />
-            </SettingsSection>
-
-            <SettingsSection title="Application">
-              <p className="app-version">H8timer v{APP_VERSION}</p>
-              <button
-                type="button"
-                className="bouton-menu"
-                onClick={onInstall}
-                disabled={installCopy.disabled}
-              >
-                {installCopy.label}
-              </button>
-              <p className="install-hint">{installCopy.hint}</p>
-              <button type="button" className="bouton-menu" onClick={onCheckUpdates}>
-                Vérifier les mises à jour
-              </button>
-              <p className="install-hint">Compare la version installée avec le serveur.</p>
-              {updateAvailable && onApplyUpdate && onSnoozeUpdate ? (
-                <div className="update-settings">
-                  <p className="install-hint">
-                    {incomingVersion
-                      ? `Nouvelle version détectée : v${incomingVersion}.`
-                      : 'Une nouvelle version est prête.'}{' '}
-                    {rollbackCopy({ updateAvailable: true, snoozed: updateSnoozed }).message}
-                  </p>
-                  <button type="button" className="bouton-menu" onClick={onApplyUpdate}>
-                    Mettre à jour
+            {tab === 'affichage' ? (
+              <>
+                <SettingsCard title="Mode d’interface">
+                  <SegmentedField
+                    label="Boutons à l’écran"
+                    value={config.modeInterface}
+                    options={INTERFACE_OPTIONS}
+                    onChange={(modeInterface) => patch({ modeInterface })}
+                    hint={
+                      config.modeInterface === 'tactile'
+                        ? 'Commandes au toucher : appui = départ / pause, double appui = nouveau coup.'
+                        : undefined
+                    }
+                  />
+                  <NumberStepper
+                    label="Taille des chiffres"
+                    htmlId="tailleChiffres"
+                    value={config.tailleChiffres}
+                    min={CONFIG_LIMITS.tailleChiffres.min}
+                    max={CONFIG_LIMITS.tailleChiffres.max}
+                    step={10}
+                    suffix="%"
+                    onChange={(tailleChiffres) => patch({ tailleChiffres })}
+                  />
+                  <ToggleField
+                    label="Dixièmes sous 10 s"
+                    checked={config.affichageMs}
+                    onChange={(affichageMs) => patch({ affichageMs })}
+                  />
+                  <button
+                    type="button"
+                    className="bouton-menu bouton-menu-secondary"
+                    id="btnFullScreen"
+                    aria-pressed={isFullscreen}
+                    onClick={onToggleFullscreen}
+                  >
+                    {isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
                   </button>
-                  <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onSnoozeUpdate}>
-                    Rester sur cette version
-                  </button>
-                </div>
-              ) : (
-                <p className="install-hint">{rollbackCopy({ updateAvailable: false, snoozed: false }).message}</p>
-              )}
-              <button type="button" className="bouton-menu" onClick={onShowChangelog}>
-                Historique des versions
-              </button>
-              <button type="button" className="bouton-menu" onClick={onShowHelp}>
-                Mode d'emploi
-              </button>
-            </SettingsSection>
+                </SettingsCard>
 
-            </>
-          ) : null}
+                <SettingsCard title="Écran distant">
+                  <SegmentedField
+                    label="Téléphone quand une salle est ouverte"
+                    value={config.viewOptions.remoteLayout}
+                    options={REMOTE_LAYOUT_OPTIONS}
+                    onChange={(remoteLayout) => patchView({ remoteLayout })}
+                  />
+                  {config.matchOptions.enabled ? (
+                    <>
+                      <SegmentedField
+                        label="Score sur la télécommande"
+                        value={config.viewOptions.remoteScore}
+                        options={REMOTE_SCORE_OPTIONS}
+                        onChange={(remoteScore) => patchView({ remoteScore })}
+                      />
+                      <SegmentedField
+                        label="Écran Visuel"
+                        value={config.viewOptions.displayLayout}
+                        options={DISPLAY_LAYOUT_OPTIONS}
+                        onChange={(displayLayout) => patchView({ displayLayout })}
+                      />
+                    </>
+                  ) : null}
+                  <ToggleField
+                    label="Garder l’écran du téléphone allumé"
+                    checked={config.viewOptions.remoteWakeLock}
+                    onChange={(remoteWakeLock) => patchView({ remoteWakeLock })}
+                  />
+                </SettingsCard>
+              </>
+            ) : null}
+
+            {tab === 'apparence' ? (
+              <>
+                <SettingsCard title="Thème">
+                  <div className="theme-picker" role="radiogroup" aria-label="Thème">
+                    {THEME_OPTIONS.map((option) => {
+                      const swatch = colorsForTheme(option.value);
+                      const active = config.theme === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          className={`theme-choice${active ? ' active' : ''}`}
+                          onClick={() => onChange(applyNamedTheme(config, option.value))}
+                        >
+                          <span
+                            className="theme-swatch"
+                            aria-hidden
+                            style={{ background: swatch.screen, color: swatch.digitDefault, borderColor: swatch.primary }}
+                          >
+                            45
+                          </span>
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <SettingsDisclosure title="Personnaliser les couleurs">
+                    <ThemeColorEditor colors={config.colors} onChange={(colors) => patch({ colors })} />
+                    <button
+                      type="button"
+                      className="bouton-menu bouton-menu-secondary"
+                      onClick={() => onChange(applyNamedTheme(config, config.theme))}
+                    >
+                      Réinitialiser les couleurs du thème
+                    </button>
+                  </SettingsDisclosure>
+                </SettingsCard>
+                <SettingsCard title="Mes thèmes">
+                  <ThemeLibrary
+                    config={config}
+                    controller={themesController}
+                    onApply={(next) => onChange(next)}
+                    onShare={onShareTheme}
+                    onNotify={onNotify}
+                  />
+                </SettingsCard>
+              </>
+            ) : null}
+
+            {tab === 'son' ? (
+              <>
+                <SettingsCard title="Volume">
+                  <SegmentedField
+                    label="Volume des alertes"
+                    value={config.volumeMode}
+                    options={VOLUME_MODE_OPTIONS}
+                    onChange={(volumeMode) => patch({ volumeMode })}
+                    hint="Montez aussi le volume média du téléphone ; sur iPhone, désactivez le mode silencieux."
+                  />
+                  {config.volumeMode === 'custom' ? (
+                    <VolumeSlider
+                      label="Niveau"
+                      htmlId="volumeSonore"
+                      gain={dbToGain(config.volume)}
+                      onChange={(gain) => patch({ volume: gainToDb(gain) })}
+                    />
+                  ) : null}
+                  <button
+                    type="button"
+                    className="bouton-menu"
+                    onClick={() => previewAlertSound('classic-alert-time', { ...config, sonAlertes: true })}
+                  >
+                    Tester le son
+                  </button>
+                </SettingsCard>
+                <SettingsCard title="Alertes & vibration">
+                  <ToggleField label="Alertes sonores" checked={config.sonAlertes} onChange={(sonAlertes) => patch({ sonAlertes })} />
+                  <ToggleField label="Sons des boutons" checked={config.sonClics} onChange={(sonClics) => patch({ sonClics })} />
+                  <ToggleField label="Vibration" checked={config.vibration} onChange={(vibration) => patch({ vibration })} />
+                  {config.minionsUnlocked ? (
+                    <ToggleField
+                      label="Mode Minions"
+                      checked={config.minionsMode}
+                      onChange={(minionsMode) => patch({ minionsMode })}
+                      hint="Cri Arghh à la première alerte orange (raccourci : appui long sur NEW)."
+                    />
+                  ) : null}
+                  <SettingsDisclosure title="Bibliothèque d’alertes">
+                    <SoundLibrarySettings config={config} onChange={(next) => onChange(next)} />
+                  </SettingsDisclosure>
+                </SettingsCard>
+              </>
+            ) : null}
+
+            {tab === 'plus' ? (
+              <>
+                {extraSections ? <SettingsCard title="Miroir télécommande">{extraSections}</SettingsCard> : null}
+                {streamSection ? <SettingsCard title="Streaming (OBS / Streamlabs)">{streamSection}</SettingsCard> : null}
+                {diagnosticsSection ? <SettingsCard title="Diagnostic">{diagnosticsSection}</SettingsCard> : null}
+                <SettingsCard title="Partage & import">
+                  <ImportPanel onImport={onImportEnvelope} />
+                </SettingsCard>
+                <SettingsCard title="Application">
+                  <p className="app-version">H8timer v{APP_VERSION}</p>
+                  {updateAvailable && onApplyUpdate && onSnoozeUpdate ? (
+                    <div className="update-settings">
+                      <p className="settings-hint">
+                        {incomingVersion ? `Nouvelle version : v${incomingVersion}.` : 'Une nouvelle version est prête.'}{' '}
+                        {rollbackCopy({ updateAvailable: true, snoozed: updateSnoozed }).message}
+                      </p>
+                      <button type="button" className="bouton-menu" onClick={onApplyUpdate}>
+                        Mettre à jour
+                      </button>
+                      <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onSnoozeUpdate}>
+                        Rester sur cette version
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" className="bouton-menu" onClick={onCheckUpdates}>
+                      Vérifier les mises à jour
+                    </button>
+                  )}
+                  {installCopy.disabled ? null : (
+                    <button type="button" className="bouton-menu" onClick={onInstall}>
+                      {installCopy.label}
+                    </button>
+                  )}
+                  <div className="settings-actions">
+                    <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onShowHelp}>
+                      Mode d’emploi
+                    </button>
+                    <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onShowChangelog}>
+                      Nouveautés
+                    </button>
+                  </div>
+                </SettingsCard>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

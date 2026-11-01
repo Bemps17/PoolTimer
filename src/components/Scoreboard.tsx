@@ -6,6 +6,8 @@ import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcc
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
 import { PlayerStatus } from './PlayerStatus';
+import { SyncDot } from './SyncDot';
+import type { SyncLevel } from '../mirror/syncLevel';
 
 interface ScoreboardProps {
   config: TimerConfig;
@@ -22,7 +24,7 @@ interface ScoreboardProps {
   /** Scoreur 1v1 (score, F, blanche), affiché sous les bandeaux joueurs. */
   matchBar?: ReactNode;
   /** Vue télécommande (salle miroir ouverte) : chrono en vedette, grosses commandes. */
-  remote?: { label: string; health: string; scorePlacement: 'compact' | 'full' | 'hidden' };
+  remote?: { level: SyncLevel; scorePlacement: 'compact' | 'full' | 'hidden' };
 }
 
 export function Scoreboard({
@@ -42,6 +44,7 @@ export function Scoreboard({
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const tapSessionRef = useRef(createScreenTapSession());
   const pendingTapTimeoutRef = useRef<number | null>(null);
   const playButtonPointerAtRef = useRef(0);
@@ -52,20 +55,22 @@ export function Scoreboard({
     unlockedThisPress: false,
   });
 
+  // Taille des chiffres = place réellement libre pour eux (hors APRÈS CASSE / EXTENSION), sinon ils repoussent
+  // les boutons d'action sous la barre de commandes quand le score occupe de la hauteur.
   const resizeTimer = useCallback(() => {
-    const screen = screenRef.current;
+    const area = contentRef.current;
     const timer = timerRef.current;
-    if (!screen || !timer) return;
-    const screenWidth = screen.clientWidth - 16;
-    const screenHeight = screen.clientHeight - 16;
-    timer.style.fontSize = `${computeTimerFontSize(screenWidth, screenHeight, config.tailleChiffres)}px`;
+    if (!area || !timer) return;
+    const width = area.clientWidth - 8;
+    const height = area.clientHeight - 8;
+    timer.style.fontSize = `${computeTimerFontSize(width, height, config.tailleChiffres)}px`;
   }, [config.tailleChiffres]);
 
   useEffect(() => {
     resizeTimer();
-    const screen = screenRef.current;
+    const area = contentRef.current;
     const observer = new ResizeObserver(resizeTimer);
-    if (screen) observer.observe(screen);
+    if (area) observer.observe(area);
     window.addEventListener('resize', resizeTimer);
     document.addEventListener('fullscreenchange', resizeTimer);
     return () => {
@@ -204,12 +209,6 @@ export function Scoreboard({
     >
       <h1 className="visually-hidden">H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
       <header className="top-bar">
-        {remote ? (
-          <p className={`remote-badge remote-badge-${remote.health}`} aria-live="polite">
-            <span className="remote-badge-dot" aria-hidden />
-            {remote.label}
-          </p>
-        ) : null}
         <div className="top-bar-players">
           <PlayerStatus
             name={config.p1Name}
@@ -244,7 +243,12 @@ export function Scoreboard({
         }}
         onClick={(event) => handleTimerScreenTap('click', event)}
       >
-        <div className="timer-content">
+        {remote ? (
+          <span className="remote-sync-dot">
+            <SyncDot level={remote.level} />
+          </span>
+        ) : null}
+        <div className="timer-content" ref={contentRef}>
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>
             {displayText}
           </div>

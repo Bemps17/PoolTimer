@@ -49,6 +49,8 @@ function stopAll() {
 }
 
 async function uncoveredTapTargets(page) {
+  const count = await page.locator('.match-bar button').count();
+  if (count < 6) return [`seulement ${count} bouton(s) de score trouvé(s)`];
   return page.evaluate(() =>
     [...document.querySelectorAll('.match-bar button')]
       .filter((button) => {
@@ -57,6 +59,20 @@ async function uncoveredTapTargets(page) {
         return box.width < 44 || box.height < 44 || !(hit === button || button.contains(hit));
       })
       .map((button) => button.getAttribute('aria-label')),
+  );
+}
+
+/** Boutons d'action (APRÈS CASSE, EXTENSION) et commandes : entiers à l'écran et non recouverts. */
+async function hiddenActions(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.timer-action-bar, .control-panel .bouton-sport')]
+      .filter((element) => getComputedStyle(element).display !== 'none')
+      .filter((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        return box.height < 44 || box.bottom > innerHeight || box.top < 0 || !(hit === element || element.contains(hit));
+      })
+      .map((element) => element.getAttribute('aria-label') ?? element.textContent?.trim()),
   );
 }
 
@@ -73,14 +89,40 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
+    // Petits écrans : score + blanche + casses fermes ne doivent jamais masquer EXTENSION ni les commandes.
+    for (const [width, height] of [[360, 640], [360, 780], [412, 915]]) {
+      const small = await (await browser.newContext({ viewport: { width, height } })).newPage();
+      await small.goto(APP);
+      await small.evaluate(() =>
+        localStorage.setItem(
+          'billiardTimerConfig',
+          JSON.stringify({ defaultsVersion: 2, matchOptions: { enabled: true, showFerme: true, showBreaker: true } }),
+        ),
+      );
+      await small.reload();
+      await small.locator('.match-bar').waitFor();
+      const hidden = await hiddenActions(small);
+      assert(hidden.length === 0, `${width}×${height}, score + blanche + F : EXTENSION et commandes visibles ${hidden.join(', ')}`);
+      await small.context().close();
+    }
+
     const remote = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
     await remote.goto(APP);
+    await remote.evaluate(() => localStorage.clear());
+    await remote.reload();
+    await remote.locator('#timerDisplay').waitFor();
+    assert((await remote.locator('.match-bar').count()) === 0, 'installation neuve : le chrono seul, pas de score');
     await remote.evaluate(() => {
       localStorage.clear();
       localStorage.setItem('h8timer.beta.mirror', '1');
       localStorage.setItem(
         'billiardTimerConfig',
-        JSON.stringify({ p1Name: 'Dupont', p2Name: 'Martin', matchOptions: { enabled: true, frameRestartsTimer: true, targetScore: 2 } }),
+        JSON.stringify({
+          defaultsVersion: 2,
+          p1Name: 'Dupont',
+          p2Name: 'Martin',
+          matchOptions: { enabled: true, showFerme: true, frameRestartsTimer: true, targetScore: 2 },
+        }),
       );
     });
     await remote.reload();
@@ -88,7 +130,7 @@ async function main() {
     const classic = await uncoveredTapTargets(remote);
     assert(classic.length === 0, `scoreur grand (vue classique) sur 360 px : boutons ≥ 44 px et accessibles ${classic.join(', ')}`);
     await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
-    await remote.getByRole('tab', { name: 'Appareil & partage' }).click();
+    await remote.getByRole('tab', { name: 'Plus' }).click();
     await remote.getByText('Miroir télécommande', { exact: true }).first().click();
     await remote.getByRole('button', { name: /Ouvrir une salle/ }).click();
     await remote.waitForFunction(() => localStorage.getItem('h8timer.mirror.room'));
@@ -101,12 +143,18 @@ async function main() {
 
     const display = await (await browser.newContext({ viewport: { width: 1000, height: 560 } })).newPage();
     await display.goto(`${APP}/d/${room}`);
-    await display.getByText('Sync OK').first().waitFor({ timeout: 15_000 });
-    assert(true, 'écran Visuel synchronisé');
+    await display.getByRole('img', { name: /Synchronisation OK/ }).waitFor({ timeout: 15_000 });
+    assert(true, 'écran Visuel : voyant vert');
+    const displayText = await display.locator('.display-top').textContent();
+    assert(!/Miroir|Sync|lecture seule/.test(displayText ?? ''), 'écran Visuel : aucun texte de statut, juste le voyant');
+    await remote.getByRole('img', { name: /Synchronisation OK/ }).waitFor({ timeout: 10_000 });
+    assert(true, 'télécommande : voyant vert');
 
+    const t0 = Date.now();
     await remote.getByLabel('Ajouter une manche à Dupont').click();
     await display.getByLabel('Score Dupont').filter({ hasText: '1' }).waitFor({ timeout: 10_000 });
-    assert(true, 'le score marqué sur la télécommande arrive sur l’écran Visuel');
+    const latency = Date.now() - t0;
+    assert(latency < 1_000, `le score marqué arrive sur l’écran Visuel en ${latency} ms (relais local)`);
     const active = (await remote.locator('.player-status.active').textContent()) ?? '';
     assert(active.includes('Martin'), 'marquer la manche relance le chrono avec le joueur qui casse (Martin)');
 
@@ -132,6 +180,23 @@ async function main() {
     const end = remote.getByRole('dialog', { name: /Victoire de Dupont/ });
     await end.waitFor({ timeout: 5_000 });
     assert(((await end.textContent()) ?? '').includes('Dupont 2 – 0 Martin'), 'fin de match : victoire et résumé partageable');
+    await end.getByRole('button', { name: /Fermer/ }).click();
+    await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    await remote.getByRole('tab', { name: 'Plus' }).click();
+    await remote.getByText('Diagnostic', { exact: true }).first().click();
+    const median = await remote.locator('.diagnostics-row', { hasText: 'Aller-retour médiane' }).locator('dd').textContent();
+    assert(/\d+ ms/.test(median ?? ''), `diagnostic : aller-retour médian mesuré (${median})`);
+    const [download] = await Promise.all([
+      remote.waitForEvent('download'),
+      remote.getByRole('button', { name: /Télécharger le journal/ }).click(),
+    ]);
+    const file = await download.path();
+    const { readFile } = await import('node:fs/promises');
+    const log = await readFile(file, 'utf8');
+    const secret = await remote.evaluate(() => localStorage.getItem('h8timer.mirror.secret'));
+    assert(download.suggestedFilename().endsWith('.log'), `journal téléchargé : ${download.suggestedFilename()}`);
+    assert(log.includes('rôle: télécommande') && /synchro/.test(log), 'journal : en-tête et événements de synchro');
+    assert(Boolean(secret) && !log.includes(secret), 'journal : le secret de salle n’y figure pas');
     console.log('e2e OK');
   } finally {
     await browser.close();

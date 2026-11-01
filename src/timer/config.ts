@@ -16,6 +16,9 @@ export { FBEP_AMBIANCE, FFB_AMBIANCE };
 
 export const CONFIG_STORAGE_KEY = 'billiardTimerConfig';
 
+/** 2 = v3.2 : chrono seul par défaut, score sans casses fermes. */
+export const CURRENT_DEFAULTS_VERSION = 2;
+
 export const COMPETITION_SHOT_TIMING = {
   tempsBase: 45,
   tempsExtension: 15,
@@ -130,6 +133,7 @@ export function getDefaultConfig(): TimerConfig {
     competitionMode: 'ffb',
     matchOptions: getDefaultMatchOptions(),
     viewOptions: getDefaultViewOptions(),
+    defaultsVersion: CURRENT_DEFAULTS_VERSION,
   };
 }
 
@@ -274,7 +278,13 @@ export function mergeConfig(saved: unknown): TimerConfig {
     competitionMode: asCompetitionMode(s.competitionMode),
     matchOptions: mergeMatchOptions(s.matchOptions),
     viewOptions: mergeViewOptions(s.viewOptions),
+    defaultsVersion: CURRENT_DEFAULTS_VERSION,
   };
+  // Migration ponctuelle (configs ≤ 3.1) : l'ancien défaut affichait score et casses fermes pour tout le monde.
+  const savedVersion = typeof s.defaultsVersion === 'number' ? s.defaultsVersion : 1;
+  if (savedVersion < 2) {
+    merged.matchOptions = { ...merged.matchOptions, enabled: false, showFerme: false };
+  }
   return withSyncedCompetitionMode(merged);
 }
 
