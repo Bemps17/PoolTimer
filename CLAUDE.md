@@ -1,5 +1,7 @@
 # CLAUDE.md — H8timer (PoolTimer)
 
+> **Reprise de session : lire d'abord [docs/CONTEXTE-SESSION.md](docs/CONTEXTE-SESSION.md)** (état, préférences de l'utilisateur, accès, prochaines étapes).
+
 Chronomètre de tir (shot clock) billard / Blackball FFB, PWA React. Langue de l'UI, des commits et de la doc : **français**. Version courante : voir `package.json` / `src/changelog.ts`.
 
 ## Commandes
@@ -27,16 +29,16 @@ src/
     config.ts             défauts, limites, presets de compétition, mergeConfig (validation localStorage)
     theme.ts              23 couleurs (ThemeColors), thèmes nommés, CSS vars
   hooks/
-    useBilliardTimer.ts   état moteur + config + effets (son/vibration) + tick 50 ms
+    useBilliardTimer.ts   état moteur + config + effets (son/vibration) ; réveils via timer/tickSchedule.ts
     useMirror.ts          useControllerMirror (push) et useDisplayMirror (réception, interpolation)
   mirror/
     protocol.ts           types + parsing/validation des messages WS (partagé client ET worker)
     room.ts, relay.ts     logique de salle éphémère (partagée avec le worker)
-    storage.ts            salle/secret en sessionStorage, miroir activé en localStorage
+    storage.ts            salle/secret persistants en localStorage (migration depuis sessionStorage)
   components/
     Scoreboard.tsx        écran de jeu (manette ET écran seul)
     DisplayView.tsx       écran Visuel en lecture seule (miroir)
-    SettingsPanel.tsx     menu ⚙️ (sections repliables)
+    SettingsPanel.tsx     menu ⚙️ en 5 onglets (Match · Affichage · Apparence · Son · Plus)
     MirrorSettings.tsx    ouverture de salle, QR, lien
   audio/                  Tone.js + packs d'alertes + sons importés
   pwa/                    mises à jour / installation
@@ -72,11 +74,11 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 - `Theme` est aussi une union fermée, dupliquée dans `protocol.ts` (`parseDisplayConfig`) : l'étendre aux deux endroits.
 - La salle miroir (code + secret) est conservée en `localStorage` (`mirror/storage.ts`, migration depuis `sessionStorage`) : le lien OBS survit à la fermeture ; seul « Fermer la salle » l'efface.
 - Le Worker supprime les salles après ~2 h sans connexion (alarm DO).
-- Les snapshots sont renvoyés toutes les 2 s tant que le chrono tourne, et à chaque changement de `config` (toute modif de réglage est poussée).
+- Les snapshots partent immédiatement à chaque changement, et sont renvoyés toutes les 5 s tant que le chrono tourne (rattrapage).
 
 ## Workflow Git
 
-Développer sur la branche désignée par la tâche, commits atomiques en français (`feat(score): …`, `fix(mirror): …`), pas de PR sans demande explicite.
+Développer sur la branche désignée par la tâche, commits atomiques en français (`feat(score): …`, `fix(mirror): …`), pas de PR sans demande explicite. Les fusions dans `main` (= mise en production Vercel) se font uniquement après l'accord explicite de l'utilisateur.
 
 ## Feuille de route
 
