@@ -6,8 +6,6 @@ import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcc
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
 import { PlayerStatus } from './PlayerStatus';
-import { SyncDot } from './SyncDot';
-import type { SyncLevel } from '../mirror/syncLevel';
 
 interface ScoreboardProps {
   config: TimerConfig;
@@ -23,8 +21,6 @@ interface ScoreboardProps {
   onToggleMinions: () => void;
   /** Scoreur 1v1 (score, F, blanche), affiché sous les bandeaux joueurs. */
   matchBar?: ReactNode;
-  /** Vue télécommande (salle miroir ouverte) : chrono en vedette, grosses commandes. */
-  remote?: { level: SyncLevel; scorePlacement: 'compact' | 'full' | 'hidden' };
 }
 
 export function Scoreboard({
@@ -40,7 +36,6 @@ export function Scoreboard({
   onToggleMenu,
   onToggleMinions,
   matchBar,
-  remote,
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -204,7 +199,7 @@ export function Scoreboard({
       id="app"
       className={`scoreboard-body${flashClass ? ` ${flashClass}` : ''}${
         config.modeInterface === 'tactile' ? ' tactile-mode' : ''
-      }${remote ? ` remote-mode remote-score-${remote.scorePlacement}` : ''}`}
+      }`}
       aria-label="H8timer — chronomètre de tir billard"
     >
       <h1 className="visually-hidden">H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
@@ -243,11 +238,6 @@ export function Scoreboard({
         }}
         onClick={(event) => handleTimerScreenTap('click', event)}
       >
-        {remote ? (
-          <span className="remote-sync-dot">
-            <SyncDot level={remote.level} />
-          </span>
-        ) : null}
         <div className="timer-content" ref={contentRef}>
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>
             {displayText}

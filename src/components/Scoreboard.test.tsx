@@ -13,7 +13,7 @@ beforeAll(() => {
 });
 afterEach(cleanup);
 
-function renderBoard(remote?: Parameters<typeof Scoreboard>[0]['remote']) {
+function renderBoard() {
   const config = getDefaultConfig();
   const noop = vi.fn();
   return render(
@@ -29,18 +29,11 @@ function renderBoard(remote?: Parameters<typeof Scoreboard>[0]['remote']) {
       onSelectPlayer={noop}
       onToggleMenu={noop}
       onToggleMinions={noop}
-      remote={remote}
     />,
   );
 }
 
 describe('Scoreboard — télécommande allégée', () => {
-  it('shows only a coloured dot for the link, no room code or status text', () => {
-    const { container } = renderBoard({ level: 'slow', scorePlacement: 'compact' });
-    expect(screen.getByRole('img', { name: /latence/ })).toBeTruthy();
-    expect(container.textContent).not.toMatch(/Miroir|MIROIR|attente|Sync/);
-  });
-
   it('no dot at all without an open room', () => {
     renderBoard();
     expect(screen.queryByRole('img', { name: /Synchronisation/ })).toBeNull();

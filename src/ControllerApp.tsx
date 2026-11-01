@@ -34,7 +34,10 @@ import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { displayUrl, toMirrorMatch } from './mirror/protocol';
 import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
-import { isRemoteViewActive } from './timer/viewOptions';
+import { boardLayout, isRemoteViewActive } from './timer/viewOptions';
+import { useIsLandscape } from './hooks/useIsLandscape';
+import { LandscapeBoard } from './components/LandscapeBoard';
+import { RemoteControl } from './components/RemoteControl';
 import type { TimerConfig } from './timer/types';
 
 export default function ControllerApp() {
@@ -168,6 +171,8 @@ export default function ControllerApp() {
 
   const viewOptions = timer.config.viewOptions;
   const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
+  const isLandscape = useIsLandscape();
+  const layout = boardLayout({ remoteActive, landscapeOption: viewOptions.landscape, isLandscape });
   // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
   useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
   const matchOptions = timer.config.matchOptions;
@@ -187,6 +192,24 @@ export default function ControllerApp() {
     },
     [matchControl.match, matchControl.addScore, matchOptions.frameRestartsTimer, timer.newGame],
   );
+
+  const scoreControls = {
+    onScore: handleScore,
+    onFerme: matchControl.addFerme,
+    onToggleBreaker: matchControl.swapBreaker,
+  };
+  const boardActions = {
+    onTogglePlayPause: timer.togglePlayPause,
+    onResetShot: timer.resetShot,
+    onApresCasse: timer.triggerApresCasse,
+    onExtension: timer.useExtension,
+    onNewGame: timer.newGame,
+    onSelectPlayer: timer.selectPlayer,
+    onToggleMenu: () => {
+      void timer.playClick();
+      setMenuOpen(true);
+    },
+  };
 
   // Fin de match : affichée une fois par score final (fermer = garder la main pour corriger).
   const winner = matchOptions.enabled ? matchWinner(matchControl.match, matchOptions.targetScore) : null;
@@ -227,45 +250,53 @@ export default function ControllerApp() {
 
   return (
     <>
-      {mirror.room && !remoteActive ? (
+      {mirror.room && layout === 'classic' ? (
         <aside className="mirror-live-dot">
           <SyncDot level={mirror.level} />
         </aside>
       ) : null}
-      <Scoreboard
-        config={timer.config}
-        state={timer.state}
-        menuOpen={menuOpen}
-        onTogglePlayPause={timer.togglePlayPause}
-        onResetShot={timer.resetShot}
-        onApresCasse={timer.triggerApresCasse}
-        onExtension={timer.useExtension}
-        onNewGame={timer.newGame}
-        onSelectPlayer={timer.selectPlayer}
-        onToggleMenu={() => {
-          void timer.playClick();
-          setMenuOpen(true);
-        }}
-        onToggleMinions={handleToggleMinions}
-        remote={remoteActive ? { level: mirror.level, scorePlacement: viewOptions.remoteScore } : undefined}
-        matchBar={
-          matchOptions.enabled && !(remoteActive && viewOptions.remoteScore === 'hidden') ? (
-            <MatchScore
-              match={mirrorMatch}
-              p1Name={timer.config.p1Name}
-              p2Name={timer.config.p2Name}
-              p1Color={timer.config.p1Color}
-              p2Color={timer.config.p2Color}
-              size={remoteActive && viewOptions.remoteScore === 'compact' ? 'compact' : 'full'}
-              controls={{
-                onScore: handleScore,
-                onFerme: matchControl.addFerme,
-                onToggleBreaker: matchControl.swapBreaker,
-              }}
-            />
-          ) : null
-        }
-      />
+      {layout === 'remote' ? (
+        <RemoteControl
+          {...boardActions}
+          config={timer.config}
+          state={timer.state}
+          match={matchOptions.enabled ? mirrorMatch : undefined}
+          level={mirror.level}
+          menuOpen={menuOpen}
+        />
+      ) : null}
+      {layout === 'landscape' ? (
+        <LandscapeBoard
+          {...boardActions}
+          config={timer.config}
+          state={timer.state}
+          match={matchOptions.enabled ? mirrorMatch : undefined}
+          remoteLevel={mirror.room ? mirror.level : undefined}
+          menuOpen={menuOpen}
+          onScore={handleScore}
+        />
+      ) : null}
+      {layout === 'classic' ? (
+        <Scoreboard
+          {...boardActions}
+          config={timer.config}
+          state={timer.state}
+          menuOpen={menuOpen}
+          onToggleMinions={handleToggleMinions}
+          matchBar={
+            matchOptions.enabled ? (
+              <MatchScore
+                match={mirrorMatch}
+                p1Name={timer.config.p1Name}
+                p2Name={timer.config.p2Name}
+                p1Color={timer.config.p1Color}
+                p2Color={timer.config.p2Color}
+                controls={scoreControls}
+              />
+            ) : null
+          }
+        />
+      ) : null}
       {winner && endKey !== dismissedEndKey && !lagPrompt ? (
         <MatchEndDialog
           winnerName={displayPlayerName(winner === 1 ? timer.config.p1Name : timer.config.p2Name, winner, matchOptions.sides)}
@@ -324,6 +355,19 @@ export default function ControllerApp() {
         updateSnoozed={pwaUpdate.snoozed}
         onApplyUpdate={pwaUpdate.applyUpdate}
         onSnoozeUpdate={handleSnoozeUpdate}
+        liveScore={
+          menuOpen && matchOptions.enabled ? (
+            <MatchScore
+              match={mirrorMatch}
+              p1Name={timer.config.p1Name}
+              p2Name={timer.config.p2Name}
+              p1Color={timer.config.p1Color}
+              p2Color={timer.config.p2Color}
+              showNames
+              controls={scoreControls}
+            />
+          ) : null
+        }
         diagnosticsSection={
           menuOpen ? (
             mirror.room ? (

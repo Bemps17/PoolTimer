@@ -36,7 +36,10 @@ src/
     room.ts, relay.ts     logique de salle éphémère (partagée avec le worker)
     storage.ts            salle/secret persistants en localStorage (migration depuis sessionStorage)
   components/
-    Scoreboard.tsx        écran de jeu (manette ET écran seul)
+    Scoreboard.tsx        écran de jeu portrait classique (sans salle, ou vue « classique »)
+    RemoteControl.tsx     télécommande dédiée (salle ouverte, portrait) : RemotePreview + grosses commandes
+    LandscapeBoard.tsx    paysage (option viewOptions.landscape) : J1 gauche, chrono/aperçu centre, J2 droite
+    RemotePreview.tsx     aperçu en direct de ce qu'affiche l'écran distant
     DisplayView.tsx       écran Visuel en lecture seule (miroir)
     SettingsPanel.tsx     menu ⚙️ en 5 onglets (Match · Écran · Thème · Son · Plus)
     MirrorSettings.tsx    ouverture de salle, QR, lien
@@ -56,6 +59,7 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 - **`protocol.ts` est un contrat partagé** avec le Worker (il l'importe via `../../src/...`). Tout champ ajouté au snapshot doit être : ajouté au type, **parsé explicitement dans `parseSnapshot`/`parseDisplayConfig`** (les champs inconnus sont supprimés), **optionnel/rétro-compatible** (anciens écrans PWA en cache), testé dans `protocol.test.ts`. Après changement de protocole : **redéployer le Worker** (`cd worker && npx wrangler deploy`) — le déploiement Vercel ne suffit pas.
 - **Toute donnée persistée/importée passe par une fonction de validation** du style `mergeConfig` (clamp, valeurs par défaut). Ne jamais faire confiance à du JSON externe (localStorage, import de fichier, lien partagé).
 - **Presets = chronométrage uniquement ; apparence = indépendante** (décision v2.7.0). Ne pas re-coupler les deux.
+- **Écran de jeu** : `boardLayout()` (`timer/viewOptions.ts`) choisit classique / télécommande / paysage. Sur la télécommande, pas de score à l'écran : il se règle dans ⚙️ → Match (« Score en cours »). Paysage = option, désactivée par défaut. Actions lourdes (nouvelle manche) à l'appui long (`HoldButton`).
 - **Pas de clavier mobile pendant le match** : aucun `<input>` texte sur l'écran de jeu.
 - **Menu ⚙️** : 5 onglets (Match · Écran · Thème · Son · Plus). Onglets : icônes **Lucide** (`lucide-react`), libellés ≤ 5 lettres (pas d'emoji). Texte variable (noms, libellés) : une seule ligne via `<FitText singleLine>` + taille de base en `clamp()`, jamais de retour à la ligne. Booléen = `ToggleField`, 2-3 choix = `SegmentedField`, section = `SettingsCard`, rarement utilisé = `SettingsDisclosure` (`components/SettingsControls.tsx`). Pas de liste Oui/Non. Une option dépendante ne s'affiche que si son parent est actif.
 - **Sobriété** : par défaut le chrono seul (score off, F off). Aucun texte de statut à l'écran : le voyant `SyncDot` (vert/orange/rouge, règles dans `mirror/syncLevel.ts`) ; les détails vont dans le diagnostic (`diagnostics/log.ts`, journaux `h8timer.log.remote` / `.display`). Pas de `setInterval` court : réveils via `timer/tickSchedule.ts`.

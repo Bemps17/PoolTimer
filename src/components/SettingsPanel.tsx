@@ -12,7 +12,7 @@ import {
   withSyncedCompetitionMode,
 } from '../timer/config';
 import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
-import type { DisplayLayout, RemoteLayout, RemoteScoreMode, ViewOptions } from '../timer/viewOptions';
+import type { DisplayLayout, RemoteLayout, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
 import { colorsForTheme } from '../timer/theme';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
@@ -58,6 +58,8 @@ interface SettingsPanelProps {
   extraSections?: ReactNode;
   streamSection?: ReactNode;
   diagnosticsSection?: ReactNode;
+  /** Score en cours avec +/− (joueurs, F) : la télécommande ne l'affiche plus sur l'écran principal. */
+  liveScore?: ReactNode;
   presetsController: PresetsController;
   themesController: ThemesController;
   onNotify: (message: string) => void;
@@ -116,12 +118,6 @@ const REMOTE_LAYOUT_OPTIONS: Array<{ value: RemoteLayout; label: string }> = [
   { value: 'classic', label: 'Classique' },
 ];
 
-const REMOTE_SCORE_OPTIONS: Array<{ value: RemoteScoreMode; label: string }> = [
-  { value: 'compact', label: 'Compact' },
-  { value: 'full', label: 'Grand' },
-  { value: 'hidden', label: 'Masqué' },
-];
-
 const DISPLAY_LAYOUT_OPTIONS: Array<{ value: DisplayLayout; label: string }> = [
   { value: 'timer', label: 'Chrono' },
   { value: 'balanced', label: 'Équilibré' },
@@ -164,6 +160,7 @@ export function SettingsPanel({
   extraSections,
   streamSection,
   diagnosticsSection,
+  liveScore,
   presetsController,
   themesController,
   onNotify,
@@ -306,6 +303,11 @@ export function SettingsPanel({
           <div role="tabpanel" id="settings-tabpanel" aria-labelledby={`settings-tab-${tab}`}>
             {tab === 'match' ? (
               <>
+                {config.matchOptions.enabled && liveScore ? (
+                  <SettingsCard title="Score en cours">
+                    <div className="settings-live-score">{liveScore}</div>
+                  </SettingsCard>
+                ) : null}
                 <SettingsCard title="Joueurs">
                   <PlayerNameField
                     label="Joueur 1"
@@ -502,6 +504,16 @@ export function SettingsPanel({
                     onChange={(tailleChiffres) => patch({ tailleChiffres })}
                   />
                   <ToggleField
+                    label="Disposition paysage (téléphone tourné)"
+                    checked={config.viewOptions.landscape}
+                    onChange={(landscape) => patchView({ landscape })}
+                    hint={
+                      config.viewOptions.landscape
+                        ? 'Téléphone en largeur : joueur 1 à gauche, chrono au centre, joueur 2 à droite.'
+                        : undefined
+                    }
+                  />
+                  <ToggleField
                     label="Dixièmes sous 10 s"
                     checked={config.affichageMs}
                     onChange={(affichageMs) => patch({ affichageMs })}
@@ -525,20 +537,12 @@ export function SettingsPanel({
                     onChange={(remoteLayout) => patchView({ remoteLayout })}
                   />
                   {config.matchOptions.enabled ? (
-                    <>
-                      <SegmentedField
-                        label="Score sur la télécommande"
-                        value={config.viewOptions.remoteScore}
-                        options={REMOTE_SCORE_OPTIONS}
-                        onChange={(remoteScore) => patchView({ remoteScore })}
-                      />
-                      <SegmentedField
-                        label="Écran Visuel"
-                        value={config.viewOptions.displayLayout}
-                        options={DISPLAY_LAYOUT_OPTIONS}
-                        onChange={(displayLayout) => patchView({ displayLayout })}
-                      />
-                    </>
+                    <SegmentedField
+                      label="Écran Visuel"
+                      value={config.viewOptions.displayLayout}
+                      options={DISPLAY_LAYOUT_OPTIONS}
+                      onChange={(displayLayout) => patchView({ displayLayout })}
+                    />
                   ) : null}
                   <ToggleField
                     label="Garder l’écran du téléphone allumé"

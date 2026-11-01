@@ -7,22 +7,23 @@
 export type DisplayLayout = 'timer' | 'balanced' | 'score';
 /** Vue de la télécommande quand une salle miroir est ouverte. */
 export type RemoteLayout = 'remote' | 'classic';
-export type RemoteScoreMode = 'compact' | 'full' | 'hidden';
+/** Disposition effective de l'écran de jeu du téléphone. */
+export type BoardLayout = 'classic' | 'remote' | 'landscape';
 
 export interface ViewOptions {
   displayLayout: DisplayLayout;
   remoteLayout: RemoteLayout;
-  remoteScore: RemoteScoreMode;
   /** Garde l'écran du téléphone allumé en mode télécommande. */
   remoteWakeLock: boolean;
+  /** Disposition paysage (joueur 1 à gauche, chrono au centre, joueur 2 à droite) quand on tourne le téléphone. */
+  landscape: boolean;
 }
 
 export const DISPLAY_LAYOUTS: DisplayLayout[] = ['timer', 'balanced', 'score'];
 export const REMOTE_LAYOUTS: RemoteLayout[] = ['remote', 'classic'];
-export const REMOTE_SCORE_MODES: RemoteScoreMode[] = ['compact', 'full', 'hidden'];
 
 export function getDefaultViewOptions(): ViewOptions {
-  return { displayLayout: 'timer', remoteLayout: 'remote', remoteScore: 'compact', remoteWakeLock: true };
+  return { displayLayout: 'timer', remoteLayout: 'remote', remoteWakeLock: true, landscape: false };
 }
 
 export function isDisplayLayout(value: unknown): value is DisplayLayout {
@@ -38,14 +39,29 @@ export function mergeViewOptions(raw: unknown): ViewOptions {
     remoteLayout: (REMOTE_LAYOUTS as unknown[]).includes(value.remoteLayout)
       ? (value.remoteLayout as RemoteLayout)
       : defaults.remoteLayout,
-    remoteScore: (REMOTE_SCORE_MODES as unknown[]).includes(value.remoteScore)
-      ? (value.remoteScore as RemoteScoreMode)
-      : defaults.remoteScore,
     remoteWakeLock: typeof value.remoteWakeLock === 'boolean' ? value.remoteWakeLock : defaults.remoteWakeLock,
+    landscape: typeof value.landscape === 'boolean' ? value.landscape : defaults.landscape,
   };
 }
 
 /** Vue télécommande active : une salle est ouverte ET l'option n'est pas « classique ». */
 export function isRemoteViewActive(hasRoom: boolean, options: Pick<ViewOptions, 'remoteLayout'>): boolean {
   return hasRoom && options.remoteLayout === 'remote';
+}
+
+/**
+ * Disposition de l'écran de jeu : paysage seulement si l'option est activée ET le téléphone tourné ;
+ * sinon portrait (télécommande dédiée si une salle est ouverte, écran classique sinon).
+ */
+export function boardLayout({
+  remoteActive,
+  landscapeOption,
+  isLandscape,
+}: {
+  remoteActive: boolean;
+  landscapeOption: boolean;
+  isLandscape: boolean;
+}): BoardLayout {
+  if (landscapeOption && isLandscape) return 'landscape';
+  return remoteActive ? 'remote' : 'classic';
 }

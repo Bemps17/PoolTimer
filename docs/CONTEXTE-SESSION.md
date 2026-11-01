@@ -35,6 +35,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
 - **Blanche** = indique qui casse ; appui dessus = inverser. **Alternance** de la casse à chaque manche marquée.
 - **Tirage à la bande** (option) : **une seule fois, au début du match**, désigne le premier casseur.
 - Option (activée) : marquer une manche relance le chrono (nouvelle manche, extensions remises à zéro, au tour du casseur).
+- **Télécommande** : le contrôle du temps d'abord ; pas de score sur l'écran de la télécommande (il se règle dans ⚙️ → Match) ; voir clairement ce qu'affiche l'écran distant (aperçu en direct). Paysage = option, jamais par défaut (défaut portrait).
 - Le bouton « annuler » a été **retiré de la barre de score** à la demande de l'utilisateur (reste dans ⚙️ → Match → Score).
 - Référence fonctionnelle du scoreur : dépôt `Bemps17/Scoreurv3` (comportement repris, pas le code).
 
@@ -66,7 +67,7 @@ npm run test:e2e         # télécommande → relais → écran Visuel → overl
 
 ## 7. Prochaines étapes possibles
 
-0. **Mode télécommande dédié (en attente du choix de l'utilisateur)** : maquettes dans `docs/propositions/telecommande.html` (+ `.png`). A = télécommande pure (aperçu temps réel de l'écran distant + gros Départ/Pause, score réglé dans ⚙️ par +/−) — recommandée ; B = score discret + feuille +/− ; C = minimale ; D = paysage (joueur 1 à gauche, chrono au centre, joueur 2 à droite), option dans ⚙️ → Écran, **pas par défaut** (défaut portrait). Demande : priorité au contrôle du temps, voir clairement ce qu'affiche l'écran distant, meilleur responsive en largeur. Ne rien coder avant le choix ; ensuite TDD.
+0. **Mode télécommande dédié — choix A + D fait, implémenté en v3.4.0** (branche de travail, à fusionner après accord) : A = télécommande portrait (`RemoteControl` : aperçu en direct de l'écran distant `RemotePreview`, gros Départ/Pause, actions, Nouvelle manche à l'appui long) ; score réglé dans ⚙️ → Match (carte « Score en cours » en tête). D = paysage (`LandscapeBoard`), option ⚙️ → Écran **désactivée par défaut**. Maquettes d'origine : `docs/propositions/telecommande.html`.
 1. **Essai en salle** sur de vrais téléphones / TV / OBS : batterie, latence réelle, lisibilité. Récupérer les fichiers `.log` (⚙️ → Plus → Diagnostic) pour analyse.
 2. **CueScore (WIP)** : phase 1 = audit de l'API publique (autoriser `api.cuescore.com` dans le réseau de la session + URL d'un tournoi public actif). Ne rien supposer (endpoints, champs, quotas). Réglage prévu : « Source du score : Manuelle / CueScore ».
 3. Non retenus pour l'instant : secret de salle hors URL, traduction (anglais), codes de partage courts (Worker + KV).
