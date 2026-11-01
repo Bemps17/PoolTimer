@@ -40,11 +40,12 @@ export function setupApresCasse(state: EngineState, config: TimerConfig): Engine
   return applyShot(state, config.tempsApresCasse, 'apresCasse');
 }
 
-export function newGame(state: EngineState, config: TimerConfig): EngineState {
+/** Nouvelle manche : extensions remises à zéro ; `firstPlayer` = celui qui casse (1 par défaut). */
+export function newGame(state: EngineState, config: TimerConfig, firstPlayer: PlayerId = 1): EngineState {
   return setupNewShot(
     {
       ...state,
-      currentPlayer: 1,
+      currentPlayer: firstPlayer,
       extensionsUsedInGame: { 1: false, 2: false },
     },
     config,

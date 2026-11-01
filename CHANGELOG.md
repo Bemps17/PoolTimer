@@ -2,6 +2,18 @@
 
 Toutes les dates sont en UTC.
 
+## 3.1.0 — 2026-11-01
+
+Suite de l’audit (TDD, scénario de bout en bout en CI).
+
+- **Score → chrono** : marquer une manche lance la nouvelle manche du chrono avec le casseur suivant (`matchOptions.frameRestartsTimer`, oui par défaut ; `newGame(state, config, firstPlayer)`).
+- **Historique des manches** (`match.frames` : vainqueur, casseur, heure) et **fenêtre de fin de match** (`MatchEndDialog`, `matchSummary`) avec partage du résultat.
+- **Mode équipe** (`matchOptions.sides`), transmis à l’écran Visuel (`match.sides`, optionnel). **Worker à redéployer.**
+- **Ergonomie** : réglages en 3 onglets ; cibles tactiles ≥ 44 px (scoreur compact sur 2 lignes) ; bouton « annuler » retiré de la barre de score (reste dans ⚙️ → Score) ; toast de preset limité à 2 changements.
+- **Écran Visuel** : bouton plein écran dédié ; compensation de la latence (moitié de la médiane des pings).
+- **Performance** : vues chargées à la demande (`React.lazy`) ; écran Visuel ≈ 88 Ko gzip au lieu de 188 ; overlay sans fondu de fond (flash sombre dans OBS).
+- **Qualité** : scénario Playwright `npm run test:e2e` (télécommande → relais → écran Visuel → overlay, cibles tactiles sur 360 px) ajouté à la CI.
+
 ## 3.0.1 — 2026-11-01
 
 - **Relais économe** (`mirror/persistence.ts`) : snapshot + séquence dans une seule clé `state`, persistée au premier push, à chaque arrêt du chrono et au plus toutes les 30 s en course ; alarme d’expiration repoussée toutes les 10 min. < 250 lignes écrites par heure de match (≈ 5 400 avant), quota gratuit Durable Objects : 100 000 / jour. **Worker à redéployer.**

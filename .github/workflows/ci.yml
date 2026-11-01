@@ -43,3 +43,20 @@ jobs:
         run: npm run test:mirror
         env:
           WRANGLER_SEND_METRICS: "false"
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end (remote -> relay -> Visual screen -> OBS overlay)
+        run: npm run test:e2e
+        env:
+          WRANGLER_SEND_METRICS: "false"

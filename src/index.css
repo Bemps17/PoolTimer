@@ -1306,7 +1306,7 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
     0%, 100% { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.35); }
     50% { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.7), 0 0 18px rgba(255,255,255,0.7); }
 }
-.match-step, .match-ferme-step, .match-undo {
+.match-step, .match-ferme-step {
     font-family: var(--font-body);
     font-weight: 700;
     color: var(--c-text-primary);
@@ -1318,8 +1318,6 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
 }
 .match-step { width: 2.6rem; height: 2.6rem; font-size: 1.6rem; line-height: 1; }
 .match-ferme-step { width: 2rem; height: 1.6rem; font-size: 1.1rem; line-height: 1; }
-.match-undo { align-self: center; width: 2.4rem; height: 2.4rem; font-size: 1.3rem; }
-.match-undo:disabled { opacity: 0.3; cursor: default; }
 .match-win { margin: 0; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; color: var(--c-play); }
 .match-lag-note {
     position: absolute;
@@ -1424,7 +1422,6 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
 .match-size-compact .match-ball { width: 18px; height: 18px; }
 .match-size-compact .match-ferme-step { width: 1.6rem; height: 1.4rem; font-size: 1rem; }
 .match-size-compact .match-ferme { font-size: 0.8rem; }
-.match-size-compact .match-undo { width: 2rem; height: 2rem; font-size: 1.1rem; }
 .match-size-compact .match-win { font-size: 0.65rem; }
 
 /* ---------- Overlay streaming (OBS / Streamlabs) ---------- */
@@ -1541,3 +1538,120 @@ html.overlay-bg-chroma body { background: #00ff00 !important; }
     font-size: 0.85rem;
 }
 .contrast-warning ul { margin: 0.25rem 0; padding-left: 1.1rem; }
+
+/* ---------- Cibles tactiles ≥ 44 px (v3.1) : le visuel reste compact, la zone de tap grandit ---------- */
+.match-step { width: 2.75rem; height: 2.75rem; }
+.match-ferme-step { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; }
+.match-size-compact .match-step { width: 2.75rem; height: 2.75rem; font-size: 1.3rem; }
+.match-size-compact .match-ferme-step { width: 2.75rem; height: 2.75rem; font-size: 1.1rem; }
+/* Compact : score et F sur une seule ligne pour ne pas voler de hauteur au chrono. */
+.match-size-compact .match-side { flex-wrap: nowrap; gap: 0.25rem; }
+.match-size-compact .match-main, .match-size-compact .match-ferme-row { width: auto; gap: 0.2rem; }
+.preset-mini { min-height: 2.75rem; padding: 0.4rem 0.75rem; }
+/* La bille garde son dessin (~28 px) mais la zone de tap fait 44 px. */
+button.match-ball {
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: none;
+    box-shadow: none;
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+button.match-ball::before {
+    content: '';
+    position: absolute;
+    inset: 0.45rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff, #e5e5e5 10%, #a0a0a0);
+    box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.7);
+    opacity: 0.18;
+    transform: scale(0.85);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+button.match-ball.active::before { opacity: 1; transform: scale(1); animation: match-ball-pulse 2s infinite; }
+button.match-ball:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+.match-end-summary {
+    margin: 0;
+    padding: 0.6rem;
+    white-space: pre-wrap;
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    border-radius: 8px;
+    background: var(--c-panel-input-bg);
+    color: var(--c-panel-text-primary);
+}
+.display-fullscreen-btn {
+    margin-left: auto;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.9rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--c-text-primary);
+    background: var(--c-button-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    cursor: pointer;
+}
+/* En plein écran, le bouton s'efface pour ne pas gêner la lecture ; il réapparaît au survol / focus. */
+:fullscreen .display-fullscreen-btn { opacity: 0.25; }
+:fullscreen .display-fullscreen-btn:hover,
+:fullscreen .display-fullscreen-btn:focus-visible { opacity: 1; }
+
+/* ---------- Onglets du menu ⚙️ ---------- */
+.settings-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.4rem 0;
+    margin-bottom: 0.4rem;
+    background: var(--c-panel-bg);
+}
+.settings-tab {
+    flex: 1 1 0;
+    min-height: 2.75rem;
+    padding: 0.35rem 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--c-panel-text-secondary);
+    background: var(--c-panel-input-bg);
+    border: 1px solid var(--c-panel-input-border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+.settings-tab.active {
+    color: #fff;
+    background: var(--c-primary);
+    border-color: var(--c-primary);
+}
+/* Overlay OBS : jamais de fondu de couleur (sinon flash sombre au chargement et à chaque changement de thème). */
+html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition: none !important; }
+
+/* Compact (télécommande) : 2 colonnes, 2 lignes par côté, cibles de 44 px qui tiennent en 360 px. */
+.match-bar-controller.match-size-compact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.3rem;
+}
+.match-size-compact .match-side { flex-direction: column; flex-wrap: nowrap; gap: 0.1rem; padding: 0.15rem 0.1rem; }
+.match-size-compact .match-side:nth-of-type(1) { grid-column: 1; grid-row: 1; }
+.match-size-compact .match-side:nth-of-type(2) { grid-column: 2; grid-row: 1; }
+.match-size-compact .match-main,
+.match-size-compact .match-ferme-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 0.15rem; }
+.match-size-compact .match-score { min-width: 1.6ch; }
+/* La zone de tap de la blanche l'emporte sur les tailles visuelles (compact, écran Visuel) côté télécommande. */
+.match-bar-controller button.match-ball,
+.match-bar-controller.match-size-compact button.match-ball { width: 2.75rem; height: 2.75rem; flex: 0 0 auto; }
+/* Télécommande : les boutons ne rétrécissent jamais sous 44 px ; la blanche a sa ligne en mode « grand ». */
+.match-bar-controller .match-side button { flex-shrink: 0; }
+.match-ball-row { display: flex; justify-content: center; width: 100%; }
+.match-bar-controller .match-main, .match-bar-controller .match-ferme-row { flex-wrap: nowrap; }
+/* La blanche inactive est atténuée par son pseudo-élément ; la zone de tap, elle, garde 44 px et reste opaque. */
+.match-bar-controller button.match-ball:not(.active) { transform: none; opacity: 1; }
+.match-ferme { white-space: nowrap; }

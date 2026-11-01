@@ -19,7 +19,7 @@ const match: MirrorMatch = {
 const base = { p1Name: 'Dupont', p2Name: 'Martin', p1Color: '#3498db', p2Color: '#e74c3c' };
 
 function controls() {
-  return { onScore: vi.fn(), onFerme: vi.fn(), onToggleBreaker: vi.fn(), onUndo: vi.fn(), canUndo: true };
+  return { onScore: vi.fn(), onFerme: vi.fn(), onToggleBreaker: vi.fn() };
 }
 
 describe('MatchScore (télécommande)', () => {
@@ -80,5 +80,49 @@ describe('LagPrompt', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Passer' }));
     expect(onChoose).toHaveBeenCalledWith(2);
     expect(onSkip).toHaveBeenCalled();
+  });
+});
+
+describe('MatchScore compact (télécommande, téléphone étroit)', () => {
+  it('fits on two rows per side: − score + / ball −F F +F, with no undo button in the bar', () => {
+    const { container } = render(<MatchScore match={match} {...base} size="compact" controls={controls()} />);
+    const sides = container.querySelectorAll('.match-side');
+    expect(sides).toHaveLength(2);
+    for (const side of sides) {
+      const main = side.querySelector('.match-main')!;
+      const ferme = side.querySelector('.match-ferme-row')!;
+      expect(main.querySelectorAll('button')).toHaveLength(2); // − et +
+      expect(ferme.querySelector('.match-ball')).not.toBeNull(); // la blanche passe sur la ligne F
+      expect(ferme.querySelectorAll('.match-ferme-step')).toHaveLength(2); // −F et +F
+    }
+    expect(screen.getAllByLabelText(/Retirer une casse ferme/)).toHaveLength(2);
+    expect(screen.queryByLabelText(/Annuler/)).toBeNull();
+  });
+
+  it('keeps − F in the full layout', () => {
+    render(<MatchScore match={match} {...base} size="full" controls={controls()} />);
+    expect(screen.getAllByLabelText(/Retirer une casse ferme/)).toHaveLength(2);
+  });
+});
+
+describe('MatchScore — pas de bouton annuler dans la barre (place pour le chrono)', () => {
+  it('full layout has no undo button either', () => {
+    render(<MatchScore match={match} {...base} size="full" controls={controls()} />);
+    expect(screen.queryByLabelText(/Annuler/)).toBeNull();
+  });
+});
+
+describe('MatchScore grand (télécommande)', () => {
+  it('puts the white ball on its own row so "− score +" fits on a narrow phone', () => {
+    const { container } = render(<MatchScore match={match} {...base} size="full" controls={controls()} />);
+    for (const side of container.querySelectorAll('.match-side')) {
+      expect(side.querySelector('.match-ball-row .match-ball')).not.toBeNull();
+      expect(side.querySelector('.match-main .match-ball')).toBeNull();
+    }
+  });
+
+  it('the read-only Visual screen keeps the ball next to the score', () => {
+    const { container } = render(<MatchScore match={match} {...base} />);
+    expect(container.querySelector('.match-main .match-ball')).not.toBeNull();
   });
 });

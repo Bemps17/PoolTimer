@@ -1,5 +1,5 @@
 import { FitText } from './FitText';
-import { displayPlayerName } from '../timer/playerName';
+import { displayPlayerName, type Sides } from '../timer/playerName';
 
 interface PlayerStatusProps {
   name: string;
@@ -8,11 +8,12 @@ interface PlayerStatusProps {
   extensionUsed: boolean;
   seat: 1 | 2;
   onSelect?: () => void;
+  sides?: Sides;
 }
 
-export function PlayerStatus({ name, color, active, extensionUsed, seat, onSelect }: PlayerStatusProps) {
+export function PlayerStatus({ name, color, active, extensionUsed, seat, onSelect, sides }: PlayerStatusProps) {
   const interactive = Boolean(onSelect);
-  const shown = displayPlayerName(name, seat);
+  const shown = displayPlayerName(name, seat, sides);
 
   return (
     <div

@@ -217,6 +217,7 @@ export function Scoreboard({
             seat={1}
             active={state.currentPlayer === 1}
             extensionUsed={state.extensionsUsedInGame[1]}
+            sides={config.matchOptions.sides}
             onSelect={() => onSelectPlayer(1)}
           />
           <PlayerStatus
@@ -225,6 +226,7 @@ export function Scoreboard({
             seat={2}
             active={state.currentPlayer === 2}
             extensionUsed={state.extensionsUsedInGame[2]}
+            sides={config.matchOptions.sides}
             onSelect={() => onSelectPlayer(2)}
           />
         </div>

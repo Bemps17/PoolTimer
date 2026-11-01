@@ -114,3 +114,18 @@ describe('presets personnalisés', () => {
     expect(loadPresets(storage)).toEqual([]);
   });
 });
+
+describe('aperçu court des changements (toast lisible sur téléphone)', () => {
+  it('shows at most two changes then "+ n autres"', async () => {
+    const { summarizeTimingChanges } = await import('./presets');
+    const ffb = builtinTimings('ffb');
+    const master = builtinTimings('ffbMaster');
+    expect(summarizeTimingChanges(ffb, master)).toBe('base 45→30 s · après casse 90→60 s + 2 autres');
+    expect(summarizeTimingChanges(ffb, { ...ffb, tempsBase: 40 })).toBe('base 45→40 s');
+    expect(summarizeTimingChanges(ffb, ffb)).toBe('');
+    expect(summarizeTimingChanges(ffb, { ...ffb, tempsBase: 40, tempsExtension: 20, seuilAlerte: 9 }, 3)).toBe(
+      'base 45→40 s · extension 15→20 s · alerte 15→9 s',
+    );
+    expect(summarizeTimingChanges(ffb, master, 1)).toBe('base 45→30 s + 3 autres');
+  });
+});

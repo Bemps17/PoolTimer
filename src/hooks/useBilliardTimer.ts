@@ -116,10 +116,14 @@ export function useBilliardTimer() {
     [apply, playClick],
   );
 
-  const newGame = useCallback(() => {
-    playClick();
-    apply((current) => newGameState(current, configRef.current));
-  }, [apply, playClick]);
+  /** Nouvelle manche ; `firstPlayer` = casseur (sinon joueur 1). */
+  const newGame = useCallback(
+    (firstPlayer?: PlayerId) => {
+      playClick();
+      apply((current) => newGameState(current, configRef.current, firstPlayer === 2 ? 2 : 1));
+    },
+    [apply, playClick],
+  );
 
   const useExtension = useCallback(() => {
     playClick();

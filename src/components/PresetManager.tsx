@@ -5,7 +5,7 @@ import {
   BUILTIN_PRESET_NAMES,
   builtinTimings,
   describeTimings,
-  diffTimings,
+  summarizeTimingChanges,
   matchesPreset,
   PRESET_NAME_MAX,
   PRESETS_MAX,
@@ -36,7 +36,7 @@ export function PresetManager({ config, controller, onApply, onNotify, onShare }
   const full = presets.length >= PRESETS_MAX;
 
   const apply = (preset: CustomPreset) => {
-    const change = diffTimings(config, preset);
+    const change = summarizeTimingChanges(config, preset);
     onApply(applyPreset(config, preset));
     onNotify(change ? `« ${preset.name} » appliqué : ${change}` : `« ${preset.name} » déjà actif`);
   };

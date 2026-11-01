@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **3.0.1** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **3.1.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -48,6 +48,7 @@ Le dossier `dist/` est le livrable statique, prêt pour Vercel (SPA Vite).
 ```bash
 npm test
 npm run test:mirror
+npm run test:e2e   # télécommande → relais → écran Visuel → overlay (Playwright + wrangler dev + Vite)
 ```
 
 `test:mirror` démarre `wrangler dev` (port 8787) puis vérifie le relais WebSocket : ping→pong, push télécommande → snapshot écran, erreurs `stale_seq` / `bad_push`, second contrôleur `room_busy`. Pour viser un Worker déjà lancé :

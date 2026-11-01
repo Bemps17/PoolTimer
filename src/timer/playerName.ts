@@ -29,10 +29,17 @@ export function sanitizePlayerName(value: unknown, fallback: string): string {
 }
 
 /** UI-only label when the stored name is empty — never written back to config. */
-export function displayPlayerName(stored: string, seat: 1 | 2): string {
+export type Sides = 'players' | 'teams';
+
+/** Libellé par défaut d'un côté : « Joueur 1 / 2 » ou « Équipe A / B ». */
+export function sideLabel(seat: 1 | 2, sides: Sides = 'players'): string {
+  return sides === 'teams' ? `Équipe ${seat === 1 ? 'A' : 'B'}` : `Joueur ${seat}`;
+}
+
+export function displayPlayerName(stored: string, seat: 1 | 2, sides: Sides = 'players'): string {
   const trimmed = stored.trim();
   if (trimmed) return trimmed;
-  return `Joueur ${seat}`;
+  return sideLabel(seat, sides);
 }
 
 /**
