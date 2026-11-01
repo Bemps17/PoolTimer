@@ -1466,3 +1466,42 @@ html.overlay-bg-chroma body { background: #00ff00 !important; }
     font-size: clamp(0.9rem, 3.2vh, 1.6rem);
     color: var(--c-text-primary);
 }
+
+/* ---------- Presets personnalisés ---------- */
+.preset-manager { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+.preset-manager-title { margin: 0.4rem 0 0; font-size: 0.95rem; color: var(--c-panel-text-primary); }
+.preset-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.preset-item { display: flex; flex-direction: column; gap: 0.3rem; }
+.preset-item .preset-card { width: 100%; }
+.preset-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.preset-mini {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    color: var(--c-panel-text-primary);
+    background: var(--c-panel-input-bg);
+    border: 1px solid var(--c-panel-input-border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.preset-mini:disabled { opacity: 0.4; cursor: default; }
+.preset-danger { color: var(--c-digit-critical); }
+.preset-rename, .preset-create { display: flex; flex-direction: column; gap: 0.4rem; }
+.preset-rename { flex-direction: row; align-items: center; }
+.preset-rename input { flex: 1; min-width: 0; }
+.preset-create input[type='text'], .preset-create select, .preset-rename input {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 0.5rem;
+    color: var(--c-panel-text-primary);
+    background: var(--c-panel-input-bg);
+    border: 1px solid var(--c-panel-input-border);
+    border-radius: 6px;
+}
+.preset-create-label { font-size: 0.85rem; color: var(--c-panel-text-secondary); }
+.preset-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--c-panel-text-primary); }
+.preset-custom {
+    background: linear-gradient(165deg, var(--c-primary), color-mix(in srgb, var(--c-primary) 35%, #000));
+    border-color: var(--c-primary);
+    overflow-wrap: anywhere;
+}

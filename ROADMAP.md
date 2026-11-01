@@ -97,7 +97,7 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 
 *Point d'attention* : l'aperçu chrono du téléphone doit rester fiable même hors ligne (le moteur reste local au téléphone).
 
-### Phase 3 — Presets personnalisés (v2.10.0)
+### Phase 3 — Presets personnalisés (v2.10.0) — ✅ fait (liste séparée `h8timer.presets`, `competitionMode` conservé pour les presets intégrés)
 1. Modèle `CustomPreset { id, name, timings, raceTo?, createdAt }` + `presets/storage.ts` (liste en `localStorage`, validation).
 2. Refactor : `competitionMode` (union fermée) → **`presetId: string`** (intégrés `ffb|fbep|ffbTdTn|ffbMaster` + ids personnalisés) ; migration dans `mergeConfig` ; `detectCompetitionMode` gère « Personnalisé / modifié ».
 3. UI ⚙️ « Presets » : créer / dupliquer (à partir d'un intégré) / renommer / supprimer ; cartes présentées comme les actuelles ; presets intégrés **non supprimables**, éditables par duplication.

@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/OBS|Streamlabs|overlay/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/télécommande|miroir/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/presets? personnalis/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/roue crantée/i);
+
+    const streaming = CHANGELOG.find((entry) => entry.version === '2.9.0');
+    expect(streaming?.notes.join(' ')).toMatch(/OBS|Streamlabs|overlay/i);
+    expect(streaming?.notes.join(' ')).toMatch(/télécommande|miroir/i);
 
     const scoreur = CHANGELOG.find((entry) => entry.version === '2.8.0');
     expect(scoreur?.notes.join(' ')).toMatch(/score|casses? fermes?|blanche/i);

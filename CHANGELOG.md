@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.10.0 — 2026-11-01
+
+- **Presets personnalisés** : créer, renommer, dupliquer, supprimer (30 max) depuis ⚙️ → Compétition & temps → *Mes presets*, à partir des réglages actuels ou d’un preset intégré. Course à N optionnelle. Chronométrage uniquement : thème, couleurs et sons inchangés.
+- Aperçu des changements à l’application (« base 45→30 s »). Stockage local validé (`h8timer.presets`).
+- **Roue crantée classique** pour le bouton Paramètres.
+- Prépare le partage (Phase 4) : format de preset validé et borné.
+
 ## 2.9.0 — 2026-11-01
 
 - **Vue télécommande** : salle miroir ouverte → vue dédiée du téléphone (bandeau de liaison, cadre accentué, grosses commandes). Le **chrono reste prioritaire**, le score est un bandeau discret (compact / grand / masqué). Écran du téléphone gardé allumé (option).

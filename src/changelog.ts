@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.9.0';
+export const APP_VERSION = '2.10.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.10.0',
+    date: '2026-11-01',
+    title: 'Presets personnalisés et nouvelle roue crantée',
+    notes: [
+      'Presets personnalisés : créez, renommez, dupliquez et supprimez vos propres presets de chronométrage (jusqu’à 30), à partir de vos réglages ou d’un preset FFB / Ultimate. ⚙️ → Compétition & temps → Mes presets.',
+      'Un preset peut inclure la course à N du scoreur. Il ne change jamais le thème, les couleurs ni les sons.',
+      'Aperçu à l’application : la liste des temps modifiés s’affiche (par exemple base 45→30 s).',
+      'Les presets sont enregistrés et validés localement ; les presets FFB / TD/TN / Master / Ultimate restent intégrés et non supprimables.',
+      'Le bouton Paramètres reprend une roue crantée classique (8 dents, moyeu percé).',
+    ],
+  },
   {
     version: '2.9.0',
     date: '2026-11-01',

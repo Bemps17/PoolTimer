@@ -17,6 +17,7 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useMatch } from './hooks/useMatch';
+import { usePresets } from './hooks/usePresets';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
@@ -43,6 +44,7 @@ export default function App() {
 function ControllerApp() {
   const timer = useBilliardTimer();
   const matchControl = useMatch(timer.config.matchOptions);
+  const presetsController = usePresets();
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
   const pwaUpdate = usePwaUpdate();
@@ -220,6 +222,11 @@ function ControllerApp() {
         onShowHelp={() => setHelpOpen(true)}
         onShowChangelog={() => setChangelogOpen(true)}
         onShowTutorial={openTutorial}
+        presetsController={presetsController}
+        onNotify={(message) => {
+          setToastMessage(message);
+          setToastVisible(true);
+        }}
         onNewMatch={handleNewMatch}
         onUndoMatch={matchControl.undoLast}
         canUndoMatch={matchControl.canUndo}

@@ -16,6 +16,8 @@ import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
+import { PresetManager } from './PresetManager';
+import type { PresetsController } from '../hooks/usePresets';
 import { PlayerNameField } from './PlayerNameField';
 import { SettingsSection } from './SettingsSection';
 import { SoundLibrarySettings } from './SoundLibrarySettings';
@@ -44,6 +46,8 @@ interface SettingsPanelProps {
   onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
   streamSection?: ReactNode;
+  presetsController: PresetsController;
+  onNotify: (message: string) => void;
 }
 
 const THEME_OPTIONS = [
@@ -126,6 +130,8 @@ export function SettingsPanel({
   onSnoozeUpdate,
   extraSections,
   streamSection,
+  presetsController,
+  onNotify,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -325,6 +331,12 @@ export function SettingsPanel({
                 );
               })}
             </div>
+            <PresetManager
+              config={config}
+              controller={presetsController}
+              onApply={(next) => onChange(next, { resetShot: true })}
+              onNotify={onNotify}
+            />
             <p className="install-hint">
               Presets de chronométrage uniquement. Changer le thème ou les couleurs ne change pas le preset. Ultimate
               FBEP : pas d’après casse. Les autres gardent le bouton si le temps post-casse est distinct.

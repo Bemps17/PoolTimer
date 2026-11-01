@@ -60,7 +60,7 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 
 ## Pièges connus
 
-- `competitionMode` est une union fermée (`ffb | fbep | ffbTdTn | ffbMaster`) **recalculée** par `detectCompetitionMode` à chaque `mergeConfig` : les presets personnalisés devront être un autre mécanisme (voir ROADMAP).
+- `competitionMode` est une union fermée (`ffb | fbep | ffbTdTn | ffbMaster`) **recalculée** par `detectCompetitionMode` à chaque `mergeConfig`. Les presets personnalisés vivent à part (`timer/presets.ts`, clé `h8timer.presets`) : un preset actif est détecté par égalité des temps (`matchesPreset`), jamais stocké dans la config.
 - `Theme` est aussi une union fermée, dupliquée dans `protocol.ts` (`parseDisplayConfig`) : l'étendre aux deux endroits.
 - La salle miroir (code + secret) vit en `sessionStorage` : fermer l'onglet/PWA perd la salle côté contrôleur.
 - Le Worker supprime les salles après ~2 h sans connexion (alarm DO).

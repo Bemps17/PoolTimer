@@ -10,6 +10,7 @@ describe('settings layout', () => {
     const panel = source('components/SettingsPanel.tsx');
     expect(panel).toContain('title="Joueurs"');
     expect(panel).toContain('title="Score"');
+    expect(panel).toContain('<PresetManager');
     expect(panel).toContain('title="Affichage télécommande & écran"');
     expect(panel).toContain('title="Streaming (OBS / Streamlabs)"');
     expect(panel).toContain('htmlId="matchLagAtStart"');
