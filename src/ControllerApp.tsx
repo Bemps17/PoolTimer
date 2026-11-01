@@ -34,8 +34,8 @@ import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { displayUrl, toMirrorMatch } from './mirror/protocol';
 import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
-import { boardLayout, isRemoteViewActive } from './timer/viewOptions';
-import { useIsLandscape } from './hooks/useIsLandscape';
+import { boardLayout, isRemoteViewActive, orientationLockTarget } from './timer/viewOptions';
+import { useIsLandscape, useOrientationLock } from './hooks/useIsLandscape';
 import { LandscapeBoard } from './components/LandscapeBoard';
 import { RemoteControl } from './components/RemoteControl';
 import type { TimerConfig } from './timer/types';
@@ -172,6 +172,7 @@ export default function ControllerApp() {
   const viewOptions = timer.config.viewOptions;
   const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
   const isLandscape = useIsLandscape();
+  useOrientationLock(orientationLockTarget(viewOptions.landscape));
   const layout = boardLayout({ remoteActive, landscapeOption: viewOptions.landscape, isLandscape });
   // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
   useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);

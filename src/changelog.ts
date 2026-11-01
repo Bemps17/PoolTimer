@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.4.0';
+export const APP_VERSION = '3.4.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.4.1',
+    date: '2026-11-01',
+    title: 'Correctif : la disposition paysage s’active en tournant le téléphone',
+    notes: [
+      'L’application installée était bloquée en portrait : tourner le téléphone ne faisait rien, même avec la disposition paysage (télécommande et paysage) activée. Elle suit maintenant la rotation quand l’option est activée.',
+      'Option désactivée (par défaut) : l’application reste en portrait comme avant, quand le téléphone le permet.',
+      'L’écran Visuel installé sur une tablette peut aussi passer en paysage.',
+    ],
+  },
   {
     version: '3.4.0',
     date: '2026-11-01',

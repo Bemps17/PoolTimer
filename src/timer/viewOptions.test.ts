@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boardLayout, getDefaultViewOptions, isRemoteViewActive, mergeViewOptions } from './viewOptions';
+import { boardLayout, getDefaultViewOptions, isRemoteViewActive, mergeViewOptions, orientationLockTarget } from './viewOptions';
 
 describe('options d’affichage', () => {
   it('defaults put the timer first, portrait only', () => {
@@ -45,5 +45,12 @@ describe('disposition de l’écran de jeu', () => {
     expect(boardLayout({ remoteActive: true, landscapeOption: true, isLandscape: true })).toBe('landscape');
     expect(boardLayout({ remoteActive: false, landscapeOption: true, isLandscape: true })).toBe('landscape');
     expect(boardLayout({ remoteActive: true, landscapeOption: true, isLandscape: false })).toBe('remote');
+  });
+});
+
+describe('verrouillage d’orientation (app installée)', () => {
+  it('stays portrait while the landscape option is off, follows the phone once it is on', () => {
+    expect(orientationLockTarget(false)).toBe('portrait');
+    expect(orientationLockTarget(true)).toBeNull();
   });
 });

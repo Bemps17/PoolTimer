@@ -65,3 +65,11 @@ export function boardLayout({
   if (landscapeOption && isLandscape) return 'landscape';
   return remoteActive ? 'remote' : 'classic';
 }
+
+/**
+ * Orientation à verrouiller (app installée) : portrait tant que l'option paysage est désactivée,
+ * rien (le téléphone décide) une fois activée. Le manifeste autorise toutes les orientations.
+ */
+export function orientationLockTarget(landscapeOption: boolean): 'portrait' | null {
+  return landscapeOption ? null : 'portrait';
+}

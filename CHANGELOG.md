@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 3.4.1 — 2026-11-01
+
+- **Correctif paysage** : le manifeste PWA verrouillait l'app installée en portrait (`orientation: 'portrait'`), donc tourner le téléphone ne faisait rien. Manifeste en `orientation: 'any'` ; tant que l'option paysage est désactivée, `useOrientationLock` demande le portrait (`screen.orientation.lock`, accepté par Android en app installée, ignoré ailleurs) ; option activée → `unlock()`. Logique pure `orientationLockTarget()` testée.
+- Aide de l'option : la rotation automatique du téléphone doit être activée.
+
 ## 3.4.0 — 2026-11-01
 
 - **Télécommande dédiée** (`components/RemoteControl.tsx`, salle ouverte, portrait) : aperçu en direct de l'écran distant (`RemotePreview` : joueurs, EXT, score s'il est envoyé, chiffres et couleurs d'alerte, `SyncDot`), très gros Départ / Pause, grille Nouveau coup · Extension · Après casse · Nouvelle manche, ⚙️ dans l'en-tête de l'aperçu. Plus de score sur l'écran de la télécommande.
