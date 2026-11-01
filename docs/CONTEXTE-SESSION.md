@@ -10,7 +10,7 @@
 | --- | --- |
 | Version en production | **3.5.1** (toucher du chrono en paysage, télécommande dédiée, paysage Non · Auto · Forcé, score masquable sur le téléphone) |
 | Site | https://pooltimer.vercel.app (Vercel, projet `pooltimer`, déploiement automatique depuis `main`) |
-| Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`f694928a-923d-4c8e-96e4-18726b0b06df`** |
+| Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`d03aef3b-4bde-4acc-8c28-18358d903038`** (3.5.2 ; retour arrière : `f694928a…`) |
 | Branche de travail | `claude/app-completion-roadmap-eyqp6k` (repartie de `main`, propre) |
 | Tests | 366 tests Vitest, sonde du relais, scénario e2e Playwright : tout vert (local + CI GitHub) |
 | CueScore | **En attente (WIP)**, rien de codé — voir `docs/integrations/cuescore.md` |
