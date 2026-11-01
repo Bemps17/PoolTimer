@@ -1912,5 +1912,6 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 /* EXT en px/vw : ne grossit pas avec la police système, pour laisser la place au nom. */
 .top-bar .player-status .ext-status { font-size: clamp(10px, 3.2vw, 1.2rem); }
 /* Réglages : sélecteur de couleur et marges bornés, pour laisser la place au nom même police agrandie. */
-.player-config input[type='color'] { width: clamp(2.75rem, 13vw, 3.5rem); flex: 0 0 auto; }
+.player-config input[type='color'] { width: clamp(36px, 11vw, 3.5rem); flex: 0 0 auto; }
+.player-config { gap: clamp(8px, 2.5vw, 1rem); }
 .name-readonly { padding: 10px 8px; gap: 6px; }
