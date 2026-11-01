@@ -18,7 +18,14 @@ import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useMatch } from './hooks/useMatch';
 import { usePresets } from './hooks/usePresets';
-import { useWakeLock } from './hooks/useWakeLock';
+import { useThemes } from './hooks/useThemes';
+import { ImportDialog } from './components/ImportDialog';
+import { ShareDialog, type ShareTarget } from './components/ShareDialog';
+import { decodeShareText, SHARE_HASH_KEY, type ShareEnvelope } from './share/envelope';
+import { applyPreset, type CustomPreset } from './timer/presets';
+import { applyCustomTheme } from './timer/themes';
+import { useKeepAwake } from './hooks/useKeepAwake';
+import { keepAwakeLabel } from './pwa/keepAwake';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
@@ -45,6 +52,9 @@ function ControllerApp() {
   const timer = useBilliardTimer();
   const matchControl = useMatch(timer.config.matchOptions);
   const presetsController = usePresets();
+  const themesController = useThemes();
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [pendingImport, setPendingImport] = useState<ShareEnvelope | null>(null);
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
   const pwaUpdate = usePwaUpdate();
@@ -122,6 +132,44 @@ function ControllerApp() {
     setToastVisible(true);
   }, [pwaUpdate.snoozeUpdate]);
 
+  // Lien de partage ouvert (#h8=…) : aperçu + confirmation, puis on nettoie l'URL.
+  useEffect(() => {
+    if (!window.location.hash.includes(`${SHARE_HASH_KEY}=`)) return;
+    const result = decodeShareText(window.location.hash);
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    if (result.ok) {
+      setPendingImport(result.envelope);
+    } else {
+      setToastMessage(result.error);
+      setToastVisible(true);
+    }
+  }, []);
+
+  const handleImportConfirm = useCallback(
+    (apply: boolean) => {
+      const envelope = pendingImport;
+      if (!envelope) return;
+      let next = timer.config;
+      if (envelope.preset) {
+        const { name, raceTo, ...timings } = envelope.preset;
+        presetsController.create(name, timings, raceTo);
+        if (apply) {
+          const asPreset: CustomPreset = { id: 'import', name, raceTo, createdAt: 0, ...timings };
+          next = applyPreset(next, asPreset);
+        }
+      }
+      if (envelope.theme) {
+        themesController.create(envelope.theme.name, envelope.theme.base, envelope.theme.colors);
+        if (apply) next = applyCustomTheme(next, envelope.theme);
+      }
+      if (apply && next !== timer.config) timer.updateConfig(next, { resetShot: Boolean(envelope.preset) });
+      setPendingImport(null);
+      setToastMessage(apply ? 'Importé et appliqué' : 'Importé');
+      setToastVisible(true);
+    },
+    [pendingImport, timer.config, timer.updateConfig, presetsController.create, themesController.create],
+  );
+
   const handleNewMatch = useCallback(() => {
     if (!window.confirm('Remettre le score, les casses fermes et le tirage à zéro (nouveau match) ?')) return;
     matchControl.newMatch();
@@ -131,7 +179,8 @@ function ControllerApp() {
 
   const viewOptions = timer.config.viewOptions;
   const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
-  useWakeLock(remoteActive && viewOptions.remoteWakeLock);
+  // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
+  const keepAwake = useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
   const matchOptions = timer.config.matchOptions;
   const mirrorMatch = toMirrorMatch(matchControl.match, matchOptions);
   const lagPrompt = matchOptions.enabled && matchOptions.lagAtStart && matchControl.match.lagPending;
@@ -177,7 +226,9 @@ function ControllerApp() {
         remote={
           remoteActive
             ? {
-                label: mirror.sync.chip || `Télécommande · ${mirror.room}`,
+                label: [mirror.sync.chip || `Télécommande · ${mirror.room}`, keepAwakeLabel(keepAwake) && keepAwake !== 'active' ? keepAwakeLabel(keepAwake) : '']
+                  .filter(Boolean)
+                  .join(' · '),
                 health: mirror.sync.health,
                 scorePlacement: viewOptions.remoteScore,
               }
@@ -223,6 +274,10 @@ function ControllerApp() {
         onShowChangelog={() => setChangelogOpen(true)}
         onShowTutorial={openTutorial}
         presetsController={presetsController}
+        themesController={themesController}
+        onSharePreset={(preset) => setShareTarget({ kind: 'preset', preset })}
+        onShareTheme={(theme) => setShareTarget({ kind: 'theme', theme })}
+        onImportEnvelope={setPendingImport}
         onNotify={(message) => {
           setToastMessage(message);
           setToastVisible(true);
@@ -270,6 +325,25 @@ function ControllerApp() {
           />
         }
       />
+      {shareTarget ? (
+        <ShareDialog
+          target={shareTarget}
+          config={timer.config}
+          onClose={() => setShareTarget(null)}
+          onNotify={(message) => {
+            setToastMessage(message);
+            setToastVisible(true);
+          }}
+        />
+      ) : null}
+      {pendingImport ? (
+        <ImportDialog
+          envelope={pendingImport}
+          config={timer.config}
+          onAdd={handleImportConfirm}
+          onCancel={() => setPendingImport(null)}
+        />
+      ) : null}
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <TutorialSlideshow open={tutorialOpen} onClose={() => setTutorialOpen(false)} />

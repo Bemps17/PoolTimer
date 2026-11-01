@@ -17,6 +17,8 @@ export default defineConfig({
         'icon-512-maskable.png',
         'apple-touch-icon.png',
         'og-image.png',
+        'keepawake.mp4',
+        'keepawake.webm',
         'sound/alert-time.mp3',
         'sound/clic.mp3',
         'sound/minions-arghh.mp3',

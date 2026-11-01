@@ -104,7 +104,7 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 4. Aperçu de ce que change le preset avant application (« 45s → 30s »).
 5. Tests : migration de config, bornes, doublons, ids uniques.
 
-### Phase 4 — Partage (v2.11.0)
+### Phase 4 — Partage (v2.11.0) — ✅ fait (liens, QR, fichiers, thèmes nommés, écran toujours allumé ; codes courts Worker/KV non faits)
 1. `share/envelope.ts` : sérialisation / parsing versionné `h8:1` + tests de fuzz (JSON invalide, valeurs hors bornes, champs inconnus, payload énorme).
 2. Export / import fichier (Web Share API + téléchargement).
 3. **Lien `#p=`** + écran de confirmation d'import (aperçu, nom, « Ajouter à mes presets ») ; QR du lien (`QrCodeSvg` existe déjà).

@@ -43,6 +43,18 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche.</li>
           </ul>
 
+          <h3>Partager presets et apparences</h3>
+          <ul>
+            <li>
+              Sur un preset ou un thème personnalisé : <strong>Partager</strong> → lien, QR code ou fichier. Le
+              destinataire ouvre le lien (ou ⚙️ → Partage &amp; import) et confirme après un aperçu.
+            </li>
+            <li>
+              <strong>Écran toujours allumé</strong> : automatique sur l’écran Visuel et sur la télécommande quand une
+              salle est ouverte. Si le message « Touchez l’écran » apparaît, un appui suffit.
+            </li>
+          </ul>
+
           <h3>Streaming (OBS / Streamlabs)</h3>
           <ul>
             <li>

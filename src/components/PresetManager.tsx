@@ -21,11 +21,12 @@ interface PresetManagerProps {
   controller: PresetsController;
   onApply: (next: TimerConfig) => void;
   onNotify: (message: string) => void;
+  onShare: (preset: CustomPreset) => void;
 }
 
 type Source = 'current' | (typeof COMPETITION_MODES)[number];
 
-export function PresetManager({ config, controller, onApply, onNotify }: PresetManagerProps) {
+export function PresetManager({ config, controller, onApply, onNotify, onShare }: PresetManagerProps) {
   const { presets, create, rename, duplicate, remove } = controller;
   const [name, setName] = useState('');
   const [source, setSource] = useState<Source>('current');
@@ -95,6 +96,9 @@ export function PresetManager({ config, controller, onApply, onNotify }: PresetM
                       </small>
                     </button>
                     <div className="preset-actions">
+                      <button type="button" className="preset-mini" onClick={() => onShare(preset)}>
+                        Partager
+                      </button>
                       <button
                         type="button"
                         className="preset-mini"

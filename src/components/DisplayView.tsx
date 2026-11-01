@@ -4,6 +4,8 @@ import { getDigitState, getFlashClass } from '../timer/engine';
 import { formatTime } from '../timer/format';
 import { useDisplayMirror } from '../hooks/useMirror';
 import { useFullscreen } from '../hooks/useFullscreen';
+import { useKeepAwake } from '../hooks/useKeepAwake';
+import { keepAwakeLabel } from '../pwa/keepAwake';
 import { formatRoomCode } from '../mirror/protocol';
 import { MatchScore } from './MatchScore';
 import { PlayerStatus } from './PlayerStatus';
@@ -15,6 +17,8 @@ interface DisplayViewProps {
 export function DisplayView({ room }: DisplayViewProps) {
   const { snapshot, remainingTime, status, sync } = useDisplayMirror(room);
   const { isFullscreen, toggle } = useFullscreen();
+  // L'écran Visuel ne doit jamais se mettre en veille pendant un match.
+  const keepAwake = useKeepAwake(true);
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const config = snapshot?.config;
@@ -87,6 +91,11 @@ export function DisplayView({ room }: DisplayViewProps) {
         >
           {statusLabel}
         </span>
+        {keepAwake !== 'off' ? (
+          <span className={`display-awake display-awake-${keepAwake}`} role="status">
+            {keepAwakeLabel(keepAwake)}
+          </span>
+        ) : null}
       </header>
       {config ? (
         <div className="display-players">

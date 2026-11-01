@@ -18,7 +18,13 @@ import { previewAlertSound } from '../audio/toneAudio';
 import type { VolumeMode } from '../audio/loudness';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
+import { ImportPanel } from './ImportPanel';
 import { PresetManager } from './PresetManager';
+import { ThemeLibrary } from './ThemeLibrary';
+import type { ThemesController } from '../hooks/useThemes';
+import type { ShareEnvelope } from '../share/envelope';
+import type { CustomPreset } from '../timer/presets';
+import type { CustomTheme } from '../timer/themes';
 import type { PresetsController } from '../hooks/usePresets';
 import { PlayerNameField } from './PlayerNameField';
 import { SettingsSection } from './SettingsSection';
@@ -49,7 +55,11 @@ interface SettingsPanelProps {
   extraSections?: ReactNode;
   streamSection?: ReactNode;
   presetsController: PresetsController;
+  themesController: ThemesController;
   onNotify: (message: string) => void;
+  onSharePreset: (preset: CustomPreset) => void;
+  onShareTheme: (theme: CustomTheme) => void;
+  onImportEnvelope: (envelope: ShareEnvelope) => void;
 }
 
 const THEME_OPTIONS = [
@@ -138,7 +148,11 @@ export function SettingsPanel({
   extraSections,
   streamSection,
   presetsController,
+  themesController,
   onNotify,
+  onSharePreset,
+  onShareTheme,
+  onImportEnvelope,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -343,6 +357,7 @@ export function SettingsPanel({
               controller={presetsController}
               onApply={(next) => onChange(next, { resetShot: true })}
               onNotify={onNotify}
+              onShare={onSharePreset}
             />
             <p className="install-hint">
               Presets de chronométrage uniquement. Changer le thème ou les couleurs ne change pas le preset. Ultimate
@@ -420,6 +435,13 @@ export function SettingsPanel({
             >
               Réinitialiser les couleurs du thème
             </button>
+            <ThemeLibrary
+              config={config}
+              controller={themesController}
+              onApply={(next) => onChange(next)}
+              onShare={onShareTheme}
+              onNotify={onNotify}
+            />
             <SelectField
               label="Mode d'interface"
               htmlId="modeInterface"
@@ -454,6 +476,10 @@ export function SettingsPanel({
               {isFullscreen ? 'Quitter le plein écran' : 'Activer le plein écran'}
             </button>
             <p className="install-hint">Utile dans le navigateur. En app installée, c’est déjà plein écran.</p>
+          </SettingsSection>
+
+          <SettingsSection title="Partage & import">
+            <ImportPanel onImport={onImportEnvelope} />
           </SettingsSection>
 
           <SettingsSection title="Sons & vibration">

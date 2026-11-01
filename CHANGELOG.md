@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.11.0 — 2026-11-01
+
+- **Partage** de presets et de thèmes personnalisés par **lien (`#h8=…`), QR code ou fichier** `.h8preset.json` ; option « inclure mon apparence » (bundle). Format versionné `h8:1`, taille bornée, valeurs clampées, **confirmation + aperçu avant tout import** (⚙️ → Partage & import, ou ouverture directe du lien).
+- **Thèmes personnalisés** nommés (20 max) : ⚙️ → Apparence → *Mes thèmes*.
+- **Écran toujours allumé** sur la télécommande (salle ouverte) **et** sur l’écran Visuel : Screen Wake Lock, repli vidéo muette (`keepawake.mp4/webm`) au premier appui, statut affiché. Remplace `useWakeLock`.
+- Limite : verrou manuel, économiseur de batterie ou veille système restent prioritaires.
+
 ## 2.10.1 — 2026-11-01
 
 - **Alertes au volume maximum** : mode *Maximum* par défaut (0 dB au lieu de -10 dB, y compris pour les configs existantes), mode *Réglable* en option (⚙️ → Sons & vibration).

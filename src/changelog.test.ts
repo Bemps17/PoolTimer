@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/volume maximum|Maximum/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/limiteur/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/partage/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/écran toujours allumé/i);
+
+    const loud = CHANGELOG.find((entry) => entry.version === '2.10.1');
+    expect(loud?.notes.join(' ')).toMatch(/volume maximum|Maximum/i);
+    expect(loud?.notes.join(' ')).toMatch(/limiteur/i);
 
     const presets = CHANGELOG.find((entry) => entry.version === '2.10.0');
     expect(presets?.notes.join(' ')).toMatch(/presets? personnalis/i);

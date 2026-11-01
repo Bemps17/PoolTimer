@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.10.1';
+export const APP_VERSION = '2.11.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.11.0',
+    date: '2026-11-01',
+    title: 'Partage de presets et d’apparences, écran toujours allumé',
+    notes: [
+      'Partage : chaque preset ou thème personnalisé se partage par lien, QR code ou fichier .h8preset.json. Option « inclure mon apparence » pour envoyer chrono et couleurs en un seul partage.',
+      'Import : ouvrir un lien de partage (ou le coller / charger un fichier dans ⚙️ → Partage & import) affiche un aperçu des changements ; rien n’est modifié sans confirmation. Contenu validé et borné.',
+      'Thèmes personnalisés : enregistrez l’apparence actuelle sous un nom, réappliquez-la, partagez-la (⚙️ → Apparence → Mes thèmes).',
+      'Écran toujours allumé sur la télécommande ET sur l’écran Visuel : verrou d’écran natif, avec repli vidéo muette quand le navigateur le refuse (un appui suffit). Statut affiché.',
+      'Limite : bouton de verrouillage, économiseur de batterie ou réglage système de mise en veille restent prioritaires sur une PWA.',
+    ],
+  },
   {
     version: '2.10.1',
     date: '2026-11-01',

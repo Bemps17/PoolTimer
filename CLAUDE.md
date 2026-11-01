@@ -53,6 +53,7 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 - **Toute donnée persistée/importée passe par une fonction de validation** du style `mergeConfig` (clamp, valeurs par défaut). Ne jamais faire confiance à du JSON externe (localStorage, import de fichier, lien partagé).
 - **Presets = chronométrage uniquement ; apparence = indépendante** (décision v2.7.0). Ne pas re-coupler les deux.
 - **Pas de clavier mobile pendant le match** : aucun `<input>` texte sur l'écran de jeu.
+- **Partage** : tout contenu entrant (lien `#h8=`, fichier, texte collé) passe par `share/envelope.ts` (`decodeShareText`) puis une confirmation (`ImportDialog`) ; ne jamais appliquer directement. Écran allumé : `useKeepAwake` (Wake Lock + repli vidéo `public/keepawake.*`).
 - Pas de back-end avec comptes ni base de données sans décision explicite (coût / RGPD / maintenance).
 - **Audio** : tout son (fichiers `HTMLAudioElement`, imports, synthés Tone) doit passer par la chaîne maître de `toneAudio.ts` (volume → gain → limiteur -1 dBFS) via `outputRoute.ts`/`loudness.ts` ; ne pas régler `audio.volume` directement ni lire `config.volume` (utiliser `effectiveVolumeDb`). Un élément routé dépend du `AudioContext` (relancé sur `visibilitychange` / `pointerdown`).
 - Pas de sons ou d'assets sous droits (Voicemod, Illumination…) dans le dépôt.

@@ -1505,3 +1505,29 @@ html.overlay-bg-chroma body { background: #00ff00 !important; }
     border-color: var(--c-primary);
     overflow-wrap: anywhere;
 }
+.display-awake { font-size: 0.8rem; color: var(--c-text-secondary); }
+.display-awake-active { color: var(--c-play); }
+.display-awake-needs-tap, .display-awake-unsupported { color: var(--c-digit-warning); font-weight: 700; }
+
+/* ---------- Partage & import ---------- */
+.share-card { max-height: 92dvh; overflow-y: auto; }
+.share-card .mirror-qr { width: min(60vw, 14rem); align-self: center; }
+.share-card .mirror-link { word-break: break-all; max-height: 4.5rem; overflow: auto; font-size: 0.7rem; margin: 0; }
+.import-block { text-align: left; padding: 0.5rem; border-radius: 8px; background: var(--c-panel-input-bg); }
+.import-block h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.import-block p { margin: 0.15rem 0; }
+.import-swatches { display: flex; gap: 0.35rem; }
+.import-swatch { width: 1.6rem; height: 1.6rem; border-radius: 6px; border: 1px solid var(--c-panel-input-border); }
+.import-text {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    color: var(--c-panel-text-primary);
+    background: var(--c-panel-input-bg);
+    border: 1px solid var(--c-panel-input-border);
+    border-radius: 6px;
+    resize: vertical;
+}
+.import-error { color: var(--c-digit-critical); }
