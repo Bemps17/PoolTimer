@@ -54,6 +54,7 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 - **Presets = chronométrage uniquement ; apparence = indépendante** (décision v2.7.0). Ne pas re-coupler les deux.
 - **Pas de clavier mobile pendant le match** : aucun `<input>` texte sur l'écran de jeu.
 - Pas de back-end avec comptes ni base de données sans décision explicite (coût / RGPD / maintenance).
+- **Audio** : tout son (fichiers `HTMLAudioElement`, imports, synthés Tone) doit passer par la chaîne maître de `toneAudio.ts` (volume → gain → limiteur -1 dBFS) via `outputRoute.ts`/`loudness.ts` ; ne pas régler `audio.volume` directement ni lire `config.volume` (utiliser `effectiveVolumeDb`). Un élément routé dépend du `AudioContext` (relancé sur `visibilitychange` / `pointerdown`).
 - Pas de sons ou d'assets sous droits (Voicemod, Illumination…) dans le dépôt.
 - Chaque évolution visible : bump `package.json` + entrée dans `src/changelog.ts` + `CHANGELOG.md` (des tests `changelog.test.ts` / `seo.test.ts` vérifient la cohérence).
 - Tests d'UI : composants non testés aujourd'hui ; garder la logique testable dans des modules purs (cf. `screenTap.ts`, `syncStatus.ts`).

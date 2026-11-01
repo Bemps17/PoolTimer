@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.10.0';
+export const APP_VERSION = '2.10.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.10.1',
+    date: '2026-11-01',
+    title: 'Alertes sonores au volume maximum',
+    notes: [
+      'Volume des alertes : mode Maximum par défaut (0 dB, auparavant -10 dB), appliqué aussi aux configurations existantes. Mode Réglable disponible dans ⚙️ → Sons & vibration.',
+      'Chaîne audio renforcée : gain +6 dB puis limiteur à -1 dBFS (pas de saturation). Mesuré sur les fichiers embarqués : niveau moyen relevé d’environ +14 à +16 dB par rapport à l’ancien réglage par défaut.',
+      'Tous les sons passent par cette chaîne : fichiers d’alerte, packs, sons importés, mode Minions et synthétiseurs.',
+      'Bip du compte à rebours plus aigu et plus riche (onde carrée, 1,5 kHz), mieux restitué par les petits haut-parleurs de smartphone ; cloche à pleine échelle.',
+      'iPhone : les alertes ignorent désormais l’interrupteur silencieux quand le navigateur le permet. Bouton « Tester le volume » dans les réglages.',
+      'Une page web ne peut pas dépasser le volume média du téléphone : montez-le au maximum avec les boutons de volume.',
+    ],
+  },
   {
     version: '2.10.0',
     date: '2026-11-01',

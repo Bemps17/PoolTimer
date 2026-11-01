@@ -1,5 +1,6 @@
 import type { SoundType, TimerConfig } from '../timer/types';
 import { clampGain, dbToGain } from '../timer/volume';
+import { routeAudio } from './outputRoute';
 
 /** Vendored in-repo since 247d3db (hidden Minions easter egg). */
 export const MINIONS_ARGHH_SRC = '/sound/minions-arghh.mp3';
@@ -33,7 +34,7 @@ export function preloadMinionsArghh(): void {
 export function playMinionsArghh(volumeDb: number): void {
   preloadMinionsArghh();
   if (!minionsAudio) return;
-  minionsAudio.volume = clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : -10));
+  minionsAudio.volume = routeAudio(minionsAudio) ? 1 : clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : 0));
   minionsAudio.currentTime = 0;
   void minionsAudio.play().catch(() => {
     // Playback can be blocked until a user gesture; ignore.

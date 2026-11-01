@@ -1,10 +1,15 @@
 import * as Tone from 'tone';
 import type { SoundType, TimerConfig } from '../timer/types';
+import { boostDb, effectiveVolumeDb, LIMITER_THRESHOLD_DB } from './loudness';
+import { registerAudioRouter } from './outputRoute';
 import { playMinionsArghh, shouldPlayMinionsArghh } from './minions';
 import { playAlertById, preloadAlertPack, resolveAlertSoundId } from './playAlert';
 
 interface AudioGraph {
   volumeNode: Tone.Volume;
+  boostNode: Tone.Gain;
+  limiter: Tone.Limiter;
+  sources: WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>;
   bellSynth: Tone.MetalSynth;
   gong: Tone.FMSynth;
   clickSynth: Tone.MembraneSynth;
@@ -23,13 +28,23 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
 
   initializing = (async () => {
     await Tone.start();
-    const volumeNode = new Tone.Volume(Number.isFinite(volumeDb) ? volumeDb : -10).toDestination();
+    // iOS : ignorer l'interrupteur silencieux (catégorie « playback »), sinon les alertes peuvent être muettes.
+    try {
+      const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+      if (session) session.type = 'playback';
+    } catch {
+      // non supporté
+    }
+    // Chaîne maître : volume -> gain (+6 dB en mode maximum) -> limiteur -1 dBFS -> sortie.
+    const limiter = new Tone.Limiter(LIMITER_THRESHOLD_DB).toDestination();
+    const boostNode = new Tone.Gain(1).connect(limiter);
+    const volumeNode = new Tone.Volume(Number.isFinite(volumeDb) ? volumeDb : 0).connect(boostNode);
     const bellSynth = new Tone.MetalSynth({
       resonance: 300,
       harmonicity: 5.1,
       modulationIndex: 16,
       envelope: { attack: 0.001, decay: 1.4, release: 0.2 },
-      volume: -10,
+      volume: 0,
     }).connect(volumeNode);
     const gong = new Tone.FMSynth({
       harmonicity: 3.1,
@@ -44,12 +59,30 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
       envelope: { attack: 0.001, decay: 0.1, sustain: 0 },
     }).connect(volumeNode);
     const countdownSynth = new Tone.Synth({
-      oscillator: { type: 'sine' },
-      volume: -5,
+      // Carré + aigu (1,5 kHz) : bien mieux restitué par un petit haut-parleur qu'un sinus grave.
+      oscillator: { type: 'square' },
+      volume: -3,
       envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 },
     }).connect(volumeNode);
 
-    graph = { volumeNode, bellSynth, gong, clickSynth, countdownSynth };
+    const sources = new WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>();
+    // Un élément routé dépend du contexte audio : le relancer dès qu'il est suspendu (retour d'écran verrouillé, etc.).
+    const resume = () => {
+      const ctx = Tone.getContext().rawContext as AudioContext;
+      if (ctx.state !== 'running') void ctx.resume().catch(() => undefined);
+    };
+    document.addEventListener('visibilitychange', resume);
+    document.addEventListener('pointerdown', resume, { passive: true });
+
+    graph = { volumeNode, boostNode, limiter, sources, bellSynth, gong, clickSynth, countdownSynth };
+    registerAudioRouter((audio) => {
+      if (!graph) return false;
+      if (graph.sources.has(audio)) return true;
+      const source = (Tone.getContext().rawContext as AudioContext).createMediaElementSource(audio);
+      Tone.connect(source, graph.volumeNode);
+      graph.sources.set(audio, source);
+      return true;
+    });
   })();
 
   try {
@@ -64,18 +97,18 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
 
 function playClassicTone(id: string, config: TimerConfig): void {
   if (!graph) return;
-  graph.volumeNode.volume.value = config.volume;
+  applyMasterLevel(config);
   const now = Tone.now();
   switch (id) {
     case 'classic-warning':
       graph.bellSynth.triggerAttack(300, now);
       return;
     case 'classic-tick':
-      graph.countdownSynth.triggerAttackRelease('G5', '16n', now);
+      graph.countdownSynth.triggerAttackRelease('G6', '16n', now);
       return;
     case 'classic-oneshot5s':
       for (let beat = 0; beat < 5; beat += 1) {
-        graph.countdownSynth.triggerAttackRelease('G5', '16n', now + beat);
+        graph.countdownSynth.triggerAttackRelease('G6', '16n', now + beat);
       }
       return;
     case 'classic-gong':
@@ -105,7 +138,7 @@ function playClassicType(type: SoundType, config: TimerConfig): void {
       return;
     case 'click':
       if (!graph) return;
-      graph.volumeNode.volume.value = config.volume;
+      applyMasterLevel(config);
       graph.clickSynth.triggerAttackRelease('C4', '32n', Tone.now(), 0.5);
       return;
     default: {
@@ -124,7 +157,8 @@ export function playSound(type: SoundType, config: TimerConfig): void {
   }
 
   if (shouldPlayMinionsArghh(type, config)) {
-    playMinionsArghh(config.volume);
+    applyMasterLevel(config);
+    playMinionsArghh(effectiveVolumeDb(config));
     return;
   }
 
@@ -134,7 +168,8 @@ export function playSound(type: SoundType, config: TimerConfig): void {
     return;
   }
 
-  const routed = playAlertById(id, config.volume);
+  applyMasterLevel(config);
+  const routed = playAlertById(id, effectiveVolumeDb(config));
   if (routed === 'classic' || routed === 'missing') {
     if (id.startsWith('classic-')) {
       playClassicTone(id, config);
@@ -145,19 +180,31 @@ export function playSound(type: SoundType, config: TimerConfig): void {
 }
 
 export function previewAlertSound(id: string, config: TimerConfig): void {
-  void initializeAudio(config.volume).then(() => {
+  void initializeAudio(effectiveVolumeDb(config)).then(() => {
     if (!config.sonAlertes) return;
-    const routed = playAlertById(id, config.volume);
+    applyMasterLevel(config);
+    const routed = playAlertById(id, effectiveVolumeDb(config));
     if (routed === 'classic' || routed === 'missing') {
       playClassicTone(id.startsWith('classic-') ? id : 'classic-warning', config);
     }
   });
 }
 
-export function setAudioVolume(volumeDb: number): void {
+export function setAudioVolume(volumeDb: number, boost = 0): void {
   if (graph) {
     graph.volumeNode.volume.value = volumeDb;
+    graph.boostNode.gain.value = Tone.dbToGain(boost);
   }
+}
+
+/** Applique volume + gain d'après la configuration (à chaque lecture : le réglage peut avoir changé). */
+function applyMasterLevel(config: TimerConfig): void {
+  setAudioVolume(effectiveVolumeDb(config), boostDb(config));
+}
+
+/** Pour le hook : le niveau maître suit la configuration. */
+export function syncMasterLevel(config: TimerConfig): void {
+  applyMasterLevel(config);
 }
 
 export function vibrate(pattern: number | number[], enabled: boolean): void {

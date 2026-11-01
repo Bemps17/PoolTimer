@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.10.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.10.1** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -16,7 +16,7 @@ Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL c
 - Deux joueurs, noms et couleurs ; thèmes Sombre / Clair / Cyberpunk / FFB / Ultimate et couleurs par zone (indépendants des presets de compétition)
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable
-- Alertes visuelles, sonores et vibration. Pack **classique** (fichiers d’origine du dépôt + cloche Tone.js), Pack Crétins et Pack Minions-like (originaux H8timer), tirage aléatoire, bips 1 s ou alerte ~5 s. Import local de vos fichiers (Voicemod : téléchargement manuel, pas de fetch)
+- Alertes visuelles, sonores et vibration. **Volume des alertes au maximum par défaut** (gain + limiteur anti-saturation) ; le volume média du téléphone reste le plafond. Pack **classique** (fichiers d’origine du dépôt + cloche Tone.js), Pack Crétins et Pack Minions-like (originaux H8timer), tirage aléatoire, bips 1 s ou alerte ~5 s. Import local de vos fichiers (Voicemod : téléchargement manuel, pas de fetch)
 - **Scoreur 1v1** (joueur ou équipe) : score, **casses fermes (F)** en compteur séparé, **blanche** sur le casseur (appui pour inverser, alternance à chaque manche), tirage à la bande optionnel au début du match, course à N. Visible en grand sur l'écran Visuel.
 - **Vue télécommande** (salle ouverte) : chrono en vedette, score discret, grosses commandes. Mise en page de l'écran Visuel réglable. **Overlay streaming** `/o/CODE` pour OBS / Streamlabs (source Navigateur, fond transparent).
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`

@@ -1,3 +1,4 @@
+import type { VolumeMode } from '../audio/loudness';
 import type { MatchOptions } from './match';
 import type { ViewOptions } from './viewOptions';
 
@@ -45,6 +46,8 @@ export interface TimerConfig {
   seuilAlerte: number;
   seuilCritique: number;
   volume: number;
+  /** max = volume des alertes poussé au maximum (défaut) ; custom = curseur. */
+  volumeMode: VolumeMode;
   sonAlertes: boolean;
   sonClics: boolean;
   vibration: boolean;

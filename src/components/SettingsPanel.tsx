@@ -14,6 +14,8 @@ import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
 import type { DisplayLayout, RemoteLayout, RemoteScoreMode, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
+import { previewAlertSound } from '../audio/toneAudio';
+import type { VolumeMode } from '../audio/loudness';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
 import { PresetManager } from './PresetManager';
@@ -61,6 +63,11 @@ const THEME_OPTIONS = [
 const INTERFACE_OPTIONS = [
   { value: 'boutons', label: 'Boutons Visibles' },
   { value: 'tactile', label: 'Boutons invisibles' },
+];
+
+const VOLUME_MODE_OPTIONS = [
+  { value: 'max', label: 'Maximum (recommandé)' },
+  { value: 'custom', label: 'Réglable' },
 ];
 
 const YES_NO = [
@@ -450,12 +457,33 @@ export function SettingsPanel({
           </SettingsSection>
 
           <SettingsSection title="Sons & vibration">
-            <VolumeSlider
-              label="Volume général"
-              htmlId="volumeSonore"
-              gain={dbToGain(config.volume)}
-              onChange={(gain) => patch({ volume: gainToDb(gain) })}
+            <SelectField
+              label="Volume des alertes"
+              htmlId="volumeMode"
+              value={config.volumeMode}
+              options={VOLUME_MODE_OPTIONS}
+              onChange={(volumeMode) => patch({ volumeMode: volumeMode as VolumeMode })}
             />
+            {config.volumeMode === 'custom' ? (
+              <VolumeSlider
+                label="Niveau réglable"
+                htmlId="volumeSonore"
+                gain={dbToGain(config.volume)}
+                onChange={(gain) => patch({ volume: gainToDb(gain) })}
+              />
+            ) : null}
+            <button
+              type="button"
+              className="bouton-menu"
+              onClick={() => previewAlertSound('classic-alert-time', { ...config, sonAlertes: true })}
+            >
+              Tester le volume
+            </button>
+            <p className="install-hint">
+              Maximum : l’application pousse le son au plus fort (gain + limiteur anti-saturation). Elle ne peut pas
+              dépasser le volume média du téléphone : montez-le au maximum avec les boutons de volume, et sur iPhone
+              désactivez le mode silencieux.
+            </p>
             <SelectField
               label="Sons d'alerte (timer)"
               htmlId="sonAlertes"

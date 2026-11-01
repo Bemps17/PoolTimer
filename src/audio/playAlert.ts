@@ -1,5 +1,6 @@
 import type { SoundType, TimerConfig } from '../timer/types';
 import { clampGain, dbToGain } from '../timer/volume';
+import { routeAudio } from './outputRoute';
 import { MINIONS_ARGHH_ID, MINIONS_ARGHH_SRC, shouldPlayMinionsArghh } from './minions';
 import { catalogById, isCustomSoundId, pickAlertSound } from './soundCatalog';
 import { getCustomSound } from './customSounds';
@@ -35,7 +36,12 @@ export function resolveAlertSoundId(type: SoundType, config: TimerConfig, random
 }
 
 function setVolume(audio: HTMLAudioElement, volumeDb: number): void {
-  audio.volume = clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : -10));
+  // Routé : le volume maître (gain + limiteur) gouverne, l'élément reste à pleine échelle.
+  if (routeAudio(audio)) {
+    audio.volume = 1;
+    return;
+  }
+  audio.volume = clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : 0));
 }
 
 export function playSoundSrc(src: string, volumeDb: number): void {

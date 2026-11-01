@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/presets? personnalis/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/roue crantée/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/volume maximum|Maximum/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/limiteur/i);
+
+    const presets = CHANGELOG.find((entry) => entry.version === '2.10.0');
+    expect(presets?.notes.join(' ')).toMatch(/presets? personnalis/i);
+    expect(presets?.notes.join(' ')).toMatch(/roue crantée/i);
 
     const streaming = CHANGELOG.find((entry) => entry.version === '2.9.0');
     expect(streaming?.notes.join(' ')).toMatch(/OBS|Streamlabs|overlay/i);

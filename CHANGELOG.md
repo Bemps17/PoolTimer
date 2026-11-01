@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.10.1 — 2026-11-01
+
+- **Alertes au volume maximum** : mode *Maximum* par défaut (0 dB au lieu de -10 dB, y compris pour les configs existantes), mode *Réglable* en option (⚙️ → Sons & vibration).
+- **Chaîne audio** : gain +6 dB → limiteur -1 dBFS pour tous les sons (fichiers, packs, imports, Minions, synthés). Niveau moyen des fichiers embarqués relevé d’environ **+14 à +16 dB** (mesuré hors ligne).
+- Bip du compte à rebours plus aigu (carré, 1,5 kHz) pour les petits haut-parleurs ; iOS : ignore l’interrupteur silencieux si possible ; bouton **Tester le volume**.
+- Limite physique : le volume média du téléphone reste le plafond.
+
 ## 2.10.0 — 2026-11-01
 
 - **Presets personnalisés** : créer, renommer, dupliquer, supprimer (30 max) depuis ⚙️ → Compétition & temps → *Mes presets*, à partir des réglages actuels ou d’un preset intégré. Course à N optionnelle. Chronométrage uniquement : thème, couleurs et sons inchangés.

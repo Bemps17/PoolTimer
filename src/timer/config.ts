@@ -1,3 +1,4 @@
+import { isVolumeMode } from '../audio/loudness';
 import { defaultIdsForPack, isAlertPackId, isAlertPickMode, isCriticalAlertStyle, sanitizeSoundIdList } from '../audio/soundCatalog';
 import { getDefaultMatchOptions, mergeMatchOptions } from './match';
 import { getDefaultViewOptions, mergeViewOptions } from './viewOptions';
@@ -102,7 +103,8 @@ export function getDefaultConfig(): TimerConfig {
     tempsExtension: COMPETITION_SHOT_TIMING.tempsExtension,
     seuilAlerte: COMPETITION_SHOT_TIMING.seuilAlerte,
     seuilCritique: COMPETITION_SHOT_TIMING.seuilCritique,
-    volume: -10,
+    volume: 0,
+    volumeMode: 'max',
     sonAlertes: true,
     sonClics: true,
     vibration: true,
@@ -240,6 +242,7 @@ export function mergeConfig(saved: unknown): TimerConfig {
       CONFIG_LIMITS.seuilCritique.max,
     ),
     volume: typeof s.volume === 'number' && Number.isFinite(s.volume) ? s.volume : defaults.volume,
+    volumeMode: isVolumeMode(s.volumeMode) ? s.volumeMode : defaults.volumeMode,
     sonAlertes: asBoolean(s.sonAlertes, defaults.sonAlertes),
     sonClics: asBoolean(s.sonClics, defaults.sonClics),
     vibration: asBoolean(s.vibration, defaults.vibration),
