@@ -2,20 +2,20 @@
 
 > Fichier de mémoire pour reprendre le projet dans une nouvelle conversation sans rien perdre.
 > **À lire en premier**, puis `CLAUDE.md` (règles) et `ROADMAP.md` (feuille de route).
-> Dernière mise à jour : 2026-11-01, après la fusion de la PR #29 (v3.5.0 en production).
+> Dernière mise à jour : 2026-11-01, après la fusion de la PR #30 (v3.5.1 en production).
 
 ## 1. Où en est le projet
 
 | Élément | État |
 | --- | --- |
-| Version en production | **3.5.0** (télécommande dédiée, paysage Non · Auto · Forcé, score masquable sur le téléphone) |
+| Version en production | **3.5.1** (toucher du chrono en paysage, télécommande dédiée, paysage Non · Auto · Forcé, score masquable sur le téléphone) |
 | Site | https://pooltimer.vercel.app (Vercel, projet `pooltimer`, déploiement automatique depuis `main`) |
-| Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`f694928a-923d-4c8e-96e4-18726b0b06df`** |
+| Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`d03aef3b-4bde-4acc-8c28-18358d903038`** (3.5.2 ; retour arrière : `f694928a…`) |
 | Branche de travail | `claude/app-completion-roadmap-eyqp6k` (repartie de `main`, propre) |
-| Tests | 362 tests Vitest, sonde du relais, scénario e2e Playwright : tout vert (local + CI GitHub) |
+| Tests | 366 tests Vitest, sonde du relais, scénario e2e Playwright : tout vert (local + CI GitHub) |
 | CueScore | **En attente (WIP)**, rien de codé — voir `docs/integrations/cuescore.md` |
 
-Historique des PR fusionnées : #22 (v3.0.1), #23 (v3.1.0), #24 (v3.2.0 + v3.3.0), #25 (docs), #26 (v3.3.1), #27 (v3.4.0), #28 (v3.4.1), #29 (v3.5.0).
+Historique des PR fusionnées : #22 (v3.0.1), #23 (v3.1.0), #24 (v3.2.0 + v3.3.0), #25 (docs), #26 (v3.3.1), #27 (v3.4.0), #28 (v3.4.1), #29 (v3.5.0), #30 (v3.5.1).
 Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et retours arrière : fin de `ROADMAP.md`.
 
 ## 2. Ce que veut l'utilisateur (préférences durables)
@@ -52,7 +52,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
 - **GitHub** : MCP `mcp__github__*` (dépôt `Bemps17/PoolTimer`). CI : `.github/workflows/ci.yml` (jobs `test`, `relay-probe`, `e2e`).
 - **Vercel** : MCP `mcp__Vercel__*`. Équipe `team_bDrALhuIP24RecBVIFibd3aV` (bemps17s-projects), projet `prj_8BH8xs4S3u5fAR3A56nvvjEFCen7` (`pooltimer`). Aperçus : `pooltimer-…-bemps17s-projects.vercel.app`.
 - **Cloudflare** : plugin Cloudflare (MCP `mcp__cloudflare__execute` / `search` / `docs`), compte de l'utilisateur. Pas de `wrangler login` dans le conteneur.
-  - **Déployer le Worker sans wrangler login** : `npx wrangler deploy --dry-run --minify --outdir /tmp/wbundle --config worker/wrangler.jsonc`, puis `PUT /accounts/{id}/workers/scripts/h8timer-mirror` en multipart (metadata : `main_module: index.js`, `compatibility_date: 2026-09-20`, binding `durable_object_namespace` `ROOMS` → classe `TimerRoom`, **sans nouvelle migration**). Vérifier ensuite `/deployments` et `/content/v2`. Noter la version dans le journal de `ROADMAP.md`.
+  - **Déployer le Worker sans wrangler login** : `npx wrangler deploy --dry-run --minify --outdir /tmp/wbundle --config worker/wrangler.jsonc`, puis `PUT /accounts/{id}/workers/scripts/h8timer-mirror` en multipart (metadata : `main_module: index.js`, `compatibility_date: 2026-09-20`, binding `durable_object_namespace` `ROOMS` → classe `TimerRoom` **et** (depuis 3.5.2) binding `{ type: 'ratelimit', name: 'CONNECT_LIMITER', namespace_id: '1001', simple: { limit: 40, period: 60 } }`, **sans nouvelle migration**). Vérifier ensuite `/deployments` et `/content/v2`. Noter la version dans le journal de `ROADMAP.md`.
 - **Réseau du conteneur** : `workers.dev`, `api.cuescore.com` et `developers.cloudflare.com` étaient bloqués → impossible de sonder le vrai relais depuis la session ; la sonde réelle se lance sur le poste de l'utilisateur : `MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror`.
 - **Playwright** : `playwright@1.63.0` en devDependency (navigateurs dans `/opt/pw-browsers`, ne pas réinstaller). Scripts de capture ad hoc : `NODE_PATH=$PWD/node_modules node script.cjs`.
 - CI : les polices y sont rendues ~3 % plus larges qu'en local ; un texte ajusté au minimum de `FitText` peut passer en local et être tronqué en CI → garder une marge (éléments voisins en px/vw, pas en rem).

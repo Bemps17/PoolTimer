@@ -114,7 +114,7 @@ function openClient(url) {
 }
 
 /** Ouvre un upgrade WebSocket brut avec une Origin donnée et renvoie le statut HTTP (101 si accepté). */
-function upgradeStatus(baseUrl, params, origin) {
+function upgradeStatus(baseUrl, params, origin, extraHeaders = {}) {
   const url = new URL(wsUrl(baseUrl, params).replace(/^ws/, 'http'));
   return new Promise((resolve, reject) => {
     const request = http.request(url, {
@@ -124,6 +124,7 @@ function upgradeStatus(baseUrl, params, origin) {
         'Sec-WebSocket-Version': '13',
         'Sec-WebSocket-Key': Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64'),
         Origin: origin,
+        ...extraHeaders,
       },
     });
     request.on('upgrade', (_response, socket) => {
@@ -140,7 +141,7 @@ function upgradeStatus(baseUrl, params, origin) {
   });
 }
 
-async function probe(baseUrl) {
+async function probe(baseUrl, { local = false } = {}) {
   const room = roomCode();
   const secret = 'probe-secret-0001';
   const display = openClient(wsUrl(baseUrl, { room, role: 'display' }));
@@ -209,6 +210,21 @@ async function probe(baseUrl) {
   if (!limited.message) throw new Error('rate_limited missing message');
   controller.ws.send(JSON.stringify({ type: 'ping' }));
   await controller.next((message) => message.type === 'pong');
+
+  // S1 : une adresse qui enchaîne les connexions est coupée (429) avant le Durable Object ; une autre passe.
+  // Seulement en local (sur le vrai relais, la machine de test serait bloquée une minute).
+  if (local) {
+    const flood = { 'CF-Connecting-IP': '203.0.113.250' };
+    const statuses = [];
+    for (let index = 0; index < 90; index += 1) {
+      statuses.push(await upgradeStatus(baseUrl, { room, role: 'display' }, 'https://pooltimer.vercel.app', flood));
+    }
+    if (!statuses.includes(429)) throw new Error(`connection flood expected 429, got ${[...new Set(statuses)]}`);
+    const other = await upgradeStatus(baseUrl, { room, role: 'display' }, 'https://pooltimer.vercel.app', {
+      'CF-Connecting-IP': '198.51.100.250',
+    });
+    if (other !== 101) throw new Error(`other address expected 101, got ${other}`);
+  }
 
   display.ws.close();
   controller.ws.close();
@@ -294,7 +310,7 @@ async function main() {
   const port = Number(process.env.MIRROR_PROBE_PORT || DEFAULT_PORT);
   const { child } = await startWrangler(port);
   try {
-    await probe(`ws://127.0.0.1:${port}`);
+    await probe(`ws://127.0.0.1:${port}`, { local: true });
   } finally {
     await stopProcessGroup(child);
   }

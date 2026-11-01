@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import {
   canAcceptDisplay,
+  connectionKey,
   createRateLimiter,
   isAllowedOrigin,
   isMessageTooLarge,
@@ -8,7 +9,7 @@ import {
   PUSH_RATE,
   type RateLimiter,
 } from '../../src/mirror/limits';
-import { createWritePlanner } from '../../src/mirror/persistence';
+import { alarmNeedsRefresh, claimNeedsPersist, createWritePlanner } from '../../src/mirror/persistence';
 import { EphemeralRoom } from '../../src/mirror/room';
 import {
   isValidRoomCode,
@@ -30,6 +31,15 @@ export interface Env {
   ROOMS: DurableObjectNamespace<TimerRoom>;
   /** Origines supplémentaires autorisées (séparées par des virgules), en plus de la production et des aperçus Vercel. */
   ALLOWED_ORIGINS?: string;
+  /** Limite de nouvelles connexions par IP (binding Rate Limiting, en mémoire : ni requête DO ni écriture). */
+  CONNECT_LIMITER?: { limit(options: { key: string }): Promise<{ success: boolean }> };
+}
+
+/** Clé unique « state » : secret + séquence + snapshot = 1 ligne écrite (au lieu de 2 avec une clé « secret »). */
+interface StoredState {
+  secret?: string;
+  seq: number;
+  snapshot: EphemeralRoom['snapshot'];
 }
 
 const CORS = {
@@ -52,9 +62,9 @@ export class TimerRoom extends DurableObject<Env> {
 
   private async restore(): Promise<void> {
     if (this.loaded) return;
-    const secret = await this.ctx.storage.get<string>('secret');
-    // v3.0.1 : snapshot + seq dans une seule clé « state » (1 ligne écrite au lieu de 2) ; clés v3.0.0 en repli.
-    const state = await this.ctx.storage.get<{ seq: number; snapshot: EphemeralRoom['snapshot'] }>('state');
+    // v3.5.2 : secret + seq + snapshot dans « state » ; clés séparées des versions précédentes en repli.
+    const state = await this.ctx.storage.get<StoredState>('state');
+    const secret = state?.secret ?? (await this.ctx.storage.get<string>('secret'));
     const seq = state?.seq ?? (await this.ctx.storage.get<number>('seq'));
     const snapshot = state?.snapshot ?? (await this.ctx.storage.get<EphemeralRoom['snapshot']>('snapshot'));
     if (typeof secret === 'string') this.room.controllerSecret = secret;
@@ -85,6 +95,7 @@ export class TimerRoom extends DurableObject<Env> {
     const client = pair[0];
     const server = pair[1];
 
+    const before = { storedSecret: this.room.controllerSecret, storedSeq: this.room.seq };
     if (role === 'controller' && this.room.claimController(secret) === 'busy') {
       this.ctx.acceptWebSocket(server, ['busy']);
       this.sendJson(server, { type: 'error', code: 'room_busy', message: ROOM_BUSY_MESSAGE });
@@ -107,11 +118,10 @@ export class TimerRoom extends DurableObject<Env> {
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    if (role === 'controller') {
-      await this.ctx.storage.put('secret', secret);
-      // La séquence repart à 0 au claim : l'écrire dans « state » (lue en priorité au réveil), sinon les pushes
-      // suivants seraient rejetés comme obsolètes après une mise en veille du Durable Object.
-      await this.ctx.storage.put('state', { seq: this.room.seq, snapshot: this.room.snapshot });
+    // La séquence repart à 0 au claim : l'écrire (sinon les pushes suivants seraient rejetés comme obsolètes après
+    // une mise en veille). Rien à écrire si la même télécommande revient sans rien à remettre à zéro.
+    if (role === 'controller' && claimNeedsPersist(before, secret)) {
+      await this.ctx.storage.put('state', { secret, seq: this.room.seq, snapshot: this.room.snapshot } satisfies StoredState);
     }
 
     this.ctx.acceptWebSocket(server, [role]);
@@ -130,7 +140,7 @@ export class TimerRoom extends DurableObject<Env> {
     });
     this.sendRaw(server, welcome);
     this.broadcastPeers();
-    await this.touchAlarm();
+    await this.refreshAlarmIfNeeded();
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -202,7 +212,11 @@ export class TimerRoom extends DurableObject<Env> {
     if (step.persist) {
       await this.ctx.storage.put(
         'state',
-        { seq: clientMessage.seq, snapshot: clientMessage.snapshot },
+        {
+          secret: this.room.controllerSecret ?? undefined,
+          seq: clientMessage.seq,
+          snapshot: clientMessage.snapshot,
+        } satisfies StoredState,
         { allowUnconfirmed: true },
       );
     }
@@ -318,6 +332,12 @@ export class TimerRoom extends DurableObject<Env> {
   private async touchAlarm(): Promise<void> {
     await this.ctx.storage.setAlarm(Date.now() + ROOM_TTL_MS, { allowUnconfirmed: true });
   }
+
+  /** Connexions : l'alarme n'est réécrite que si elle manque ou approche (lecture au lieu d'écriture). */
+  private async refreshAlarmIfNeeded(): Promise<void> {
+    const current = await this.ctx.storage.getAlarm();
+    if (alarmNeedsRefresh(current, Date.now(), ROOM_TTL_MS)) await this.touchAlarm();
+  }
 }
 
 export default {
@@ -338,6 +358,16 @@ export default {
           { type: 'error', code: 'invalid_room', message: 'Code salle invalide.' },
           { status: 400, headers: CORS },
         );
+      }
+      // Script qui boucle sur des connexions : coupé ici, avant le Durable Object (ni requête DO, ni écriture).
+      if (env.CONNECT_LIMITER) {
+        const { success } = await env.CONNECT_LIMITER.limit({ key: connectionKey(request.headers) });
+        if (!success) {
+          return Response.json(
+            { type: 'error', code: 'rate_limited', message: 'Trop de connexions : réessayez dans une minute.' },
+            { status: 429, headers: CORS },
+          );
+        }
       }
       const id = env.ROOMS.idFromName(room);
       return env.ROOMS.get(id).fetch(request);

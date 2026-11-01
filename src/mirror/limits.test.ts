@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   canAcceptDisplay,
+  CONNECT_RATE,
+  connectionKey,
   createRateLimiter,
   isAllowedOrigin,
   isMessageTooLarge,
@@ -82,5 +84,22 @@ describe('relais : limites de sécurité', () => {
       expect(parseServerMessage({ type: 'error', code, message: 'x' })).toEqual({ type: 'error', code, message: 'x' });
     }
     expect(parseServerMessage({ type: 'error', code: 'nope', message: 'x' })).toMatchObject({ code: 'unknown' });
+  });
+});
+
+describe('relais : limite de connexions par adresse (S1)', () => {
+  it('keys the limit on the client IP given by Cloudflare', () => {
+    expect(connectionKey(new Headers({ 'CF-Connecting-IP': '203.0.113.7' }))).toBe('ip:203.0.113.7');
+  });
+
+  it('falls back to a shared key when the IP is unknown (local dev)', () => {
+    expect(connectionKey(new Headers())).toBe('ip:unknown');
+  });
+
+  it('allows a normal club evening (reconnections, several screens) but not a script', () => {
+    // 1 télécommande + quelques écrans qui se reconnectent : bien en dessous ; un script : des centaines par minute.
+    expect(CONNECT_RATE.limit).toBeGreaterThanOrEqual(20);
+    expect(CONNECT_RATE.limit).toBeLessThanOrEqual(120);
+    expect(CONNECT_RATE.period).toBe(60);
   });
 });

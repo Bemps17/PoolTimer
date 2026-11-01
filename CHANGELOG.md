@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 3.5.2 — 2026-11-01
+
+Correctifs de l'audit de sécurité (`docs/audit/2026-11-01-audit-securite.md`, S1 et S2).
+
+- **S1 — quota du relais** : binding Rate Limiting `CONNECT_LIMITER` (40 nouvelles connexions / 60 s par IP, `connectionKey()` dans `mirror/limits.ts`) avant le Durable Object → 429 sans requête DO ni écriture. Plus d'écriture inutile : alarme réécrite seulement si absente ou à mi-délai (`alarmNeedsRefresh`, lecture `getAlarm()`), prise de salle écrite seulement si le secret change ou si la séquence doit repartir à 0 (`claimNeedsPersist`) ; secret rangé dans la clé `state` (1 ligne au lieu de 2, ancienne clé `secret` relue en repli). Sonde du relais : inondation de connexions → 429, autre IP acceptée. **Worker à redéployer (avec le binding).**
+- **S2 — en-têtes** (`vercel.json`, toutes les pages) : CSP (`default-src 'self'`, scripts `'self' blob:` pour le worklet audio de Tone.js, `connect-src` relais + polices, `object-src 'none'`, `frame-ancestors 'none'`…), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` (caméra, micro, géolocalisation, paiement… coupés ; écran allumé et plein écran conservés). Test `securityHeaders.test.ts` ; vérifié sur le build servi avec ces en-têtes : aucune violation (chrono, son, salle, QR, écran Visuel, overlay), script et image tiers injectés bloqués.
+
 ## 3.5.1 — 2026-11-01
 
 - **Correctif paysage, toucher du chrono** : la gestion des appuis sur l'écran (un appui = départ / pause, double appui = nouveau coup) est sortie de `Scoreboard` dans `hooks/useTimerScreenTap.ts` (décision pure inchangée : `timer/screenTap.ts`) et branchée sur la zone centrale du paysage (chrono ou aperçu distant).

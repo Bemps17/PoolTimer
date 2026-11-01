@@ -59,3 +59,15 @@ export function createRateLimiter(options: { capacity: number; refillPerSec: num
     },
   };
 }
+
+/**
+ * Nouvelles connexions WebSocket par adresse IP (binding « Rate Limiting » des Workers : en mémoire, sans écriture).
+ * Une soirée de club (télécommande + écrans + reconnexions) reste très en dessous ; un script qui boucle est coupé
+ * avant d'atteindre le Durable Object, donc sans consommer de requête ni d'écriture du quota gratuit.
+ */
+export const CONNECT_RATE = { limit: 40, period: 60 } as const;
+
+export function connectionKey(headers: Pick<Headers, 'get'>): string {
+  const ip = headers.get('CF-Connecting-IP')?.trim();
+  return `ip:${ip || 'unknown'}`;
+}
