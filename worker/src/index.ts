@@ -1,4 +1,14 @@
 import { DurableObject } from 'cloudflare:workers';
+import {
+  canAcceptDisplay,
+  createRateLimiter,
+  isAllowedOrigin,
+  isMessageTooLarge,
+  PING_RATE,
+  PUSH_RATE,
+  type RateLimiter,
+} from '../../src/mirror/limits';
+import { createWritePlanner } from '../../src/mirror/persistence';
 import { EphemeralRoom } from '../../src/mirror/room';
 import {
   isValidRoomCode,
@@ -18,6 +28,8 @@ import {
 
 export interface Env {
   ROOMS: DurableObjectNamespace<TimerRoom>;
+  /** Origines supplémentaires autorisées (séparées par des virgules), en plus de la production et des aperçus Vercel. */
+  ALLOWED_ORIGINS?: string;
 }
 
 const CORS = {
@@ -28,16 +40,23 @@ const CORS = {
 
 const ROOM_TTL_MS = 2 * 60 * 60 * 1000;
 const ROOM_BUSY_MESSAGE = 'Cette salle a déjà une télécommande.';
+const WS_CLOSE_ROOM_FULL = 4010;
 
 export class TimerRoom extends DurableObject<Env> {
   private room = new EphemeralRoom();
   private loaded = false;
+  private pushLimiters = new WeakMap<WebSocket, RateLimiter>();
+  private pingLimiters = new WeakMap<WebSocket, RateLimiter>();
+  /** Budget d'écritures (plan gratuit : 100 000 lignes/jour pour tout le compte). */
+  private writes = createWritePlanner();
 
   private async restore(): Promise<void> {
     if (this.loaded) return;
     const secret = await this.ctx.storage.get<string>('secret');
-    const seq = await this.ctx.storage.get<number>('seq');
-    const snapshot = await this.ctx.storage.get<EphemeralRoom['snapshot']>('snapshot');
+    // v3.0.1 : snapshot + seq dans une seule clé « state » (1 ligne écrite au lieu de 2) ; clés v3.0.0 en repli.
+    const state = await this.ctx.storage.get<{ seq: number; snapshot: EphemeralRoom['snapshot'] }>('state');
+    const seq = state?.seq ?? (await this.ctx.storage.get<number>('seq'));
+    const snapshot = state?.snapshot ?? (await this.ctx.storage.get<EphemeralRoom['snapshot']>('snapshot'));
     if (typeof secret === 'string') this.room.controllerSecret = secret;
     if (typeof seq === 'number') this.room.seq = seq;
     if (snapshot) this.room.snapshot = snapshot;
@@ -58,6 +77,10 @@ export class TimerRoom extends DurableObject<Env> {
       return new Response('Invalid room or role', { status: 400, headers: CORS });
     }
 
+    if (!isAllowedOrigin(request.headers.get('Origin'), this.env.ALLOWED_ORIGINS)) {
+      return new Response('Origin not allowed', { status: 403, headers: CORS });
+    }
+
     const pair = new WebSocketPair();
     const client = pair[0];
     const server = pair[1];
@@ -73,9 +96,22 @@ export class TimerRoom extends DurableObject<Env> {
       return new Response(null, { status: 101, webSocket: client });
     }
 
+    if (role === 'display' && !canAcceptDisplay(this.countRole('display'))) {
+      this.ctx.acceptWebSocket(server, ['full']);
+      this.sendJson(server, { type: 'error', code: 'room_full', message: 'Trop d’écrans connectés à cette salle.' });
+      try {
+        server.close(WS_CLOSE_ROOM_FULL, 'room_full');
+      } catch {
+        // ignore
+      }
+      return new Response(null, { status: 101, webSocket: client });
+    }
+
     if (role === 'controller') {
       await this.ctx.storage.put('secret', secret);
-      await this.ctx.storage.put('seq', this.room.seq);
+      // La séquence repart à 0 au claim : l'écrire dans « state » (lue en priorité au réveil), sinon les pushes
+      // suivants seraient rejetés comme obsolètes après une mise en veille du Durable Object.
+      await this.ctx.storage.put('state', { seq: this.room.seq, snapshot: this.room.snapshot });
     }
 
     this.ctx.acceptWebSocket(server, [role]);
@@ -99,6 +135,11 @@ export class TimerRoom extends DurableObject<Env> {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    if (isMessageTooLarge(message)) {
+      this.sendError(ws, 'too_large', 'Message trop volumineux.');
+      return;
+    }
+
     await this.restore();
     this.ensureAttachment(ws);
 
@@ -112,11 +153,17 @@ export class TimerRoom extends DurableObject<Env> {
 
     const type = parsed && typeof parsed === 'object' ? (parsed as { type?: unknown }).type : undefined;
     if (type === 'ping') {
+      if (!this.limiterFor(this.pingLimiters, ws, PING_RATE).take(Date.now())) return;
       this.sendJson(ws, { type: 'pong', serverTime: Date.now() });
       return;
     }
 
     if (type !== 'push') return;
+
+    if (!this.limiterFor(this.pushLimiters, ws, PUSH_RATE).take(Date.now())) {
+      this.sendError(ws, 'rate_limited', 'Trop de messages : ralentissez.');
+      return;
+    }
 
     if (this.socketRole(ws) !== 'controller') {
       this.sendError(ws, 'unauthorized', 'Seul la télécommande peut publier le chrono.');
@@ -138,8 +185,10 @@ export class TimerRoom extends DurableObject<Env> {
       return;
     }
 
-    await this.ctx.storage.put('snapshot', clientMessage.snapshot);
-    await this.ctx.storage.put('seq', clientMessage.seq);
+    const step = this.writes.onPush({ isRunning: clientMessage.snapshot.isRunning, now: Date.now() });
+    if (step.persist) {
+      await this.ctx.storage.put('state', { seq: clientMessage.seq, snapshot: clientMessage.snapshot });
+    }
 
     const payload = JSON.stringify({
       type: 'snapshot',
@@ -151,7 +200,7 @@ export class TimerRoom extends DurableObject<Env> {
       this.sendRaw(peer, payload);
     }
     this.sendJson(ws, { type: 'push_ok', seq: clientMessage.seq });
-    await this.touchAlarm();
+    if (step.refreshAlarm) await this.touchAlarm();
   }
 
   async webSocketClose(): Promise<void> {
@@ -167,6 +216,19 @@ export class TimerRoom extends DurableObject<Env> {
     await this.ctx.storage.deleteAll();
     this.room = new EphemeralRoom();
     this.loaded = true;
+  }
+
+  private limiterFor(
+    store: WeakMap<WebSocket, RateLimiter>,
+    ws: WebSocket,
+    options: { capacity: number; refillPerSec: number },
+  ): RateLimiter {
+    let limiter = store.get(ws);
+    if (!limiter) {
+      limiter = createRateLimiter(options);
+      store.set(ws, limiter);
+    }
+    return limiter;
   }
 
   private socketRole(ws: WebSocket): MirrorRole | undefined {

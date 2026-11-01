@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { computeTimerFontSize, showsApresCasseControl } from '../timer/config';
 import { canUseExtension, getDigitState, getFlashClass } from '../timer/engine';
 import { formatSecondsClock, formatTime } from '../timer/format';
@@ -19,6 +19,10 @@ interface ScoreboardProps {
   onSelectPlayer: (player: PlayerId) => void;
   onToggleMenu: () => void;
   onToggleMinions: () => void;
+  /** Scoreur 1v1 (score, F, blanche), affiché sous les bandeaux joueurs. */
+  matchBar?: ReactNode;
+  /** Vue télécommande (salle miroir ouverte) : chrono en vedette, grosses commandes. */
+  remote?: { label: string; health: string; scorePlacement: 'compact' | 'full' | 'hidden' };
 }
 
 export function Scoreboard({
@@ -33,6 +37,8 @@ export function Scoreboard({
   onSelectPlayer,
   onToggleMenu,
   onToggleMinions,
+  matchBar,
+  remote,
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -193,11 +199,17 @@ export function Scoreboard({
       id="app"
       className={`scoreboard-body${flashClass ? ` ${flashClass}` : ''}${
         config.modeInterface === 'tactile' ? ' tactile-mode' : ''
-      }`}
+      }${remote ? ` remote-mode remote-score-${remote.scorePlacement}` : ''}`}
       aria-label="H8timer — chronomètre de tir billard"
     >
       <h1 className="visually-hidden">H8timer — Chronomètre billard avec télécommande et écran miroir</h1>
       <header className="top-bar">
+        {remote ? (
+          <p className={`remote-badge remote-badge-${remote.health}`} aria-live="polite">
+            <span className="remote-badge-dot" aria-hidden />
+            {remote.label}
+          </p>
+        ) : null}
         <div className="top-bar-players">
           <PlayerStatus
             name={config.p1Name}
@@ -216,6 +228,7 @@ export function Scoreboard({
             onSelect={() => onSelectPlayer(2)}
           />
         </div>
+        {matchBar}
       </header>
 
       <section

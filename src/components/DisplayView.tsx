@@ -4,7 +4,10 @@ import { getDigitState, getFlashClass } from '../timer/engine';
 import { formatTime } from '../timer/format';
 import { useDisplayMirror } from '../hooks/useMirror';
 import { useFullscreen } from '../hooks/useFullscreen';
+import { useKeepAwake } from '../hooks/useKeepAwake';
+import { keepAwakeLabel } from '../pwa/keepAwake';
 import { formatRoomCode } from '../mirror/protocol';
+import { MatchScore } from './MatchScore';
 import { PlayerStatus } from './PlayerStatus';
 
 interface DisplayViewProps {
@@ -14,6 +17,8 @@ interface DisplayViewProps {
 export function DisplayView({ room }: DisplayViewProps) {
   const { snapshot, remainingTime, status, sync } = useDisplayMirror(room);
   const { isFullscreen, toggle } = useFullscreen();
+  // L'écran Visuel ne doit jamais se mettre en veille pendant un match.
+  const keepAwake = useKeepAwake(true);
   const screenRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const config = snapshot?.config;
@@ -71,7 +76,7 @@ export function DisplayView({ room }: DisplayViewProps) {
   return (
     <main
       id="app"
-      className={`display-root${flashClass ? ` ${flashClass}` : ''}`}
+      className={`display-root display-layout-${config?.displayLayout ?? 'timer'}${flashClass ? ` ${flashClass}` : ''}`}
       onClick={() => {
         void toggle();
       }}
@@ -86,6 +91,11 @@ export function DisplayView({ room }: DisplayViewProps) {
         >
           {statusLabel}
         </span>
+        {keepAwake !== 'off' ? (
+          <span className={`display-awake display-awake-${keepAwake}`} role="status">
+            {keepAwakeLabel(keepAwake)}
+          </span>
+        ) : null}
       </header>
       {config ? (
         <div className="display-players">
@@ -104,6 +114,15 @@ export function DisplayView({ room }: DisplayViewProps) {
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[2])}
           />
         </div>
+      ) : null}
+      {config && snapshot?.match ? (
+        <MatchScore
+          match={snapshot.match}
+          p1Name={config.p1Name}
+          p2Name={config.p2Name}
+          p1Color={config.p1Color}
+          p2Color={config.p2Color}
+        />
       ) : null}
       <div className="display-screen" ref={screenRef}>
         {waiting ? (

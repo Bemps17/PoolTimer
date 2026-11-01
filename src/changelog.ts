@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.7.1';
+export const APP_VERSION = '3.0.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,89 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.0.1',
+    date: '2026-11-01',
+    title: 'Relais économe et alertes toujours audibles',
+    notes: [
+      'Relais : beaucoup moins d’écritures dans le stockage Cloudflare (moins de 250 par heure de match au lieu d’environ 5 400), pour ne jamais atteindre le quota gratuit quotidien. Le chrono reste diffusé en direct. Worker à redéployer.',
+      'Alertes toujours audibles : si le navigateur suspend l’audio (appel, notification, écran verrouillé), l’alerte est jouée directement au lieu de rester muette, puis le volume renforcé reprend dès que l’audio est relancé.',
+    ],
+  },
+  {
+    version: '3.0.0',
+    date: '2026-11-01',
+    title: 'H8timer 3.0 : fiabilité, sécurité et accessibilité',
+    notes: [
+      'Salle miroir persistante : le code et le secret sont conservés sur l’appareil, donc le lien de l’écran Visuel et l’overlay OBS restent valables après fermeture de l’application. « Fermer la salle » l’efface.',
+      'Relais plus sûr : origines autorisées (production, aperçus Vercel, localhost), messages limités à 32 Ko, débit de la télécommande limité, 40 écrans maximum par salle. Les rafales sont renvoyées automatiquement. Worker Cloudflare à redéployer.',
+      'Accessibilité : alerte de contraste (WCAG) dans l’éditeur de couleurs quand le chrono ou le menu deviennent illisibles ; couleur d’alerte du thème Clair corrigée (2,3:1 → plus de 4:1).',
+      'Tutoriel : trois nouvelles diapositives (scoreur, streaming OBS / Streamlabs, partage).',
+      'Qualité : intégration continue GitHub Actions (typecheck, tests, build, sonde du relais) et tests d’interface (scoreur, tirage, import, contraste).',
+    ],
+  },
+  {
+    version: '2.11.0',
+    date: '2026-11-01',
+    title: 'Partage de presets et d’apparences, écran toujours allumé',
+    notes: [
+      'Partage : chaque preset ou thème personnalisé se partage par lien, QR code ou fichier .h8preset.json. Option « inclure mon apparence » pour envoyer chrono et couleurs en un seul partage.',
+      'Import : ouvrir un lien de partage (ou le coller / charger un fichier dans ⚙️ → Partage & import) affiche un aperçu des changements ; rien n’est modifié sans confirmation. Contenu validé et borné.',
+      'Thèmes personnalisés : enregistrez l’apparence actuelle sous un nom, réappliquez-la, partagez-la (⚙️ → Apparence → Mes thèmes).',
+      'Écran toujours allumé sur la télécommande ET sur l’écran Visuel : verrou d’écran natif, avec repli vidéo muette quand le navigateur le refuse (un appui suffit). Statut affiché.',
+      'Limite : bouton de verrouillage, économiseur de batterie ou réglage système de mise en veille restent prioritaires sur une PWA.',
+    ],
+  },
+  {
+    version: '2.10.1',
+    date: '2026-11-01',
+    title: 'Alertes sonores au volume maximum',
+    notes: [
+      'Volume des alertes : mode Maximum par défaut (0 dB, auparavant -10 dB), appliqué aussi aux configurations existantes. Mode Réglable disponible dans ⚙️ → Sons & vibration.',
+      'Chaîne audio renforcée : gain +6 dB puis limiteur à -1 dBFS (pas de saturation). Mesuré sur les fichiers embarqués : niveau moyen relevé d’environ +14 à +16 dB par rapport à l’ancien réglage par défaut.',
+      'Tous les sons passent par cette chaîne : fichiers d’alerte, packs, sons importés, mode Minions et synthétiseurs.',
+      'Bip du compte à rebours plus aigu et plus riche (onde carrée, 1,5 kHz), mieux restitué par les petits haut-parleurs de smartphone ; cloche à pleine échelle.',
+      'iPhone : les alertes ignorent désormais l’interrupteur silencieux quand le navigateur le permet. Bouton « Tester le volume » dans les réglages.',
+      'Une page web ne peut pas dépasser le volume média du téléphone : montez-le au maximum avec les boutons de volume.',
+    ],
+  },
+  {
+    version: '2.10.0',
+    date: '2026-11-01',
+    title: 'Presets personnalisés et nouvelle roue crantée',
+    notes: [
+      'Presets personnalisés : créez, renommez, dupliquez et supprimez vos propres presets de chronométrage (jusqu’à 30), à partir de vos réglages ou d’un preset FFB / Ultimate. ⚙️ → Compétition & temps → Mes presets.',
+      'Un preset peut inclure la course à N du scoreur. Il ne change jamais le thème, les couleurs ni les sons.',
+      'Aperçu à l’application : la liste des temps modifiés s’affiche (par exemple base 45→30 s).',
+      'Les presets sont enregistrés et validés localement ; les presets FFB / TD/TN / Master / Ultimate restent intégrés et non supprimables.',
+      'Le bouton Paramètres reprend une roue crantée classique (8 dents, moyeu percé).',
+    ],
+  },
+  {
+    version: '2.9.0',
+    date: '2026-11-01',
+    title: 'Vue télécommande, mises en page et overlay de streaming',
+    notes: [
+      'Vue télécommande : quand une salle miroir est ouverte, le téléphone passe en vue dédiée (bandeau de liaison, cadre accentué, grosses commandes). Le chrono reste l’élément principal et le score devient un bandeau discret (compact, grand ou masqué).',
+      'Écran Visuel : mise en page réglable depuis la télécommande (chrono en grand par défaut, équilibré, score en grand).',
+      'Streaming OBS / Streamlabs : lien overlay /o/CODE à coller dans une source Navigateur. Chrono seul, score seul ou les deux, côte à côte ou empilés, taille, fond transparent / sombre / vert chroma, noms, F et blanche au choix.',
+      'L’écran du téléphone reste allumé en mode télécommande (option).',
+      'Réglages dans ⚙️ → Affichage télécommande & écran, et ⚙️ → Streaming. Compatible avec les anciennes télécommandes ; aucun redéploiement du Worker requis pour cette version.',
+    ],
+  },
+  {
+    version: '2.8.0',
+    date: '2026-11-01',
+    title: 'Scoreur 1 contre 1 : score, casses fermes et blanche',
+    notes: [
+      'Scoreur 1 contre 1 (joueur ou équipe) sur la télécommande : score de chaque côté avec +/−, annulation de la dernière action.',
+      'Casses fermes (F) : compteur séparé du score, affiché en plus petit chiffre à côté du score.',
+      'La blanche indique qui casse ; appui sur la blanche pour inverser. La casse alterne à chaque manche marquée.',
+      'Option Tirage à la bande : une seule fois au début du match, pour désigner le premier casseur.',
+      'Course à N optionnelle avec annonce de victoire. Réglages dans ⚙️ → Score, bouton Nouveau match.',
+      'L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche. Compatible avec les anciennes télécommandes.',
+    ],
+  },
   {
     version: '2.7.1',
     date: '2026-09-21',

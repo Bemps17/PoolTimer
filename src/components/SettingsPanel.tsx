@@ -10,10 +10,22 @@ import {
   showsApresCasseControl,
   withSyncedCompetitionMode,
 } from '../timer/config';
+import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
+import type { DisplayLayout, RemoteLayout, RemoteScoreMode, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
+import { previewAlertSound } from '../audio/toneAudio';
+import type { VolumeMode } from '../audio/loudness';
 import { dbToGain, gainToDb } from '../timer/volume';
 import { NumberStepper, parseBooleanSelect, SelectField, VolumeSlider } from './NumberStepper';
+import { ImportPanel } from './ImportPanel';
+import { PresetManager } from './PresetManager';
+import { ThemeLibrary } from './ThemeLibrary';
+import type { ThemesController } from '../hooks/useThemes';
+import type { ShareEnvelope } from '../share/envelope';
+import type { CustomPreset } from '../timer/presets';
+import type { CustomTheme } from '../timer/themes';
+import type { PresetsController } from '../hooks/usePresets';
 import { PlayerNameField } from './PlayerNameField';
 import { SettingsSection } from './SettingsSection';
 import { SoundLibrarySettings } from './SoundLibrarySettings';
@@ -28,6 +40,9 @@ interface SettingsPanelProps {
   onShowHelp: () => void;
   onShowChangelog: () => void;
   onShowTutorial: () => void;
+  onNewMatch: () => void;
+  onUndoMatch: () => void;
+  canUndoMatch: boolean;
   onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
@@ -38,6 +53,13 @@ interface SettingsPanelProps {
   onApplyUpdate?: () => void;
   onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
+  streamSection?: ReactNode;
+  presetsController: PresetsController;
+  themesController: ThemesController;
+  onNotify: (message: string) => void;
+  onSharePreset: (preset: CustomPreset) => void;
+  onShareTheme: (theme: CustomTheme) => void;
+  onImportEnvelope: (envelope: ShareEnvelope) => void;
 }
 
 const THEME_OPTIONS = [
@@ -53,6 +75,11 @@ const INTERFACE_OPTIONS = [
   { value: 'tactile', label: 'Boutons invisibles' },
 ];
 
+const VOLUME_MODE_OPTIONS = [
+  { value: 'max', label: 'Maximum (recommandé)' },
+  { value: 'custom', label: 'Réglable' },
+];
+
 const YES_NO = [
   { value: 'true', label: 'Oui' },
   { value: 'false', label: 'Non' },
@@ -66,6 +93,23 @@ const ON_OFF = [
 const VIBRATION = [
   { value: 'true', label: 'Activée' },
   { value: 'false', label: 'Désactivée' },
+];
+
+const REMOTE_LAYOUT_OPTIONS = [
+  { value: 'remote', label: 'Télécommande (chrono en vedette)' },
+  { value: 'classic', label: 'Classique' },
+];
+
+const REMOTE_SCORE_OPTIONS = [
+  { value: 'compact', label: 'Bandeau compact' },
+  { value: 'full', label: 'Grand' },
+  { value: 'hidden', label: 'Masqué' },
+];
+
+const DISPLAY_LAYOUT_OPTIONS = [
+  { value: 'timer', label: 'Chrono en grand (score discret)' },
+  { value: 'balanced', label: 'Équilibré' },
+  { value: 'score', label: 'Score en grand' },
 ];
 
 const COMPETITION_PRESET_CARDS: Array<{
@@ -89,6 +133,9 @@ export function SettingsPanel({
   onShowHelp,
   onShowChangelog,
   onShowTutorial,
+  onNewMatch,
+  onUndoMatch,
+  canUndoMatch,
   onToggleFullscreen,
   installStatus,
   onInstall,
@@ -99,6 +146,13 @@ export function SettingsPanel({
   onApplyUpdate,
   onSnoozeUpdate,
   extraSections,
+  streamSection,
+  presetsController,
+  themesController,
+  onNotify,
+  onSharePreset,
+  onShareTheme,
+  onImportEnvelope,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -114,6 +168,14 @@ export function SettingsPanel({
 
   const patchTimings = (partial: Partial<TimerConfig>, resetShot = false) => {
     onChange(withSyncedCompetitionMode({ ...config, ...partial }), { resetShot });
+  };
+
+  const patchMatch = (partial: Partial<MatchOptions>) => {
+    onChange({ ...config, matchOptions: { ...config.matchOptions, ...partial } });
+  };
+
+  const patchView = (partial: Partial<ViewOptions>) => {
+    onChange({ ...config, viewOptions: { ...config.viewOptions, ...partial } });
   };
 
   const hideApresCasse = !showsApresCasseControl(config);
@@ -219,6 +281,59 @@ export function SettingsPanel({
             <p className="install-hint">Nom vide autorisé (affichage « Joueur 1 / 2 » à l’écran, sans réécrire P1).</p>
           </SettingsSection>
 
+          <SettingsSection title="Score" defaultOpen>
+            <SelectField
+              label="Scoreur (1 contre 1)"
+              htmlId="matchEnabled"
+              value={String(config.matchOptions.enabled)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ enabled: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Tirage à la bande au début du match"
+              htmlId="matchLagAtStart"
+              value={String(config.matchOptions.lagAtStart)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ lagAtStart: parseBooleanSelect(value) })}
+            />
+            <p className="install-hint">
+              Sert à désigner le premier casseur (joueur ou équipe), une seule fois par match. Ensuite la casse alterne
+              à chaque manche marquée. Désactivé : la casse commence au joueur 1.
+            </p>
+            <NumberStepper
+              label="Course à (0 = sans limite)"
+              htmlId="matchTargetScore"
+              value={config.matchOptions.targetScore}
+              min={MATCH_LIMITS.targetScore.min}
+              max={MATCH_LIMITS.targetScore.max}
+              suffix=""
+              onChange={(targetScore) => patchMatch({ targetScore })}
+            />
+            <SelectField
+              label="Afficher les casses fermes (F)"
+              htmlId="matchShowFerme"
+              value={String(config.matchOptions.showFerme)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ showFerme: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Afficher la blanche (qui casse)"
+              htmlId="matchShowBreaker"
+              value={String(config.matchOptions.showBreaker)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ showBreaker: parseBooleanSelect(value) })}
+            />
+            <p className="install-hint">
+              Score et casses fermes sont deux compteurs séparés. Appui sur la blanche : inverser le casseur.
+            </p>
+            <button type="button" className="bouton-menu" onClick={onUndoMatch} disabled={!canUndoMatch}>
+              Annuler la dernière action du score
+            </button>
+            <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onNewMatch}>
+              Nouveau match (tout remettre à zéro)
+            </button>
+          </SettingsSection>
+
           <SettingsSection title="Compétition & temps" defaultOpen>
             <div className="preset-row" role="group" aria-label="Presets de compétition">
               {COMPETITION_PRESET_CARDS.map((preset) => {
@@ -237,6 +352,13 @@ export function SettingsPanel({
                 );
               })}
             </div>
+            <PresetManager
+              config={config}
+              controller={presetsController}
+              onApply={(next) => onChange(next, { resetShot: true })}
+              onNotify={onNotify}
+              onShare={onSharePreset}
+            />
             <p className="install-hint">
               Presets de chronométrage uniquement. Changer le thème ou les couleurs ne change pas le preset. Ultimate
               FBEP : pas d’après casse. Les autres gardent le bouton si le temps post-casse est distinct.
@@ -313,6 +435,13 @@ export function SettingsPanel({
             >
               Réinitialiser les couleurs du thème
             </button>
+            <ThemeLibrary
+              config={config}
+              controller={themesController}
+              onApply={(next) => onChange(next)}
+              onShare={onShareTheme}
+              onNotify={onNotify}
+            />
             <SelectField
               label="Mode d'interface"
               htmlId="modeInterface"
@@ -349,13 +478,38 @@ export function SettingsPanel({
             <p className="install-hint">Utile dans le navigateur. En app installée, c’est déjà plein écran.</p>
           </SettingsSection>
 
+          <SettingsSection title="Partage & import">
+            <ImportPanel onImport={onImportEnvelope} />
+          </SettingsSection>
+
           <SettingsSection title="Sons & vibration">
-            <VolumeSlider
-              label="Volume général"
-              htmlId="volumeSonore"
-              gain={dbToGain(config.volume)}
-              onChange={(gain) => patch({ volume: gainToDb(gain) })}
+            <SelectField
+              label="Volume des alertes"
+              htmlId="volumeMode"
+              value={config.volumeMode}
+              options={VOLUME_MODE_OPTIONS}
+              onChange={(volumeMode) => patch({ volumeMode: volumeMode as VolumeMode })}
             />
+            {config.volumeMode === 'custom' ? (
+              <VolumeSlider
+                label="Niveau réglable"
+                htmlId="volumeSonore"
+                gain={dbToGain(config.volume)}
+                onChange={(gain) => patch({ volume: gainToDb(gain) })}
+              />
+            ) : null}
+            <button
+              type="button"
+              className="bouton-menu"
+              onClick={() => previewAlertSound('classic-alert-time', { ...config, sonAlertes: true })}
+            >
+              Tester le volume
+            </button>
+            <p className="install-hint">
+              Maximum : l’application pousse le son au plus fort (gain + limiteur anti-saturation). Elle ne peut pas
+              dépasser le volume média du téléphone : montez-le au maximum avec les boutons de volume, et sur iPhone
+              désactivez le mode silencieux.
+            </p>
             <SelectField
               label="Sons d'alerte (timer)"
               htmlId="sonAlertes"
@@ -415,6 +569,45 @@ export function SettingsPanel({
           </SettingsSection>
 
           {extraSections ? <SettingsSection title="Miroir télécommande">{extraSections}</SettingsSection> : null}
+
+          <SettingsSection title="Affichage télécommande & écran">
+            <SelectField
+              label="Vue du téléphone quand une salle est ouverte"
+              htmlId="remoteLayout"
+              value={config.viewOptions.remoteLayout}
+              options={REMOTE_LAYOUT_OPTIONS}
+              onChange={(remoteLayout) => patchView({ remoteLayout: remoteLayout as RemoteLayout })}
+            />
+            <SelectField
+              label="Score sur la télécommande"
+              htmlId="remoteScore"
+              value={config.viewOptions.remoteScore}
+              options={REMOTE_SCORE_OPTIONS}
+              onChange={(remoteScore) => patchView({ remoteScore: remoteScore as RemoteScoreMode })}
+            />
+            <SelectField
+              label="Garder l’écran du téléphone allumé"
+              htmlId="remoteWakeLock"
+              value={String(config.viewOptions.remoteWakeLock)}
+              options={YES_NO}
+              onChange={(value) => patchView({ remoteWakeLock: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Mise en page de l’écran Visuel"
+              htmlId="displayLayout"
+              value={config.viewOptions.displayLayout}
+              options={DISPLAY_LAYOUT_OPTIONS}
+              onChange={(displayLayout) => patchView({ displayLayout: displayLayout as DisplayLayout })}
+            />
+            <p className="install-hint">
+              Le chrono reste toujours l’élément principal. « Chrono en grand » réduit le score à un bandeau discret ;
+              le choix s’applique à tous les écrans Visuel de la salle.
+            </p>
+          </SettingsSection>
+
+          {streamSection ? (
+            <SettingsSection title="Streaming (OBS / Streamlabs)">{streamSection}</SettingsSection>
+          ) : null}
 
           <SettingsSection title="Application">
             <p className="app-version">H8timer v{APP_VERSION}</p>

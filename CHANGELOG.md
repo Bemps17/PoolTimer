@@ -2,6 +2,55 @@
 
 Toutes les dates sont en UTC.
 
+## 3.0.1 — 2026-11-01
+
+- **Relais économe** (`mirror/persistence.ts`) : snapshot + séquence dans une seule clé `state`, persistée au premier push, à chaque arrêt du chrono et au plus toutes les 30 s en course ; alarme d’expiration repoussée toutes les 10 min. < 250 lignes écrites par heure de match (≈ 5 400 avant), quota gratuit Durable Objects : 100 000 / jour. **Worker à redéployer.**
+- **Alertes toujours audibles** (`audio/outputRoute.ts`) : chaque son a un élément routé (gain + limiteur) et un élément direct ; le direct est utilisé tant que l’`AudioContext` n’est pas `running`, avec tentative de relance avant chaque son.
+
+## 3.0.0 — 2026-11-01
+
+- **Salle miroir persistante** (`localStorage`, migration depuis la session) : le lien de l’écran Visuel et l’overlay OBS survivent à la fermeture de l’app ; « Fermer la salle » l’efface.
+- **Relais durci** : liste d’origines autorisées (production, aperçus Vercel du projet, localhost, `ALLOWED_ORIGINS` optionnel), messages ≤ 32 Ko, débit limité (seau à jetons), 40 écrans max par salle, nouveaux codes d’erreur `too_large` / `rate_limited` / `room_full`. **Redéployer le Worker** (`cd worker && npx wrangler deploy`).
+- **Accessibilité** : alerte de contraste WCAG dans l’éditeur de couleurs ; thème Clair : orange d’alerte du chrono foncé (2,3:1 → > 4:1).
+- **Tutoriel** : diapositives scoreur, streaming, partage.
+- **Qualité** : CI GitHub Actions (typecheck, tests, build, sonde du relais), tests d’interface (Testing Library).
+
+## 2.11.0 — 2026-11-01
+
+- **Partage** de presets et de thèmes personnalisés par **lien (`#h8=…`), QR code ou fichier** `.h8preset.json` ; option « inclure mon apparence » (bundle). Format versionné `h8:1`, taille bornée, valeurs clampées, **confirmation + aperçu avant tout import** (⚙️ → Partage & import, ou ouverture directe du lien).
+- **Thèmes personnalisés** nommés (20 max) : ⚙️ → Apparence → *Mes thèmes*.
+- **Écran toujours allumé** sur la télécommande (salle ouverte) **et** sur l’écran Visuel : Screen Wake Lock, repli vidéo muette (`keepawake.mp4/webm`) au premier appui, statut affiché. Remplace `useWakeLock`.
+- Limite : verrou manuel, économiseur de batterie ou veille système restent prioritaires.
+
+## 2.10.1 — 2026-11-01
+
+- **Alertes au volume maximum** : mode *Maximum* par défaut (0 dB au lieu de -10 dB, y compris pour les configs existantes), mode *Réglable* en option (⚙️ → Sons & vibration).
+- **Chaîne audio** : gain +6 dB → limiteur -1 dBFS pour tous les sons (fichiers, packs, imports, Minions, synthés). Niveau moyen des fichiers embarqués relevé d’environ **+14 à +16 dB** (mesuré hors ligne).
+- Bip du compte à rebours plus aigu (carré, 1,5 kHz) pour les petits haut-parleurs ; iOS : ignore l’interrupteur silencieux si possible ; bouton **Tester le volume**.
+- Limite physique : le volume média du téléphone reste le plafond.
+
+## 2.10.0 — 2026-11-01
+
+- **Presets personnalisés** : créer, renommer, dupliquer, supprimer (30 max) depuis ⚙️ → Compétition & temps → *Mes presets*, à partir des réglages actuels ou d’un preset intégré. Course à N optionnelle. Chronométrage uniquement : thème, couleurs et sons inchangés.
+- Aperçu des changements à l’application (« base 45→30 s »). Stockage local validé (`h8timer.presets`).
+- **Roue crantée classique** pour le bouton Paramètres.
+- Prépare le partage (Phase 4) : format de preset validé et borné.
+
+## 2.9.0 — 2026-11-01
+
+- **Vue télécommande** : salle miroir ouverte → vue dédiée du téléphone (bandeau de liaison, cadre accentué, grosses commandes). Le **chrono reste prioritaire**, le score est un bandeau discret (compact / grand / masqué). Écran du téléphone gardé allumé (option).
+- **Écran Visuel** : mise en page pilotée depuis la télécommande — chrono en grand (défaut), équilibré, score en grand.
+- **Streaming OBS / Streamlabs** : lien `/o/CODE` (source Navigateur), lecture seule, fond transparent / sombre / vert chroma ; chrono seul, score seul ou les deux ; paramètres dans l’URL (`p`, `l`, `n`, `f`, `b`, `s`, `bg`).
+- Pas de redéploiement du Worker nécessaire (le champ `displayLayout` est optionnel). Redéployer reste utile pour le score (2.8.0).
+
+## 2.8.0 — 2026-11-01
+
+- **Scoreur 1 contre 1** (joueur ou équipe) : score avec +/− et annulation, **casses fermes (F)** en compteur séparé et en plus petit chiffre.
+- **Blanche** = qui casse ; appui pour inverser ; la casse alterne à chaque manche marquée.
+- **Tirage à la bande** (option) : une seule fois au début du match, désigne le premier casseur.
+- Course à N optionnelle, bouton **Nouveau match** (⚙️ → Score).
+- **Écran Visuel** : score en grand, F en petit, blanche sur le casseur. Champ `match` optionnel dans le snapshot (anciennes télécommandes compatibles). **Worker Cloudflare à redéployer** (`cd worker && npx wrangler deploy`).
+
 ## 2.7.1 — 2026-09-21
 
 - **SEO** : titre et description Google axés sur le **contrôle à distance** (télécommande + écran Visuel en miroir).

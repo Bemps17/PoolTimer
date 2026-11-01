@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyThemeToDocument } from '../timer/engine';
+import type { MatchState } from '../timer/match';
 import type { EngineState, TimerConfig } from '../timer/types';
 import {
   buildSnapshot,
@@ -28,9 +29,10 @@ interface UseControllerMirrorOptions {
   enabled: boolean;
   state: EngineState;
   config: TimerConfig;
+  match?: MatchState;
 }
 
-export function useControllerMirror({ enabled, state, config }: UseControllerMirrorOptions) {
+export function useControllerMirror({ enabled, state, config, match }: UseControllerMirrorOptions) {
   const [room, setRoom] = useState<string | null>(null);
   const [status, setStatus] = useState<MirrorConnectionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +46,10 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
   const stopRef = useRef<(() => void) | null>(null);
   const stateRef = useRef(state);
   const configRef = useRef(config);
+  const matchRef = useRef(match);
   stateRef.current = state;
   configRef.current = config;
+  matchRef.current = match;
 
   const sendSnapshot = useCallback(() => {
     const socket = socketRef.current;
@@ -56,7 +60,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
       JSON.stringify({
         type: 'push',
         seq: seqRef.current,
-        snapshot: buildSnapshot(stateRef.current, configRef.current, Date.now()),
+        snapshot: buildSnapshot(stateRef.current, configRef.current, Date.now(), matchRef.current),
       }),
     );
   }, []);
@@ -134,6 +138,9 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
               if (message.code === 'room_busy' || message.code === 'unauthorized') {
                 markFatal(message.message);
                 wsSafeClose(ws);
+              } else if (message.code === 'rate_limited') {
+                // Le dernier état a pu être freiné : le renvoyer pour que l'écran ne reste pas en retard.
+                window.setTimeout(sendSnapshot, 700);
               }
               break;
             case 'snapshot':
@@ -213,6 +220,7 @@ export function useControllerMirror({ enabled, state, config }: UseControllerMir
     state.extensionsUsedInGame,
     state.isRunning ? null : state.remainingTime,
     config,
+    match,
   ]);
 
   useEffect(() => {

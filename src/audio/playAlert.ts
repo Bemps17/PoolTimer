@@ -1,5 +1,6 @@
 import type { SoundType, TimerConfig } from '../timer/types';
 import { clampGain, dbToGain } from '../timer/volume';
+import { createElementPool } from './outputRoute';
 import { MINIONS_ARGHH_ID, MINIONS_ARGHH_SRC, shouldPlayMinionsArghh } from './minions';
 import { catalogById, isCustomSoundId, pickAlertSound } from './soundCatalog';
 import { getCustomSound } from './customSounds';
@@ -8,9 +9,16 @@ import { getCustomSound } from './customSounds';
 export const CLASSIC_ALERT_TIME_SRC = '/sound/alert-time.mp3';
 export const CLASSIC_CLIC_SRC = '/sound/clic.mp3';
 
-const fileAudio = new Map<string, HTMLAudioElement>();
+function newAudio(src: string): HTMLAudioElement {
+  const audio = new Audio(src);
+  audio.preload = 'auto';
+  return audio;
+}
+
+/** Fichiers embarqués et sons importés : élément routé (chaîne maître) ou direct (repli), selon l'état audio. */
+const filePool = createElementPool(newAudio);
+const customPool = createElementPool(newAudio);
 const objectUrls = new Map<string, string>();
-let customAudio: HTMLAudioElement | null = null;
 
 export function resolveAlertSoundId(type: SoundType, config: TimerConfig, random?: () => number): string | undefined {
   switch (type) {
@@ -34,19 +42,15 @@ export function resolveAlertSoundId(type: SoundType, config: TimerConfig, random
   }
 }
 
-function setVolume(audio: HTMLAudioElement, volumeDb: number): void {
-  audio.volume = clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : -10));
+function setVolume(audio: HTMLAudioElement, routed: boolean, volumeDb: number): void {
+  // Routé : le volume maître (gain + limiteur) gouverne, l'élément reste à pleine échelle.
+  audio.volume = routed ? 1 : clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : 0));
 }
 
 export function playSoundSrc(src: string, volumeDb: number): void {
   if (typeof Audio === 'undefined') return;
-  let audio = fileAudio.get(src);
-  if (!audio) {
-    audio = new Audio(src);
-    audio.preload = 'auto';
-    fileAudio.set(src, audio);
-  }
-  setVolume(audio, volumeDb);
+  const { audio, routed } = filePool.acquire(src);
+  setVolume(audio, routed, volumeDb);
   audio.currentTime = 0;
   void audio.play().catch(() => {
     // Playback can be blocked until a user gesture.
@@ -54,10 +58,8 @@ export function playSoundSrc(src: string, volumeDb: number): void {
 }
 
 function preloadSrc(src: string): void {
-  if (typeof Audio === 'undefined' || fileAudio.has(src)) return;
-  const audio = new Audio(src);
-  audio.preload = 'auto';
-  fileAudio.set(src, audio);
+  if (typeof Audio === 'undefined') return;
+  filePool.acquire(src);
 }
 
 async function playCustom(id: string, volumeDb: number): Promise<void> {
@@ -69,11 +71,10 @@ async function playCustom(id: string, volumeDb: number): Promise<void> {
     url = URL.createObjectURL(record.blob);
     objectUrls.set(id, url);
   }
-  if (!customAudio) customAudio = new Audio();
-  customAudio.src = url;
-  setVolume(customAudio, volumeDb);
-  customAudio.currentTime = 0;
-  void customAudio.play().catch(() => {
+  const { audio, routed } = customPool.acquire(url);
+  setVolume(audio, routed, volumeDb);
+  audio.currentTime = 0;
+  void audio.play().catch(() => {
     // ignore autoplay failures
   });
 }

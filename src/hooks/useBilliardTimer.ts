@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { initializeAudio, playSound, preloadAlertPack, setAudioVolume, vibrate } from '../audio/toneAudio';
+import { effectiveVolumeDb } from '../audio/loudness';
+import { initializeAudio, playSound, preloadAlertPack, syncMasterLevel, vibrate } from '../audio/toneAudio';
 import { loadConfig, saveConfig } from '../timer/config';
 import {
   canUseExtension,
@@ -61,8 +62,8 @@ export function useBilliardTimer() {
   }, [config.theme, config.colors]);
 
   useEffect(() => {
-    setAudioVolume(config.volume);
-  }, [config.volume]);
+    syncMasterLevel(config);
+  }, [config.volume, config.volumeMode]);
 
   useEffect(() => {
     preloadAlertPack(config);
@@ -80,7 +81,7 @@ export function useBilliardTimer() {
   }, [state.isRunning, runEffects]);
 
   const ensureAudio = useCallback(async () => {
-    await initializeAudio(configRef.current.volume);
+    await initializeAudio(effectiveVolumeDb(configRef.current));
   }, []);
 
   const playClick = useCallback(() => {

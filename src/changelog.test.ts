@@ -12,8 +12,34 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/SEO|référencement|sitemap|robots/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/télécommande|miroir/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/quota/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/audibles?/i);
+
+    const v3 = CHANGELOG.find((entry) => entry.version === '3.0.0');
+    expect(v3?.notes.join(' ')).toMatch(/salle miroir persistante/i);
+    expect(v3?.notes.join(' ')).toMatch(/contraste/i);
+
+    const sharing = CHANGELOG.find((entry) => entry.version === '2.11.0');
+    expect(sharing?.notes.join(' ')).toMatch(/partage/i);
+    expect(sharing?.notes.join(' ')).toMatch(/écran toujours allumé/i);
+
+    const loud = CHANGELOG.find((entry) => entry.version === '2.10.1');
+    expect(loud?.notes.join(' ')).toMatch(/volume maximum|Maximum/i);
+    expect(loud?.notes.join(' ')).toMatch(/limiteur/i);
+
+    const presets = CHANGELOG.find((entry) => entry.version === '2.10.0');
+    expect(presets?.notes.join(' ')).toMatch(/presets? personnalis/i);
+    expect(presets?.notes.join(' ')).toMatch(/roue crantée/i);
+
+    const streaming = CHANGELOG.find((entry) => entry.version === '2.9.0');
+    expect(streaming?.notes.join(' ')).toMatch(/OBS|Streamlabs|overlay/i);
+    expect(streaming?.notes.join(' ')).toMatch(/télécommande|miroir/i);
+
+    const scoreur = CHANGELOG.find((entry) => entry.version === '2.8.0');
+    expect(scoreur?.notes.join(' ')).toMatch(/score|casses? fermes?|blanche/i);
+
+    const seo = CHANGELOG.find((entry) => entry.version === '2.7.1');
+    expect(seo?.notes.join(' ')).toMatch(/SEO|référencement|sitemap|robots/i);
 
     const appearance = CHANGELOG.find((entry) => entry.version === '2.7.0');
     expect(appearance?.notes.join(' ')).toMatch(/Apparence|thème|preset/i);

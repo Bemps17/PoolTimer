@@ -26,6 +26,52 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             en haut du menu ⚙️.
           </p>
 
+          <h3>Scoreur 1 contre 1</h3>
+          <ul>
+            <li>
+              <strong>Score :</strong> +/− sous les noms (joueur ou équipe). <strong>F</strong> = casses fermes,
+              compteur séparé du score, affiché en plus petit.
+            </li>
+            <li>
+              <strong>Blanche :</strong> indique qui casse. Appui dessus pour inverser. La casse alterne à chaque
+              manche marquée.
+            </li>
+            <li>
+              <strong>Tirage à la bande :</strong> option dans ⚙️ → Score ; désigne le premier casseur une seule fois,
+              au début du match. <strong>Nouveau match</strong> remet tout à zéro.
+            </li>
+            <li>L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche.</li>
+          </ul>
+
+          <h3>Partager presets et apparences</h3>
+          <ul>
+            <li>
+              Sur un preset ou un thème personnalisé : <strong>Partager</strong> → lien, QR code ou fichier. Le
+              destinataire ouvre le lien (ou ⚙️ → Partage &amp; import) et confirme après un aperçu.
+            </li>
+            <li>
+              <strong>Écran toujours allumé</strong> : automatique sur l’écran Visuel et sur la télécommande quand une
+              salle est ouverte. Si le message « Touchez l’écran » apparaît, un appui suffit.
+            </li>
+          </ul>
+
+          <h3>Salle permanente</h3>
+          <ul>
+            <li>
+              Le code de salle est conservé sur le téléphone : même après avoir fermé l’application, le lien de l’écran
+              Visuel et l’overlay OBS restent valables. « Fermer la salle » efface le code.
+            </li>
+          </ul>
+
+          <h3>Streaming (OBS / Streamlabs)</h3>
+          <ul>
+            <li>
+              Ouvrez une salle, puis ⚙️ → <strong>Streaming</strong> : copiez le lien overlay et collez-le dans une
+              source <strong>Navigateur</strong> d’OBS ou Streamlabs. Fond transparent, lecture seule.
+            </li>
+            <li>Choisissez chrono seul, score seul ou les deux, la disposition, la taille et le fond.</li>
+          </ul>
+
           <h3>Contrôles Principaux</h3>
           <ul>
             <li>

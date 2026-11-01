@@ -1,3 +1,7 @@
+import type { VolumeMode } from '../audio/loudness';
+import type { MatchOptions } from './match';
+import type { ViewOptions } from './viewOptions';
+
 export type Theme = 'sombre' | 'light' | 'cyberpunk' | 'ffb' | 'fbep';
 export type CompetitionMode = 'ffb' | 'fbep' | 'ffbTdTn' | 'ffbMaster';
 export type InterfaceMode = 'boutons' | 'tactile';
@@ -42,6 +46,8 @@ export interface TimerConfig {
   seuilAlerte: number;
   seuilCritique: number;
   volume: number;
+  /** max = volume des alertes poussé au maximum (défaut) ; custom = curseur. */
+  volumeMode: VolumeMode;
   sonAlertes: boolean;
   sonClics: boolean;
   vibration: boolean;
@@ -65,6 +71,8 @@ export interface TimerConfig {
   theme: Theme;
   colors: ThemeColors;
   competitionMode: CompetitionMode | null;
+  matchOptions: MatchOptions;
+  viewOptions: ViewOptions;
 }
 
 export interface AlertsFired {

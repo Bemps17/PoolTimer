@@ -17,6 +17,8 @@ export default defineConfig({
         'icon-512-maskable.png',
         'apple-touch-icon.png',
         'og-image.png',
+        'keepawake.mp4',
+        'keepawake.webm',
         'sound/alert-time.mp3',
         'sound/clic.mp3',
         'sound/minions-arghh.mp3',
@@ -38,6 +40,9 @@ export default defineConfig({
         'tutorial/slide-reglages.svg',
         'tutorial/slide-miroir-remote.svg',
         'tutorial/slide-miroir-visuel.svg',
+        'tutorial/slide-score.svg',
+        'tutorial/slide-streaming.svg',
+        'tutorial/slide-partage.svg',
       ],
       manifest: {
         name: 'H8timer',

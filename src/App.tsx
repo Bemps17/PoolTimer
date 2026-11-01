@@ -3,7 +3,11 @@ import { minionsToggleMessage, toggleMinionsMode } from './audio/minions';
 import { APP_VERSION } from './changelog';
 import { ChangelogPanel } from './components/ChangelogPanel';
 import { DisplayView } from './components/DisplayView';
+import { OverlayView } from './components/OverlayView';
+import { StreamSettings } from './components/StreamSettings';
 import { HelpPanel } from './components/HelpPanel';
+import { LagPrompt } from './components/LagPrompt';
+import { MatchScore } from './components/MatchScore';
 import { MirrorSettings } from './components/MirrorSettings';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -12,15 +16,32 @@ import { TutorialSlideshow } from './components/TutorialSlideshow';
 import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
+import { useMatch } from './hooks/useMatch';
+import { usePresets } from './hooks/usePresets';
+import { useThemes } from './hooks/useThemes';
+import { ImportDialog } from './components/ImportDialog';
+import { ShareDialog, type ShareTarget } from './components/ShareDialog';
+import { decodeShareText, SHARE_HASH_KEY, type ShareEnvelope } from './share/envelope';
+import { applyPreset, type CustomPreset } from './timer/presets';
+import { applyCustomTheme } from './timer/themes';
+import { useKeepAwake } from './hooks/useKeepAwake';
+import { keepAwakeLabel } from './pwa/keepAwake';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
-import { displayUrl, parseDisplayRoom } from './mirror/protocol';
+import { parseOverlayOptions, parseOverlayRoom } from './mirror/overlay';
+import { displayUrl, parseDisplayRoom, toMirrorMatch } from './mirror/protocol';
 import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
+import { isRemoteViewActive } from './timer/viewOptions';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
+  const [overlayRoom] = useState(() => parseOverlayRoom(window.location.pathname));
+  const [overlayOptions] = useState(() => parseOverlayOptions(window.location.search));
   const [displayRoom] = useState(() => parseDisplayRoom(window.location.pathname, window.location.search));
+  if (overlayRoom) {
+    return <OverlayView room={overlayRoom} options={overlayOptions} />;
+  }
   if (displayRoom) {
     return <DisplayView room={displayRoom} />;
   }
@@ -29,6 +50,11 @@ export default function App() {
 
 function ControllerApp() {
   const timer = useBilliardTimer();
+  const matchControl = useMatch(timer.config.matchOptions);
+  const presetsController = usePresets();
+  const themesController = useThemes();
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [pendingImport, setPendingImport] = useState<ShareEnvelope | null>(null);
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
   const pwaUpdate = usePwaUpdate();
@@ -43,6 +69,7 @@ function ControllerApp() {
     enabled: mirrorEnabled,
     state: timer.state,
     config: timer.config,
+    match: matchControl.match,
   });
 
   useEffect(() => {
@@ -105,6 +132,59 @@ function ControllerApp() {
     setToastVisible(true);
   }, [pwaUpdate.snoozeUpdate]);
 
+  // Lien de partage ouvert (#h8=…) : aperçu + confirmation, puis on nettoie l'URL.
+  useEffect(() => {
+    if (!window.location.hash.includes(`${SHARE_HASH_KEY}=`)) return;
+    const result = decodeShareText(window.location.hash);
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    if (result.ok) {
+      setPendingImport(result.envelope);
+    } else {
+      setToastMessage(result.error);
+      setToastVisible(true);
+    }
+  }, []);
+
+  const handleImportConfirm = useCallback(
+    (apply: boolean) => {
+      const envelope = pendingImport;
+      if (!envelope) return;
+      let next = timer.config;
+      if (envelope.preset) {
+        const { name, raceTo, ...timings } = envelope.preset;
+        presetsController.create(name, timings, raceTo);
+        if (apply) {
+          const asPreset: CustomPreset = { id: 'import', name, raceTo, createdAt: 0, ...timings };
+          next = applyPreset(next, asPreset);
+        }
+      }
+      if (envelope.theme) {
+        themesController.create(envelope.theme.name, envelope.theme.base, envelope.theme.colors);
+        if (apply) next = applyCustomTheme(next, envelope.theme);
+      }
+      if (apply && next !== timer.config) timer.updateConfig(next, { resetShot: Boolean(envelope.preset) });
+      setPendingImport(null);
+      setToastMessage(apply ? 'Importé et appliqué' : 'Importé');
+      setToastVisible(true);
+    },
+    [pendingImport, timer.config, timer.updateConfig, presetsController.create, themesController.create],
+  );
+
+  const handleNewMatch = useCallback(() => {
+    if (!window.confirm('Remettre le score, les casses fermes et le tirage à zéro (nouveau match) ?')) return;
+    matchControl.newMatch();
+    setToastMessage('Nouveau match');
+    setToastVisible(true);
+  }, [matchControl.newMatch]);
+
+  const viewOptions = timer.config.viewOptions;
+  const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
+  // Télécommande : écran allumé dès qu'une salle est ouverte (pas seulement en vue « télécommande »).
+  const keepAwake = useKeepAwake(Boolean(mirror.room) && viewOptions.remoteWakeLock);
+  const matchOptions = timer.config.matchOptions;
+  const mirrorMatch = toMirrorMatch(matchControl.match, matchOptions);
+  const lagPrompt = matchOptions.enabled && matchOptions.lagAtStart && matchControl.match.lagPending;
+
   const displayLink = mirror.room ? displayUrl(window.location.origin, mirror.room) : null;
 
   const handleCopyLink = useCallback(async () => {
@@ -120,7 +200,7 @@ function ControllerApp() {
 
   return (
     <>
-      {mirror.room ? (
+      {mirror.room && !remoteActive ? (
         <aside
           className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
           aria-live="polite"
@@ -143,7 +223,47 @@ function ControllerApp() {
           setMenuOpen(true);
         }}
         onToggleMinions={handleToggleMinions}
+        remote={
+          remoteActive
+            ? {
+                label: [mirror.sync.chip || `Télécommande · ${mirror.room}`, keepAwakeLabel(keepAwake) && keepAwake !== 'active' ? keepAwakeLabel(keepAwake) : '']
+                  .filter(Boolean)
+                  .join(' · '),
+                health: mirror.sync.health,
+                scorePlacement: viewOptions.remoteScore,
+              }
+            : undefined
+        }
+        matchBar={
+          matchOptions.enabled && !(remoteActive && viewOptions.remoteScore === 'hidden') ? (
+            <MatchScore
+              match={mirrorMatch}
+              p1Name={timer.config.p1Name}
+              p2Name={timer.config.p2Name}
+              p1Color={timer.config.p1Color}
+              p2Color={timer.config.p2Color}
+              size={remoteActive && viewOptions.remoteScore === 'compact' ? 'compact' : 'full'}
+              controls={{
+                onScore: matchControl.addScore,
+                onFerme: matchControl.addFerme,
+                onToggleBreaker: matchControl.swapBreaker,
+                onUndo: matchControl.undoLast,
+                canUndo: matchControl.canUndo,
+              }}
+            />
+          ) : null
+        }
       />
+      {lagPrompt ? (
+        <LagPrompt
+          p1Name={timer.config.p1Name}
+          p2Name={timer.config.p2Name}
+          p1Color={timer.config.p1Color}
+          p2Color={timer.config.p2Color}
+          onChoose={matchControl.chooseFirstBreaker}
+          onSkip={matchControl.dismissLag}
+        />
+      ) : null}
       <SettingsPanel
         open={menuOpen}
         config={timer.config}
@@ -153,6 +273,18 @@ function ControllerApp() {
         onShowHelp={() => setHelpOpen(true)}
         onShowChangelog={() => setChangelogOpen(true)}
         onShowTutorial={openTutorial}
+        presetsController={presetsController}
+        themesController={themesController}
+        onSharePreset={(preset) => setShareTarget({ kind: 'preset', preset })}
+        onShareTheme={(theme) => setShareTarget({ kind: 'theme', theme })}
+        onImportEnvelope={setPendingImport}
+        onNotify={(message) => {
+          setToastMessage(message);
+          setToastVisible(true);
+        }}
+        onNewMatch={handleNewMatch}
+        onUndoMatch={matchControl.undoLast}
+        canUndoMatch={matchControl.canUndo}
         onToggleFullscreen={toggle}
         installStatus={pwaInstall.status}
         onInstall={() => {
@@ -166,6 +298,15 @@ function ControllerApp() {
         updateSnoozed={pwaUpdate.snoozed}
         onApplyUpdate={pwaUpdate.applyUpdate}
         onSnoozeUpdate={handleSnoozeUpdate}
+        streamSection={
+          <StreamSettings
+            room={mirror.room}
+            onCopied={(message) => {
+              setToastMessage(message);
+              setToastVisible(true);
+            }}
+          />
+        }
         extraSections={
           <MirrorSettings
             enabled={mirrorEnabled}
@@ -184,6 +325,25 @@ function ControllerApp() {
           />
         }
       />
+      {shareTarget ? (
+        <ShareDialog
+          target={shareTarget}
+          config={timer.config}
+          onClose={() => setShareTarget(null)}
+          onNotify={(message) => {
+            setToastMessage(message);
+            setToastVisible(true);
+          }}
+        />
+      ) : null}
+      {pendingImport ? (
+        <ImportDialog
+          envelope={pendingImport}
+          config={timer.config}
+          onAdd={handleImportConfirm}
+          onCancel={() => setPendingImport(null)}
+        />
+      ) : null}
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
       <TutorialSlideshow open={tutorialOpen} onClose={() => setTutorialOpen(false)} />

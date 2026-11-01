@@ -1,3 +1,5 @@
+import { isDisplayLayout, type DisplayLayout } from '../timer/viewOptions';
+import { MATCH_LIMITS, type MatchOptions, type MatchState } from '../timer/match';
 import { readStoredPlayerName } from '../timer/playerName';
 import { colorsForTheme, parseThemeColors } from '../timer/theme';
 import type { EngineState, PlayerId, ShotKind, Theme, ThemeColors, TimerConfig } from '../timer/types';
@@ -22,6 +24,20 @@ export interface MirrorDisplayConfig {
   p2Color: string;
   theme: Theme;
   colors: ThemeColors;
+  /** Mise en page de l'écran Visuel, pilotée par la télécommande (absent = chrono d'abord). */
+  displayLayout?: DisplayLayout;
+}
+
+/** Scoreur (optionnel : absent des anciennes télécommandes ou si le scoreur est masqué). */
+export interface MirrorMatch {
+  scores: Record<PlayerId, number>;
+  /** Casses fermes (F), compteur séparé du score. */
+  fermes: Record<PlayerId, number>;
+  breaker: PlayerId;
+  lagPending: boolean;
+  targetScore: number;
+  showFerme: boolean;
+  showBreaker: boolean;
 }
 
 export interface MirrorSnapshot {
@@ -34,6 +50,7 @@ export interface MirrorSnapshot {
   isExtensionUsedForShot: boolean;
   shotKind: ShotKind;
   config: MirrorDisplayConfig;
+  match?: MirrorMatch;
 }
 
 export type ClientMessage =
@@ -63,6 +80,9 @@ export type MirrorErrorCode =
   | 'unauthorized'
   | 'bad_push'
   | 'stale_seq'
+  | 'too_large'
+  | 'rate_limited'
+  | 'room_full'
   | 'unknown';
 
 export const WS_CLOSE_ROOM_BUSY = 4009;
@@ -143,10 +163,29 @@ export function toDisplayConfig(config: TimerConfig): MirrorDisplayConfig {
     p2Color: config.p2Color,
     theme: config.theme,
     colors: config.colors,
+    displayLayout: config.viewOptions.displayLayout,
   };
 }
 
-export function buildSnapshot(state: EngineState, config: TimerConfig, now: number): MirrorSnapshot {
+export function toMirrorMatch(match: MatchState, options: MatchOptions): MirrorMatch {
+  return {
+    scores: { ...match.scores },
+    fermes: { ...match.fermes },
+    breaker: match.breaker,
+    lagPending: options.lagAtStart && match.lagPending,
+    targetScore: options.targetScore,
+    showFerme: options.showFerme,
+    showBreaker: options.showBreaker,
+  };
+}
+
+export function buildSnapshot(
+  state: EngineState,
+  config: TimerConfig,
+  now: number,
+  match?: MatchState,
+): MirrorSnapshot {
+  const mirrorMatch = match && config.matchOptions.enabled ? toMirrorMatch(match, config.matchOptions) : undefined;
   return {
     remainingTime: state.remainingTime,
     isRunning: state.isRunning,
@@ -157,6 +196,7 @@ export function buildSnapshot(state: EngineState, config: TimerConfig, now: numb
     isExtensionUsedForShot: state.isExtensionUsedForShot,
     shotKind: state.shotKind,
     config: toDisplayConfig(config),
+    ...(mirrorMatch ? { match: mirrorMatch } : {}),
   };
 }
 
@@ -213,6 +253,7 @@ export function parseSnapshot(raw: unknown): MirrorSnapshot | undefined {
   if (typeof extensions[1] !== 'boolean' || typeof extensions[2] !== 'boolean') return undefined;
   const config = parseDisplayConfig(value.config);
   if (!config) return undefined;
+  const match = parseMirrorMatch(value.match);
   return {
     remainingTime: value.remainingTime,
     isRunning: value.isRunning,
@@ -223,6 +264,37 @@ export function parseSnapshot(raw: unknown): MirrorSnapshot | undefined {
     isExtensionUsedForShot: value.isExtensionUsedForShot,
     shotKind: value.shotKind,
     config,
+    ...(match ? { match } : {}),
+  };
+}
+
+function clampCounter(value: unknown, max: number): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+  return Math.min(max, Math.max(0, Math.round(value)));
+}
+
+/** Champ optionnel : invalide ou absent => ignoré (jamais d'échec du snapshot entier). */
+export function parseMirrorMatch(raw: unknown): MirrorMatch | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const value = raw as Partial<Record<keyof MirrorMatch, unknown>>;
+  const scores = value.scores as Partial<Record<PlayerId, unknown>> | undefined;
+  const fermes = value.fermes as Partial<Record<PlayerId, unknown>> | undefined;
+  if (!scores || typeof scores !== 'object' || !fermes || typeof fermes !== 'object') return undefined;
+  const s1 = clampCounter(scores[1], MATCH_LIMITS.score.max);
+  const s2 = clampCounter(scores[2], MATCH_LIMITS.score.max);
+  const f1 = clampCounter(fermes[1], MATCH_LIMITS.ferme.max);
+  const f2 = clampCounter(fermes[2], MATCH_LIMITS.ferme.max);
+  if (s1 === undefined || s2 === undefined || f1 === undefined || f2 === undefined) return undefined;
+  if (value.breaker !== 1 && value.breaker !== 2) return undefined;
+  const target = clampCounter(value.targetScore, MATCH_LIMITS.targetScore.max) ?? 0;
+  return {
+    scores: { 1: s1, 2: s2 },
+    fermes: { 1: f1, 2: f2 },
+    breaker: value.breaker,
+    lagPending: value.lagPending === true,
+    targetScore: target,
+    showFerme: value.showFerme !== false,
+    showBreaker: value.showBreaker !== false,
   };
 }
 
@@ -261,6 +333,7 @@ function parseDisplayConfig(raw: unknown): MirrorDisplayConfig | undefined {
     p2Color: value.p2Color,
     theme,
     colors: parseThemeColors(value.colors, colorsForTheme(theme)),
+    ...(isDisplayLayout(value.displayLayout) ? { displayLayout: value.displayLayout } : {}),
   };
 }
 
@@ -329,6 +402,9 @@ function asErrorCode(value: unknown): MirrorErrorCode {
     case 'unauthorized':
     case 'bad_push':
     case 'stale_seq':
+    case 'too_large':
+    case 'rate_limited':
+    case 'room_full':
     case 'unknown':
       return value;
     default:

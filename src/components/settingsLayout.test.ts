@@ -9,6 +9,11 @@ describe('settings layout', () => {
   it('groups related settings into collapsible sections', () => {
     const panel = source('components/SettingsPanel.tsx');
     expect(panel).toContain('title="Joueurs"');
+    expect(panel).toContain('title="Score"');
+    expect(panel).toContain('<PresetManager');
+    expect(panel).toContain('title="Affichage télécommande & écran"');
+    expect(panel).toContain('title="Streaming (OBS / Streamlabs)"');
+    expect(panel).toContain('htmlId="matchLagAtStart"');
     expect(panel).toContain('title="Compétition & temps"');
     expect(panel).toContain('title="Apparence"');
     expect(panel).toContain('title="Sons & vibration"');
