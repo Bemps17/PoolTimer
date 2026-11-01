@@ -1908,8 +1908,9 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 .name-readonly svg.name-edit-hint { flex: 0 0 auto; color: var(--c-panel-text-secondary); }
 .name-readonly { gap: 0.5rem; padding: 0.7rem 0.6rem; }
 /* EXT reste lisible mais ne prend plus la place du nom quand la police système est agrandie. */
-.top-bar .player-status { gap: 0.3rem; }
-.top-bar .player-status .ext-status { font-size: clamp(0.7rem, 3.6vw, 1.2rem); }
+.top-bar .player-status { gap: clamp(3px, 1vw, 0.3rem); padding-inline: clamp(4px, 1.5vw, 0.45rem); }
+/* EXT en px/vw : ne grossit pas avec la police système, pour laisser la place au nom. */
+.top-bar .player-status .ext-status { font-size: clamp(10px, 3.2vw, 1.2rem); }
 /* Réglages : sélecteur de couleur et marges bornés, pour laisser la place au nom même police agrandie. */
 .player-config input[type='color'] { width: clamp(2.75rem, 13vw, 3.5rem); flex: 0 0 auto; }
 .name-readonly { padding: 10px 8px; gap: 6px; }
