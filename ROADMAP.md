@@ -42,9 +42,16 @@ Validation par clamp (`CONFIG_LIMITS`) et `parseThemeColors` existants ; taille 
 
 **Recommandé** : un preset personnalisé = **chronométrage + règles de score** (course à N, option après-casse, sans après-casse) ; **l'apparence reste un objet séparé** (cohérent avec la décision v2.7.0). Un « bundle » optionnel regroupe preset + thème pour un partage en un seul lien.
 
-### D3 — Score : périmètre
+### D3 — Score : périmètre (précisé par le client)
 
-**Recommandé (v1)** : score par joueur (+/−), **course à N manches** (optionnelle, affiche « Race to 7 »), détection de fin de manche manuelle, remise à zéro avec « Nouvelle partie ». Bouton NEW = « manche suivante » (garde le score) vs « nouveau match » (remet à 0, appui long/confirmation). Plus tard : historique des manches, nom de la rencontre/table.
+Match **1 contre 1** uniquement. Le scoreur gère :
+- **Score** de chaque joueur (manches gagnées), course à N optionnelle.
+- **Qui casse** : indicateur visible (ex. pastille « ● CASSE » sur le joueur), mis à jour automatiquement à chaque manche selon la règle choisie : *alternance* (défaut) ou *le gagnant casse*, avec correction manuelle possible (inversion en un appui) et choix du premier à casser au début du match.
+- **Casses fermes (F)** = parties parfaites : le joueur gagne la manche sur sa propre casse, sans que l'adversaire ne joue. Compteur **par joueur**, affiché en **plus petit chiffre** à côté du score, avec le symbole F (ex. `5` grand, `F2` petit en exposant). Une casse ferme **compte aussi comme manche gagnée**.
+- Annulation (undo) de la dernière manche, pour corriger une erreur de saisie.
+- Remise à zéro avec confirmation ; « manche suivante » conserve scores et F.
+
+Saisie : à la fin de chaque manche, 2 gestes max côté télécommande : « Manche à J1 / J2 », et un bouton **F** (actif seulement pour le joueur qui a cassé) qui ajoute la manche **et** la casse ferme.
 
 ### D4 — Où vit l'état de score ?
 
@@ -60,10 +67,10 @@ Validation par clamp (`CONFIG_LIMITS`) et `parseThemeColors` existants ; taille 
 - [ ] Test de non-régression du **contrat de protocole** : un snapshot v2.7.1 doit toujours être accepté (rétro-compat)
 
 ### Phase 1 — Score (v2.8.0) — *prioritaire*
-1. `timer/match.ts` : `MatchState { scores: {1,2}, raceTo: number|null, frame: number }`, fonctions pures `addPoint`, `removePoint`, `nextFrame`, `resetMatch`, `isMatchWon` + tests.
+1. `timer/match.ts` : `MatchState { scores: {1,2}, breakFlawless: {1,2} (casses fermes), breaker: 1|2, breakRule: 'alternate'|'winnerBreaks', raceTo: number|null, history: Frame[] }`, fonctions pures `winFrame(player, {flawless})`, `undoLastFrame`, `swapBreaker`, `resetMatch`, `isMatchWon` + tests (F impossible si le joueur n'a pas cassé, alternance, undo restaure score/F/casseur).
 2. Persistance + `mergeMatch` (validation, bornes 0–99).
 3. **Protocole** : `MirrorSnapshot.match?: MirrorMatch` optionnel ; `parseSnapshot` le parse explicitement (sinon le Worker le supprime) ; tests de rétro-compat ; **redéployer le Worker**.
-4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), animation de gain de point, indicateur « manche N / course à N », bannière de victoire.
+4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), **casses fermes en petit chiffre `F n`** à côté du score, **pastille de casse** sur le joueur qui casse, indicateur « manche N / course à N », bannière de victoire.
 5. Réglage « Course à N » dans ⚙️ ; tutoriel + aide mis à jour.
 
 *Critère de fin* : un point marqué sur le téléphone apparaît < 1 s sur l'écran Visuel, survit à un rechargement et à une reconnexion WebSocket.
