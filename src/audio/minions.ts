@@ -1,12 +1,16 @@
 import type { SoundType, TimerConfig } from '../timer/types';
 import { clampGain, dbToGain } from '../timer/volume';
-import { routeAudio } from './outputRoute';
+import { createElementPool } from './outputRoute';
 
 /** Vendored in-repo since 247d3db (hidden Minions easter egg). */
 export const MINIONS_ARGHH_SRC = '/sound/minions-arghh.mp3';
 export const MINIONS_ARGHH_ID = 'minions-arghh';
 
-let minionsAudio: HTMLAudioElement | null = null;
+const minionsPool = createElementPool((src) => {
+  const audio = new Audio(src);
+  audio.preload = 'auto';
+  return audio;
+});
 
 export function shouldPlayMinionsArghh(sound: SoundType, config: TimerConfig): boolean {
   return sound === 'warning' && config.minionsMode && config.sonAlertes;
@@ -25,18 +29,15 @@ export function minionsToggleMessage(enabled: boolean): string {
 
 export function preloadMinionsArghh(): void {
   if (typeof Audio === 'undefined') return;
-  if (!minionsAudio) {
-    minionsAudio = new Audio(MINIONS_ARGHH_SRC);
-    minionsAudio.preload = 'auto';
-  }
+  minionsPool.acquire(MINIONS_ARGHH_SRC);
 }
 
 export function playMinionsArghh(volumeDb: number): void {
-  preloadMinionsArghh();
-  if (!minionsAudio) return;
-  minionsAudio.volume = routeAudio(minionsAudio) ? 1 : clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : 0));
-  minionsAudio.currentTime = 0;
-  void minionsAudio.play().catch(() => {
+  if (typeof Audio === 'undefined') return;
+  const { audio, routed } = minionsPool.acquire(MINIONS_ARGHH_SRC);
+  audio.volume = routed ? 1 : clampGain(dbToGain(Number.isFinite(volumeDb) ? volumeDb : 0));
+  audio.currentTime = 0;
+  void audio.play().catch(() => {
     // Playback can be blocked until a user gesture; ignore.
   });
 }

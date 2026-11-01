@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.0.0';
+export const APP_VERSION = '3.0.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.0.1',
+    date: '2026-11-01',
+    title: 'Relais économe et alertes toujours audibles',
+    notes: [
+      'Relais : beaucoup moins d’écritures dans le stockage Cloudflare (moins de 250 par heure de match au lieu d’environ 5 400), pour ne jamais atteindre le quota gratuit quotidien. Le chrono reste diffusé en direct. Worker à redéployer.',
+      'Alertes toujours audibles : si le navigateur suspend l’audio (appel, notification, écran verrouillé), l’alerte est jouée directement au lieu de rester muette, puis le volume renforcé reprend dès que l’audio est relancé.',
+    ],
+  },
   {
     version: '3.0.0',
     date: '2026-11-01',

@@ -82,7 +82,7 @@ export async function initializeAudio(volumeDb: number): Promise<void> {
       Tone.connect(source, graph.volumeNode);
       graph.sources.set(audio, source);
       return true;
-    });
+    }, () => (Tone.getContext().rawContext as AudioContext).state === 'running');
   })();
 
   try {
@@ -148,7 +148,18 @@ function playClassicType(type: SoundType, config: TimerConfig): void {
   }
 }
 
+/** Relance l'audio s'il a été suspendu (appel, notification, écran verrouillé) ; sans attendre. */
+function resumeIfSuspended(): void {
+  try {
+    const ctx = Tone.getContext().rawContext as AudioContext;
+    if (ctx.state !== 'running') void ctx.resume().catch(() => undefined);
+  } catch {
+    // contexte indisponible : le repli direct prend le relais
+  }
+}
+
 export function playSound(type: SoundType, config: TimerConfig): void {
+  resumeIfSuspended();
   const isAlertType =
     type === 'warning' || type === 'countdown_tick' || type === 'gong' || type === 'critical_oneshot';
   const isClickType = type === 'click';

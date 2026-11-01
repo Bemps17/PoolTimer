@@ -8,6 +8,7 @@ import {
   PUSH_RATE,
   type RateLimiter,
 } from '../../src/mirror/limits';
+import { createWritePlanner } from '../../src/mirror/persistence';
 import { EphemeralRoom } from '../../src/mirror/room';
 import {
   isValidRoomCode,
@@ -46,12 +47,16 @@ export class TimerRoom extends DurableObject<Env> {
   private loaded = false;
   private pushLimiters = new WeakMap<WebSocket, RateLimiter>();
   private pingLimiters = new WeakMap<WebSocket, RateLimiter>();
+  /** Budget d'écritures (plan gratuit : 100 000 lignes/jour pour tout le compte). */
+  private writes = createWritePlanner();
 
   private async restore(): Promise<void> {
     if (this.loaded) return;
     const secret = await this.ctx.storage.get<string>('secret');
-    const seq = await this.ctx.storage.get<number>('seq');
-    const snapshot = await this.ctx.storage.get<EphemeralRoom['snapshot']>('snapshot');
+    // v3.0.1 : snapshot + seq dans une seule clé « state » (1 ligne écrite au lieu de 2) ; clés v3.0.0 en repli.
+    const state = await this.ctx.storage.get<{ seq: number; snapshot: EphemeralRoom['snapshot'] }>('state');
+    const seq = state?.seq ?? (await this.ctx.storage.get<number>('seq'));
+    const snapshot = state?.snapshot ?? (await this.ctx.storage.get<EphemeralRoom['snapshot']>('snapshot'));
     if (typeof secret === 'string') this.room.controllerSecret = secret;
     if (typeof seq === 'number') this.room.seq = seq;
     if (snapshot) this.room.snapshot = snapshot;
@@ -104,7 +109,9 @@ export class TimerRoom extends DurableObject<Env> {
 
     if (role === 'controller') {
       await this.ctx.storage.put('secret', secret);
-      await this.ctx.storage.put('seq', this.room.seq);
+      // La séquence repart à 0 au claim : l'écrire dans « state » (lue en priorité au réveil), sinon les pushes
+      // suivants seraient rejetés comme obsolètes après une mise en veille du Durable Object.
+      await this.ctx.storage.put('state', { seq: this.room.seq, snapshot: this.room.snapshot });
     }
 
     this.ctx.acceptWebSocket(server, [role]);
@@ -178,8 +185,10 @@ export class TimerRoom extends DurableObject<Env> {
       return;
     }
 
-    await this.ctx.storage.put('snapshot', clientMessage.snapshot);
-    await this.ctx.storage.put('seq', clientMessage.seq);
+    const step = this.writes.onPush({ isRunning: clientMessage.snapshot.isRunning, now: Date.now() });
+    if (step.persist) {
+      await this.ctx.storage.put('state', { seq: clientMessage.seq, snapshot: clientMessage.snapshot });
+    }
 
     const payload = JSON.stringify({
       type: 'snapshot',
@@ -191,7 +200,7 @@ export class TimerRoom extends DurableObject<Env> {
       this.sendRaw(peer, payload);
     }
     this.sendJson(ws, { type: 'push_ok', seq: clientMessage.seq });
-    await this.touchAlarm();
+    if (step.refreshAlarm) await this.touchAlarm();
   }
 
   async webSocketClose(): Promise<void> {

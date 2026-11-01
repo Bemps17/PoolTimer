@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 3.0.1 — 2026-11-01
+
+- **Relais économe** (`mirror/persistence.ts`) : snapshot + séquence dans une seule clé `state`, persistée au premier push, à chaque arrêt du chrono et au plus toutes les 30 s en course ; alarme d’expiration repoussée toutes les 10 min. < 250 lignes écrites par heure de match (≈ 5 400 avant), quota gratuit Durable Objects : 100 000 / jour. **Worker à redéployer.**
+- **Alertes toujours audibles** (`audio/outputRoute.ts`) : chaque son a un élément routé (gain + limiteur) et un élément direct ; le direct est utilisé tant que l’`AudioContext` n’est pas `running`, avec tentative de relance avant chaque son.
+
 ## 3.0.0 — 2026-11-01
 
 - **Salle miroir persistante** (`localStorage`, migration depuis la session) : le lien de l’écran Visuel et l’overlay OBS survivent à la fermeture de l’app ; « Fermer la salle » l’efface.
