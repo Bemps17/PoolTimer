@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>H8timer — propositions mode télécommande</title>
+<style>
+  :root { --bg:#0a0a0a; --bezel:#1a1a1a; --screen:#000; --txt:#e0e0e0; --sub:#8b949e; --primary:#3498db; --play:#20c20e; --p1:#3498db; --p2:#e74c3c; --chip:#141414; --btn:#262626; --border:#2c2c2c; --warn:#ff8c00; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#e9ecef; font-family: Poppins, system-ui, sans-serif; color:var(--txt); }
+  .row { display:flex; gap:28px; padding:24px; align-items:flex-start; flex-wrap:wrap; }
+  .card { background:#fff; color:#111; border-radius:14px; padding:14px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+  .card h2 { margin:0 0 4px; font-size:17px; } .card p { margin:0 0 10px; font-size:12.5px; color:#555; max-width:340px; line-height:1.35; }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; background:#d1fae5; color:#065f46; margin-bottom:6px; }
+  .tag.opt { background:#e0e7ff; color:#3730a3; }
+  /* téléphone */
+  .phone { color:var(--txt); width:360px; height:740px; background:var(--bg); border-radius:28px; padding:10px; border:6px solid #111; position:relative; overflow:hidden; display:flex; flex-direction:column; gap:8px; }
+  .phone.land { width:740px; height:360px; flex-direction:row; }
+  .bar { height:18px; font-size:11px; color:#9aa; display:flex; justify-content:space-between; padding:0 8px; }
+  /* aperçu écran distant */
+  .preview { position:relative; border-radius:12px; border:1px solid var(--border); background:#050505; padding:8px; }
+  .preview .label { position:absolute; top:6px; left:10px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); display:flex; align-items:center; gap:6px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#22c55e; box-shadow:0 0 6px #22c55e; display:inline-block; }
+  .tv { aspect-ratio:16/9; width:100%; border-radius:6px; background:#000; border:2px solid #333; display:grid; grid-template-rows:auto 1fr; padding:6px 8px; margin-top:14px; }
+  .tv .names { display:flex; justify-content:space-between; font-size:10px; color:#ccc; }
+  .tv .names b { font-family: "Arial Black", Impact, sans-serif; font-size:13px; }
+  .tv .t { display:grid; place-items:center; font-family:"Arial Black", Impact, sans-serif; font-size:58px; color:#e0e0e0; letter-spacing:2px; }
+  .tv.small .t { font-size:44px; }
+  /* chrono local */
+  .local { flex:1; border-radius:14px; background:var(--screen); display:grid; place-items:center; font-family:"Arial Black", Impact, sans-serif; color:#e0e0e0; font-size:120px; }
+  .local.mid { font-size:96px; }
+  /* boutons */
+  .bigplay { height:120px; border-radius:22px; background:#0f2d12; border:2px solid var(--play); color:var(--play); display:flex; align-items:center; justify-content:center; gap:12px; font-weight:800; font-size:26px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .b { min-height:58px; border-radius:14px; background:var(--btn); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:15px; color:#ddd; text-align:center; }
+  .b.casse { background:#163049; border-color:var(--primary); color:#cfe6fb; }
+  .b.ext { background:#10361b; border-color:#2ecc71; color:#bff3d0; }
+  .b small { display:block; font-weight:500; font-size:11px; color:#9aa; }
+  .players { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pl { min-height:52px; border-radius:12px; background:var(--chip); border:2px solid transparent; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:15px; }
+  .pl.active { border-color:var(--p1); box-shadow:0 0 10px rgba(52,152,219,.5); }
+  .ext-flag { font-size:11px; color:#2ecc71; }
+  .footer { display:flex; justify-content:space-between; align-items:center; padding:0 6px; color:#8b949e; font-size:12px; }
+  .icon { width:44px; height:44px; border-radius:50%; background:var(--btn); display:grid; place-items:center; color:#bbb; font-size:20px; }
+  .mini-score { display:flex; justify-content:center; gap:10px; font-size:12px; color:var(--sub); }
+  .mini-score b { color:#ddd; }
+  .chip { font-size:12px; padding:6px 10px; border-radius:99px; background:#1d1d1d; border:1px solid var(--border); color:#bbb; }
+  /* feuille score */
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#1f2128; border-radius:18px 18px 0 0; padding:12px 14px 18px; border-top:1px solid #333; }
+  .sheet h3 { margin:0 0 8px; font-size:13px; color:#aab; text-transform:uppercase; letter-spacing:.06em; }
+  .srow { display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:8px; margin:6px 0; font-size:15px; }
+  .pm { width:44px; height:44px; border-radius:10px; background:#2a2d36; display:grid; place-items:center; font-size:22px; color:#eee; }
+  .val { min-width:32px; text-align:center; font-family:"Arial Black"; font-size:22px; }
+  .shade { position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  /* paysage */
+  .side { width:170px; display:flex; flex-direction:column; gap:8px; }
+  .sidecard { flex:1; border-radius:14px; background:var(--chip); border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .sidecard.active { border-color:var(--p1); box-shadow:0 0 10px rgba(52,152,219,.45); }
+  .sidecard .nm { font-weight:800; font-size:16px; }
+  .sidecard .sc { font-family:"Arial Black"; font-size:46px; }
+  .sidecard .f { font-size:12px; color:var(--sub); }
+  .center { flex:1; display:flex; flex-direction:column; gap:8px; }
+  .center .local { font-size:110px; }
+  .hrow { display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:8px; }
+  .hrow .b { min-height:64px; font-size:14px; }
+  .hrow .bigplay { height:64px; font-size:20px; border-radius:14px; }
+  .pmrow { display:flex; gap:6px; }
+  .pmrow .pm { width:40px; height:40px; font-size:20px; }
+  .note { font-size:11px; color:#666; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="row">
+  <!-- OPTION A -->
+  <div class="card">
+    <span class="tag">Recommandé</span>
+    <h2>A — Télécommande pure</h2>
+    <p>Comme une vraie télécommande : en haut, l'<b>aperçu en direct</b> de ce qu'affiche l'écran distant (mis à jour en temps réel, voyant de synchro). Au centre, un <b>énorme bouton Départ / Pause</b>. Dessous, les actions du coup. <b>Aucun score à l'écran</b> : il se règle dans ⚙️ → Score (+/−).</p>
+    <div class="phone">
+      <div class="bar"><span>8:27</span><span>100 %</span></div>
+      <div class="preview"><span class="label"><span class="dot"></span>Écran distant · en direct</span>
+        <div class="tv"><div class="names"><span><b>Puilboreau</b></span><span><b>Delacroix</b></span></div><div class="t">38</div></div>
+      </div>
+      <div class="players"><div class="pl active">Puilboreau <span class="ext-flag">EXT</span></div><div class="pl">Delacroix <span class="ext-flag">EXT</span></div></div>
+      <div class="bigplay">⏸ Pause</div>
+      <div class="grid">
+        <div class="b">↺ Nouveau coup</div>
+        <div class="b ext">+15 s<small>Extension</small></div>
+        <div class="b casse">Après casse<small>1:30</small></div>
+        <div class="b">Nouvelle manche</div>
+      </div>
+      <div class="footer"><span class="chip">Score : ⚙️</span><div class="icon">⚙</div></div>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="card">
+    <span class="tag opt">Option</span>
+    <h2>B — Télécommande + score discret</h2>
+    <p>Même télécommande, avec une <b>ligne de score en petit</b> (lecture seule). Un appui dessus ouvre une <b>feuille « Score »</b> avec juste <b>+ / −</b> par joueur (et F si activé). Rien ne gêne le contrôle du temps.</p>
+    <div class="phone">
+      <div class="bar"><span>8:27</span><span>100 %</span></div>
+      <div class="preview"><span class="label"><span class="dot"></span>Écran distant · en direct</span>
+        <div class="tv small"><div class="names"><span><b>Puilboreau 3</b></span><span><b>2 Delacroix</b></span></div><div class="t">38</div></div>
+      </div>
+      <div class="mini-score"><span>Puilboreau <b>3</b></span><span>–</span><span><b>2</b> Delacroix</span><span class="chip" style="padding:2px 8px">Modifier</span></div>
+      <div class="players"><div class="pl active">Puilboreau</div><div class="pl">Delacroix</div></div>
+      <div class="bigplay">⏸ Pause</div>
+      <div class="grid">
+        <div class="b">↺ Nouveau coup</div>
+        <div class="b ext">+15 s<small>Extension</small></div>
+        <div class="b casse">Après casse<small>1:30</small></div>
+        <div class="b">Nouvelle manche</div>
+      </div>
+      <div class="shade"></div>
+      <div class="sheet">
+        <h3>Score (feuille ouverte)</h3>
+        <div class="srow"><span>Puilboreau</span><span class="pm">−</span><span class="val">3</span><span class="pm">+</span></div>
+        <div class="srow"><span>Delacroix</span><span class="pm">−</span><span class="val">2</span><span class="pm">+</span></div>
+        <div class="srow" style="color:#9aa;font-size:13px"><span>Casses fermes (si activées)</span><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="card">
+    <span class="tag opt">Option</span>
+    <h2>C — Télécommande minimale</h2>
+    <p>Pour les arbitres qui ne regardent que l'écran distant : <b>pas d'aperçu</b>, seulement le voyant et un petit rappel du temps. Toute la hauteur sert aux boutons : très grandes cibles, utilisable sans regarder.</p>
+    <div class="phone">
+      <div class="bar"><span>8:27</span><span>100 %</span></div>
+      <div class="footer" style="padding:4px 8px"><span><span class="dot"></span>&nbsp; Lié · 38 s</span><span>Puilboreau au tir</span></div>
+      <div class="bigplay" style="height:200px;font-size:34px">⏸ Pause</div>
+      <div class="grid">
+        <div class="b" style="min-height:90px">↺ Nouveau coup</div>
+        <div class="b ext" style="min-height:90px">+15 s<small>Extension</small></div>
+        <div class="b casse" style="min-height:90px">Après casse<small>1:30</small></div>
+        <div class="b" style="min-height:90px">Joueur suivant</div>
+      </div>
+      <div class="footer"><span class="chip">Nouvelle manche</span><div class="icon">⚙</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- PAYSAGE -->
+  <div class="card">
+    <span class="tag opt">Option dans ⚙️ (pas par défaut)</span>
+    <h2>D — Paysage : joueur 1 à gauche, chrono au centre, joueur 2 à droite</h2>
+    <p>Téléphone posé en largeur sur la table. Chaque côté affiche le <b>nom</b>, le <b>score</b> (et F si activé) avec <b>+ / −</b> ; appui sur un côté = c'est son tour. Au centre : le chrono et la rangée d'actions. Disponible aussi hors télécommande. Bascule automatique si on tourne le téléphone, ou forcée dans ⚙️ → Écran.</p>
+    <div class="phone land">
+      <div class="side">
+        <div class="sidecard active"><span class="nm">Puilboreau</span><span class="sc" style="color:var(--p1)">3</span><span class="f">F 1 · EXT dispo</span><div class="pmrow"><span class="pm">−</span><span class="pm">+</span></div></div>
+      </div>
+      <div class="center">
+        <div class="footer" style="padding:0 4px"><span><span class="dot"></span>&nbsp; Écran distant lié</span><span>course à 7</span></div>
+        <div class="local">38</div>
+        <div class="hrow"><div class="bigplay">⏸ Pause</div><div class="b">↺ Coup</div><div class="b ext">+15 s</div><div class="b casse">Casse</div></div>
+      </div>
+      <div class="side">
+        <div class="sidecard"><span class="nm">Delacroix</span><span class="sc" style="color:var(--p2)">2</span><span class="f">F 0 · EXT dispo</span><div class="pmrow"><span class="pm">−</span><span class="pm">+</span></div></div>
+      </div>
+    </div>
+    <p class="note">En mode télécommande paysage, l'aperçu de l'écran distant peut remplacer le gros chrono central (au choix).</p>
+  </div>
+</div>
+</body>
+</html>

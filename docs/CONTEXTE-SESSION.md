@@ -8,7 +8,7 @@
 
 | Élément | État |
 | --- | --- |
-| Version en production | **3.3.0** — `main` = commit `dd92a55` (PR #24 fusionnée) |
+| Version en production | **3.3.0** (v3.3.1 prête sur la branche de travail : onglets Lucide) |
 | Site | https://pooltimer.vercel.app (Vercel, projet `pooltimer`, déploiement automatique depuis `main`) |
 | Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`f694928a-923d-4c8e-96e4-18726b0b06df`** |
 | Branche de travail | `claude/app-completion-roadmap-eyqp6k` (repartie de `main`, propre) |
@@ -43,7 +43,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
 - PWA React + Vite + TypeScript, déployée sur Vercel. Routeur `App.tsx` en `React.lazy` : `/` télécommande (`ControllerApp.tsx`), `/d/CODE` écran Visuel, `/o/CODE` overlay OBS/Streamlabs.
 - Logique pure et testée : `timer/` (moteur, match, presets, thèmes, contrastes, tickSchedule), `mirror/` (protocole partagé avec le Worker, limites, persistance, latence, syncLevel, overlay), `share/` (enveloppe de partage), `diagnostics/` (journal), `audio/` (chaîne maître + repli).
 - Relais : `worker/src/index.ts` (Durable Object `TimerRoom`, SQLite). Protocole rétro-compatible : tout nouveau champ du snapshot est **optionnel** et **parsé explicitement**.
-- Menu ⚙️ : 5 onglets **Match · Affichage · Apparence · Son · Plus** ; contrôles `ToggleField`, `SegmentedField`, `SettingsCard`, `SettingsDisclosure` (`components/SettingsControls.tsx`).
+- Menu ⚙️ : 5 onglets **Match · Écran · Thème · Son · Plus** ; contrôles `ToggleField`, `SegmentedField`, `SettingsCard`, `SettingsDisclosure` (`components/SettingsControls.tsx`).
 
 ## 5. Accès et outils (constatés dans les sessions précédentes)
 

@@ -2,6 +2,12 @@
 
 Toutes les dates sont en UTC.
 
+## 3.3.1 — 2026-11-01
+
+- **Onglets du menu ⚙️** : libellés courts **Match · Écran · Thème · Son · Plus** (les anciens « Affichage » / « Apparence » débordaient sur un vrai téléphone avec police agrandie) et **icônes Lucide** (`lucide-react` : Timer, MonitorSmartphone, Palette, Volume2, Ellipsis) à la place des emojis.
+- **Texte sur une ligne** (`FitText singleLine`, `fitSingleLineFontSize`) : taille de base en `clamp()` puis réduction automatique jusqu'à tenir en largeur (ellipse seulement au-delà du minimum) ; réajusté après chargement des polices. Appliqué aux noms (accueil, réglages) et aux libellés d'onglets. « EXT », sélecteur de couleur et marges bornés en `clamp()`. « modifier » → icône crayon.
+- e2e : aucun onglet ne déborde ni ne chevauche sur 360 px ; noms sur une ligne et entiers (accueil, réglages jusqu'à 32 caractères), police à 100 % et 130 %.
+
 ## 3.3.0 — 2026-11-01
 
 - **Menu ⚙️ repensé** (QoL d’abord) : 5 onglets — Match (joueurs, chrono, score), Affichage (mode d’interface, écran distant), Apparence (thème, couleurs repliées, mes thèmes), Son, Plus (miroir, streaming, diagnostic, partage, application). Dernier onglet mémorisé.

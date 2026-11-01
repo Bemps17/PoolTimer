@@ -1871,3 +1871,47 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
     font-weight: 800;
     font-size: 0.95rem;
 }
+
+/* Onglets v3.3.1 : icônes Lucide + libellés courts, jamais de débordement. */
+.settings-tab { gap: 0.2rem; padding: 0.4rem 0.1rem; overflow: hidden; }
+.settings-tab-icon { width: 1.25rem; height: 1.25rem; flex: 0 0 auto; }
+.settings-tab-label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* ---------- Texte sur une ligne : clamp() responsive + réduction automatique (FitText singleLine) ---------- */
+.fit-single {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.top-bar .player-name.fit-single {
+    font-size: clamp(0.85rem, 4.6vw, 1.2rem);
+    line-height: 1.2;
+    max-height: none;
+    overflow-wrap: normal;
+}
+.name-readonly .name-value.fit-single { flex: 1 1 auto; font-size: clamp(1rem, 5.2vw, 1.35rem); line-height: 1.2; }
+.name-readonly { flex-wrap: nowrap; }
+.name-edit-hint { flex-shrink: 0; }
+.settings-tab-label.fit-single { font-size: clamp(0.6rem, 3.2vw, 0.75rem); text-align: center; }
+.name-readonly svg.name-edit-hint { flex: 0 0 auto; color: var(--c-panel-text-secondary); }
+.name-readonly { gap: 0.5rem; padding: 0.7rem 0.6rem; }
+/* EXT reste lisible mais ne prend plus la place du nom quand la police système est agrandie. */
+.top-bar .player-status { gap: clamp(3px, 1vw, 0.3rem); padding-inline: clamp(4px, 1.5vw, 0.45rem); }
+/* EXT en px/vw : ne grossit pas avec la police système, pour laisser la place au nom. */
+.top-bar .player-status .ext-status { font-size: clamp(10px, 3.2vw, 1.2rem); }
+/* Réglages : sélecteur de couleur et marges bornés, pour laisser la place au nom même police agrandie. */
+.player-config input[type='color'] { width: clamp(36px, 11vw, 3.5rem); flex: 0 0 auto; }
+.player-config { gap: clamp(8px, 2.5vw, 1rem); }
+.name-readonly { padding: 10px 8px; gap: 6px; }

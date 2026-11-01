@@ -94,3 +94,29 @@ describe('computeFitFontSize', () => {
     ).toBe(11);
   });
 });
+
+describe('texte sur une seule ligne qui rétrécit pour tenir (noms, onglets)', () => {
+  it('keeps the CSS size when the text already fits', async () => {
+    const { fitSingleLineFontSize } = await import('./playerName');
+    expect(fitSingleLineFontSize({ availableWidth: 200, contentWidth: 150, maxFontSize: 20, minFontSize: 10 })).toBe(20);
+  });
+
+  it('shrinks proportionally to the overflow, with a small safety margin', async () => {
+    const { fitSingleLineFontSize } = await import('./playerName');
+    const size = fitSingleLineFontSize({ availableWidth: 100, contentWidth: 200, maxFontSize: 20, minFontSize: 8 });
+    expect(size).toBeLessThanOrEqual(10);
+    expect(size).toBeGreaterThan(9);
+  });
+
+  it('never goes below the minimum (ellipsis takes over beyond)', async () => {
+    const { fitSingleLineFontSize } = await import('./playerName');
+    expect(fitSingleLineFontSize({ availableWidth: 50, contentWidth: 1_000, maxFontSize: 20, minFontSize: 11 })).toBe(11);
+  });
+
+  it('is safe with zero or invalid sizes', async () => {
+    const { fitSingleLineFontSize } = await import('./playerName');
+    expect(fitSingleLineFontSize({ availableWidth: 0, contentWidth: 100, maxFontSize: 20, minFontSize: 10 })).toBe(10);
+    expect(fitSingleLineFontSize({ availableWidth: 100, contentWidth: 0, maxFontSize: 20, minFontSize: 10 })).toBe(20);
+    expect(fitSingleLineFontSize({ availableWidth: 100, contentWidth: 300, maxFontSize: Number.NaN, minFontSize: 10 })).toBe(10);
+  });
+});
