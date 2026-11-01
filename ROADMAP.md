@@ -139,6 +139,7 @@ Détails, prérequis et plan en 3 phases (audit de l'API publique d'abord, aucun
 
 | Date (UTC) | Version Worker | Contenu | Retour arrière |
 | --- | --- | --- | --- |
+| 2026-11-01 | `1acbdc15-8450-4b06-affe-adbf0ee47281` | H8timer 3.0.1 : écritures limitées (clé `state`, 30 s / 10 min) pour le quota gratuit | `dcb3967d-848c-47e0-b34b-011c90c3e6ea` |
 | 2026-11-01 | `dcb3967d-848c-47e0-b34b-011c90c3e6ea` | H8timer 3.0 : score, `displayLayout`, origines autorisées, messages ≤ 32 Ko, débit limité, 40 écrans max | `8a9199f4-b6c9-40bb-a01d-fa3a5e4b12c3` (2026-09-20) |
 
 Déployé via l'API Cloudflare (même nom de Worker, même namespace Durable Object `TimerRoom`, aucune nouvelle migration). Pour revenir en arrière : tableau de bord Cloudflare → Workers → `h8timer-mirror` → Deployments → redéployer la version précédente. À refaire après tout changement de `src/mirror/protocol.ts`, `limits.ts` ou `worker/` : `cd worker && npx wrangler deploy`.
