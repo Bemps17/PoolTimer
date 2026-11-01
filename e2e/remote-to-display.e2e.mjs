@@ -191,6 +191,36 @@ async function main() {
       await small.context().close();
     }
 
+    // Paysage + boutons invisibles : appui sur le chrono = départ, double appui = nouveau coup (comme en portrait).
+    {
+      const tactile = await (
+        await browser.newContext({ viewport: { width: 740, height: 360 }, hasTouch: true, isMobile: true })
+      ).newPage();
+      await tactile.goto(APP);
+      await tactile.evaluate(() =>
+        localStorage.setItem(
+          'billiardTimerConfig',
+          JSON.stringify({ defaultsVersion: 2, modeInterface: 'tactile', viewOptions: { landscape: 'auto' } }),
+        ),
+      );
+      await tactile.reload();
+      await tactile.locator('.landscape-board').waitFor();
+      assert((await tactile.locator('#btnPlayPause').count()) === 0, 'paysage, boutons invisibles : pas de bouton Départ');
+      const read = async () => Number((await tactile.locator('#timerDisplay').textContent())?.trim());
+      await tactile.locator('.landscape-tap-zone').tap();
+      await tactile.waitForTimeout(1_600);
+      const before = await read();
+      await tactile.waitForTimeout(1_100);
+      const after = await read();
+      assert(after < before, `paysage, boutons invisibles : un appui sur le chrono le lance (${before} → ${after})`);
+      await tactile.locator('.landscape-tap-zone').tap();
+      await tactile.waitForTimeout(80);
+      await tactile.locator('.landscape-tap-zone').tap();
+      await tactile.waitForTimeout(600);
+      assert((await read()) === 45, 'paysage, boutons invisibles : double appui = nouveau coup');
+      await tactile.context().close();
+    }
+
     const remote = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
     await remote.goto(APP);
     await remote.evaluate(() => localStorage.clear());

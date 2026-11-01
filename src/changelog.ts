@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.5.0';
+export const APP_VERSION = '3.5.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.5.1',
+    date: '2026-11-01',
+    title: 'Correctif : le toucher du chrono fonctionne en paysage',
+    notes: [
+      'En paysage, toucher le chrono (ou l’aperçu de l’écran distant) fonctionne comme en portrait : un appui = départ / pause, double appui = nouveau coup.',
+      'Mode « Boutons invisibles » en paysage : Départ, Nouveau coup et Nouvelle manche se cachent ; Extension, Après casse et ⚙️ restent, comme en portrait.',
+    ],
+  },
   {
     version: '3.5.0',
     date: '2026-11-01',

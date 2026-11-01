@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **3.5.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **3.5.1** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 

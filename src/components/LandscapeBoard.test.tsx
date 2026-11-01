@@ -6,6 +6,7 @@ import { createInitialState } from '../timer/engine';
 import type { MirrorMatch } from '../mirror/protocol';
 import type { EngineState, TimerConfig } from '../timer/types';
 import { HOLD_TO_CONFIRM_MS } from './HoldButton';
+import { DOUBLE_TAP_MS } from '../timer/screenTap';
 import { LandscapeBoard } from './LandscapeBoard';
 
 beforeAll(() => {
@@ -140,5 +141,48 @@ describe('LandscapeBoard — paysage : joueur 1 à gauche, chrono au centre, jou
   it('without a room there is no sync dot', () => {
     setup();
     expect(screen.queryByRole('img', { name: /Synchronisation/ })).toBeNull();
+  });
+
+  describe('appuis sur le chrono (comme en portrait)', () => {
+    it('one tap on the centre starts / pauses', () => {
+      vi.useFakeTimers();
+      const { container, actions } = setup();
+      const centre = container.querySelector('[data-zone="center"] .landscape-tap-zone')!;
+      fireEvent.pointerUp(centre, { pointerType: 'touch', button: 0 });
+      act(() => vi.advanceTimersByTime(DOUBLE_TAP_MS + 10));
+      expect(actions.onTogglePlayPause).toHaveBeenCalledTimes(1);
+    });
+
+    it('double tap = new shot', () => {
+      vi.useFakeTimers();
+      const { container, actions } = setup({ state: { isRunning: true } });
+      const centre = container.querySelector('[data-zone="center"] .landscape-tap-zone')!;
+      fireEvent.pointerUp(centre, { pointerType: 'touch', button: 0 });
+      act(() => vi.advanceTimersByTime(100));
+      fireEvent.pointerUp(centre, { pointerType: 'touch', button: 0 });
+      act(() => vi.advanceTimersByTime(DOUBLE_TAP_MS + 10));
+      expect(actions.onResetShot).toHaveBeenCalledTimes(1);
+      expect(actions.onTogglePlayPause).not.toHaveBeenCalled();
+    });
+
+    it('also works on the remote preview in the centre', () => {
+      vi.useFakeTimers();
+      const { container, actions } = setup({ remote: true });
+      const centre = container.querySelector('[data-zone="center"] .landscape-tap-zone')!;
+      expect(centre.querySelector('.remote-preview')).not.toBeNull();
+      fireEvent.pointerUp(centre, { pointerType: 'touch', button: 0 });
+      act(() => vi.advanceTimersByTime(DOUBLE_TAP_MS + 10));
+      expect(actions.onTogglePlayPause).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('invisible buttons mode: start / new shot / new frame hidden, extension, after break and settings kept', () => {
+    setup({ config: { modeInterface: 'tactile', tempsApresCasse: 90, tempsBase: 45 } });
+    expect(screen.queryByRole('button', { name: 'Démarrer' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Nouveau coup' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Nouvelle manche/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /^Extension/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^Après casse/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Ouvrir le menu' })).toBeTruthy();
   });
 });
