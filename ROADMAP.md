@@ -129,3 +129,12 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 | Refactor `competitionMode → presetId` casse les configs existantes | Migration dans `mergeConfig` + tests avant/après |
 | Latence / perte de WebSocket en salle | Déjà géré (reconnexion, `seq`) ; le score doit être idempotent (envoyer l'état complet, pas des « +1 ») — c'est le cas avec le snapshot complet |
 | Vue télécommande dupliquant `Scoreboard` | Extraire hooks de gestes avant la phase 2 |
+
+## Journal de déploiement du relais (Cloudflare Worker `h8timer-mirror`)
+
+| Date (UTC) | Version Worker | Contenu | Retour arrière |
+| --- | --- | --- | --- |
+| 2026-11-01 | `dcb3967d-848c-47e0-b34b-011c90c3e6ea` | H8timer 3.0 : score, `displayLayout`, origines autorisées, messages ≤ 32 Ko, débit limité, 40 écrans max | `8a9199f4-b6c9-40bb-a01d-fa3a5e4b12c3` (2026-09-20) |
+
+Déployé via l'API Cloudflare (même nom de Worker, même namespace Durable Object `TimerRoom`, aucune nouvelle migration). Pour revenir en arrière : tableau de bord Cloudflare → Workers → `h8timer-mirror` → Deployments → redéployer la version précédente. À refaire après tout changement de `src/mirror/protocol.ts`, `limits.ts` ou `worker/` : `cd worker && npx wrangler deploy`.
+
