@@ -12,13 +12,15 @@ npx tsc -b            # typecheck (fait aussi partie de `npm run build`)
 npm run build         # tsc -b && vite build -> dist/
 npm run mirror:dev    # Worker Cloudflare local (ws://localhost:8787), .env.development le cible
 npm run test:mirror   # sonde le relais WebSocket (wrangler dev)
+npm run test:e2e      # bout en bout Playwright (wrangler dev + Vite), aussi en CI
 ```
 
 ## Architecture
 
 ```
 src/
-  App.tsx                 route : /d/CODE -> DisplayView, sinon ControllerApp
+  App.tsx                 routeur : /o/CODE -> OverlayView, /d/CODE -> DisplayView, sinon ControllerApp (React.lazy)
+  ControllerApp.tsx       télécommande / app principale (scoreur, réglages, miroir, partage)
   timer/
     types.ts              TimerConfig, EngineState, Theme, CompetitionMode
     engine.ts             logique PURE (tick, start/pause, extension, après-casse) -> testée

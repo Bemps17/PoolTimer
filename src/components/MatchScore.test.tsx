@@ -82,3 +82,40 @@ describe('LagPrompt', () => {
     expect(onSkip).toHaveBeenCalled();
   });
 });
+
+describe('MatchScore compact (télécommande, téléphone étroit)', () => {
+  it('fits on two rows per side: − score + / ball F +F (corrections of F via Undo)', () => {
+    const { container } = render(<MatchScore match={match} {...base} size="compact" controls={controls()} />);
+    const sides = container.querySelectorAll('.match-side');
+    expect(sides).toHaveLength(2);
+    for (const side of sides) {
+      const main = side.querySelector('.match-main')!;
+      const ferme = side.querySelector('.match-ferme-row')!;
+      expect(main.querySelectorAll('button')).toHaveLength(2); // − et +
+      expect(ferme.querySelector('.match-ball')).not.toBeNull(); // la blanche passe sur la ligne F
+      expect(ferme.querySelectorAll('.match-ferme-step')).toHaveLength(1); // +F seulement
+    }
+    expect(screen.queryByLabelText(/Retirer une casse ferme/)).toBeNull();
+    expect(screen.getByLabelText('Annuler la dernière action du score')).toBeTruthy();
+  });
+
+  it('keeps − F in the full layout', () => {
+    render(<MatchScore match={match} {...base} size="full" controls={controls()} />);
+    expect(screen.getAllByLabelText(/Retirer une casse ferme/)).toHaveLength(2);
+  });
+});
+
+describe('MatchScore grand (télécommande)', () => {
+  it('puts the white ball on its own row so "− score +" fits on a narrow phone', () => {
+    const { container } = render(<MatchScore match={match} {...base} size="full" controls={controls()} />);
+    for (const side of container.querySelectorAll('.match-side')) {
+      expect(side.querySelector('.match-ball-row .match-ball')).not.toBeNull();
+      expect(side.querySelector('.match-main .match-ball')).toBeNull();
+    }
+  });
+
+  it('the read-only Visual screen keeps the ball next to the score', () => {
+    const { container } = render(<MatchScore match={match} {...base} />);
+    expect(container.querySelector('.match-main .match-ball')).not.toBeNull();
+  });
+});

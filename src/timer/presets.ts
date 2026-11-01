@@ -199,10 +199,22 @@ export function describeTimings(t: PresetTimings): string {
 }
 
 /** Aperçu avant application : « base 45→30 s · extension 15→30 s » (vide si rien ne change). */
+function timingChanges(current: PresetTimings, next: PresetTimings): string[] {
+  return TIMING_KEYS.filter((key) => current[key] !== next[key]).map(
+    (key) => `${TIMING_LABELS[key]} ${current[key]}→${next[key]} s`,
+  );
+}
+
 export function diffTimings(current: PresetTimings, next: PresetTimings): string {
-  return TIMING_KEYS.filter((key) => current[key] !== next[key])
-    .map((key) => `${TIMING_LABELS[key]} ${current[key]}→${next[key]} s`)
-    .join(' · ');
+  return timingChanges(current, next).join(' · ');
+}
+
+/** Version courte pour un toast : les `max` premiers changements, puis « + n autres ». */
+export function summarizeTimingChanges(current: PresetTimings, next: PresetTimings, max = 2): string {
+  const changes = timingChanges(current, next);
+  if (changes.length <= max) return changes.join(' · ');
+  const rest = changes.length - max;
+  return `${changes.slice(0, max).join(' · ')} + ${rest} ${rest > 1 ? 'autres' : 'autre'}`;
 }
 
 /** Applique un preset : chronométrage (+ course à N). Apparence et sons intacts. */

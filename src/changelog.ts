@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.0.1';
+export const APP_VERSION = '3.1.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.1.0',
+    date: '2026-11-01',
+    title: 'Fin de match, mode équipe et ergonomie',
+    notes: [
+      'Marquer une manche relance le chrono : nouvelle manche, extensions remises à zéro, au tour du joueur qui casse (réglable dans ⚙️ → Score).',
+      'Historique des manches et fenêtre de fin de match : vainqueur, score, course à N, nombre de manches, durée, casses fermes, avec « Partager le résultat » et « Nouveau match ».',
+      'Mode équipe : « Équipe A / B » à la place de « Joueur 1 / 2 » sur la télécommande, l’écran Visuel et l’overlay.',
+      'Réglages en 3 onglets (Match, Apparence, Appareil & partage) ; boutons du scoreur d’au moins 44 px, même sur un téléphone de 360 px ; aperçu de preset court.',
+      'Écran Visuel : bouton « Plein écran » dédié (un appui ne quitte plus le plein écran), chrono compensé de la latence réseau.',
+      'Plus rapide : l’écran Visuel et l’overlay OBS chargent environ deux fois moins de code ; l’overlay n’a plus de flash sombre au chargement.',
+    ],
+  },
   {
     version: '3.0.1',
     date: '2026-11-01',

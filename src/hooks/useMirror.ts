@@ -21,6 +21,7 @@ import {
   type DisplaySyncView,
   type MirrorConnectionStatus,
 } from '../mirror/syncStatus';
+import { createLatencyTracker } from '../mirror/latency';
 import { buildMirrorWsUrl } from '../mirror/wsUrl';
 
 export type { MirrorConnectionStatus };
@@ -274,8 +275,17 @@ export function useDisplayMirror(room: string) {
       return undefined;
     }
 
+    // Le snapshot a voyagé un aller simple : on le date de son émission estimée (chrono en marche seulement).
+    const latency = createLatencyTracker();
+    let pingSentAt: number | null = null;
+    const sendPing = (socket: WebSocket) => {
+      if (socket.readyState !== WebSocket.OPEN) return;
+      pingSentAt = Date.now();
+      socket.send(JSON.stringify({ type: 'ping' }));
+    };
+
     const applySnapshot = (next: MirrorSnapshot) => {
-      const receivedAt = Date.now();
+      const receivedAt = Date.now() - (next.isRunning ? latency.oneWayMs() : 0);
       snapshotRef.current = { snapshot: next, receivedAt };
       setSnapshot(next);
       setLastSnapshotAt(receivedAt);
@@ -296,10 +306,9 @@ export function useDisplayMirror(room: string) {
         setError(null);
         setLiveSince(Date.now());
         setNow(Date.now());
+        if (ws) sendPing(ws);
         pingTimer = window.setInterval(() => {
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping' }));
-          }
+          if (ws) sendPing(ws);
         }, 10_000);
       };
       ws.onmessage = (event) => {
@@ -326,8 +335,13 @@ export function useDisplayMirror(room: string) {
             setStatus('error');
             setError(message.message);
             break;
-          case 'push_ok':
           case 'pong':
+            if (pingSentAt !== null) {
+              latency.addRoundTrip(Date.now() - pingSentAt);
+              pingSentAt = null;
+            }
+            break;
+          case 'push_ok':
             break;
           default: {
             const exhaustive: never = message;

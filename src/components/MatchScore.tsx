@@ -35,9 +35,11 @@ export function MatchScore({
   showNames = false,
 }: MatchScoreProps) {
   const winner = matchWinner(match, match.targetScore);
+  // Compact (télécommande) : 2 lignes par côté, « − score + » puis « blanche · F · +F » ; −F via Annuler.
+  const compact = size === 'compact' && Boolean(controls);
   const sides: Array<{ player: PlayerId; name: string; color: string }> = [
-    { player: 1, name: displayPlayerName(p1Name, 1), color: p1Color },
-    { player: 2, name: displayPlayerName(p2Name, 2), color: p2Color },
+    { player: 1, name: displayPlayerName(p1Name, 1, match.sides), color: p1Color },
+    { player: 2, name: displayPlayerName(p2Name, 2, match.sides), color: p2Color },
   ];
 
   return (
@@ -48,6 +50,24 @@ export function MatchScore({
       {sides.map(({ player, name, color }) => {
         const isBreaker = match.breaker === player;
         const won = winner === player;
+        const ball = match.showBreaker ? (
+          controls ? (
+            <button
+              type="button"
+              className={`match-ball${isBreaker ? ' active' : ''}`}
+              aria-label={isBreaker ? `${name} casse (appuyer pour inverser)` : `Donner la casse à ${name}`}
+              aria-pressed={isBreaker}
+              onClick={controls.onToggleBreaker}
+            />
+          ) : (
+            <span
+              className={`match-ball${isBreaker ? ' active' : ''}`}
+              role={isBreaker ? 'img' : undefined}
+              aria-label={isBreaker ? `${name} casse` : undefined}
+              aria-hidden={isBreaker ? undefined : true}
+            />
+          )
+        ) : null;
         return (
           <div
             key={player}
@@ -55,25 +75,9 @@ export function MatchScore({
             style={{ borderColor: won ? color : undefined }}
           >
             {showNames ? <p className="match-name">{name}</p> : null}
+            {controls && !compact && ball ? <div className="match-ball-row">{ball}</div> : null}
             <div className="match-main">
-              {match.showBreaker ? (
-                controls ? (
-                  <button
-                    type="button"
-                    className={`match-ball${isBreaker ? ' active' : ''}`}
-                    aria-label={isBreaker ? `${name} casse (appuyer pour inverser)` : `Donner la casse à ${name}`}
-                    aria-pressed={isBreaker}
-                    onClick={controls.onToggleBreaker}
-                  />
-                ) : (
-                  <span
-                    className={`match-ball${isBreaker ? ' active' : ''}`}
-                    role={isBreaker ? 'img' : undefined}
-                    aria-label={isBreaker ? `${name} casse` : undefined}
-                    aria-hidden={isBreaker ? undefined : true}
-                  />
-                )
-              ) : null}
+              {controls ? null : ball}
               {controls ? (
                 <button
                   type="button"
@@ -98,9 +102,10 @@ export function MatchScore({
                 </button>
               ) : null}
             </div>
-            {match.showFerme ? (
+            {match.showFerme || (compact && match.showBreaker) ? (
               <div className="match-ferme-row">
-                {controls ? (
+                {compact ? ball : null}
+                {controls && !compact && match.showFerme ? (
                   <button
                     type="button"
                     className="match-ferme-step"
@@ -110,10 +115,12 @@ export function MatchScore({
                     −
                   </button>
                 ) : null}
-                <span className="match-ferme" aria-label={`Casses fermes ${name}`}>
-                  <abbr title="Casses fermes">F</abbr> {match.fermes[player]}
-                </span>
-                {controls ? (
+                {match.showFerme ? (
+                  <span className="match-ferme" aria-label={`Casses fermes ${name}`}>
+                    <abbr title="Casses fermes">F</abbr> {match.fermes[player]}
+                  </span>
+                ) : null}
+                {controls && match.showFerme ? (
                   <button
                     type="button"
                     className="match-ferme-step"

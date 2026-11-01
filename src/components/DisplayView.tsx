@@ -77,9 +77,6 @@ export function DisplayView({ room }: DisplayViewProps) {
     <main
       id="app"
       className={`display-root display-layout-${config?.displayLayout ?? 'timer'}${flashClass ? ` ${flashClass}` : ''}`}
-      onClick={() => {
-        void toggle();
-      }}
       aria-label="H8timer — écran Visuel en miroir"
     >
       <h1 className="visually-hidden">H8timer — Écran Visuel (miroir de la télécommande)</h1>
@@ -91,6 +88,16 @@ export function DisplayView({ room }: DisplayViewProps) {
         >
           {statusLabel}
         </span>
+        <button
+          type="button"
+          className="display-fullscreen-btn"
+          aria-pressed={isFullscreen}
+          onClick={() => {
+            void toggle();
+          }}
+        >
+          {isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+        </button>
         {keepAwake !== 'off' ? (
           <span className={`display-awake display-awake-${keepAwake}`} role="status">
             {keepAwakeLabel(keepAwake)}
@@ -105,6 +112,7 @@ export function DisplayView({ room }: DisplayViewProps) {
             seat={1}
             active={snapshot?.currentPlayer === 1}
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[1])}
+            sides={snapshot?.match?.sides}
           />
           <PlayerStatus
             name={config.p2Name}
@@ -112,6 +120,7 @@ export function DisplayView({ room }: DisplayViewProps) {
             seat={2}
             active={snapshot?.currentPlayer === 2}
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[2])}
+            sides={snapshot?.match?.sides}
           />
         </div>
       ) : null}
@@ -140,7 +149,7 @@ export function DisplayView({ room }: DisplayViewProps) {
           ? 'Écran Visuel — lecture seule. Attendez Sync OK (les commandes sont sur la télécommande).'
           : isFullscreen
             ? 'Affichage miroir — lecture seule'
-            : 'Appui : plein écran — lecture seule'}
+            : 'Bouton « Plein écran » en haut — lecture seule'}
       </p>
     </main>
   );

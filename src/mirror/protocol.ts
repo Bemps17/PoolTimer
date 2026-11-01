@@ -38,6 +38,8 @@ export interface MirrorMatch {
   targetScore: number;
   showFerme: boolean;
   showBreaker: boolean;
+  /** Absent = joueurs (rétro-compatible). */
+  sides?: 'teams';
 }
 
 export interface MirrorSnapshot {
@@ -176,6 +178,7 @@ export function toMirrorMatch(match: MatchState, options: MatchOptions): MirrorM
     targetScore: options.targetScore,
     showFerme: options.showFerme,
     showBreaker: options.showBreaker,
+    ...(options.sides === 'teams' ? { sides: 'teams' as const } : {}),
   };
 }
 
@@ -295,6 +298,7 @@ export function parseMirrorMatch(raw: unknown): MirrorMatch | undefined {
     targetScore: target,
     showFerme: value.showFerme !== false,
     showBreaker: value.showBreaker !== false,
+    ...(value.sides === 'teams' ? { sides: 'teams' as const } : {}),
   };
 }
 

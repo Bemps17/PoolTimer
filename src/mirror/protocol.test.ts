@@ -315,3 +315,17 @@ describe('mirror protocol — mise en page de l’écran Visuel', () => {
     expect(parseSnapshot(wire)).toBeDefined();
   });
 });
+
+describe('mirror protocol — mode équipe', () => {
+  const config = getDefaultConfig();
+  const state = createInitialState(config);
+
+  it('carries "teams" to the Visual screen and through the relay; players stays implicit', () => {
+    const match = createMatch({ lagAtStart: false });
+    const teams = buildSnapshot(state, { ...config, matchOptions: { ...config.matchOptions, sides: 'teams' } }, 1, match);
+    expect(parseSnapshot(JSON.parse(JSON.stringify(teams)))?.match?.sides).toBe('teams');
+    const players = buildSnapshot(state, config, 1, match);
+    expect(parseSnapshot(JSON.parse(JSON.stringify(players)))?.match?.sides).toBeUndefined();
+    expect(parseMirrorMatch({ ...players.match, sides: 'aliens' })?.sides).toBeUndefined();
+  });
+});

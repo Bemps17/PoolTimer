@@ -130,6 +130,11 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 | Latence / perte de WebSocket en salle | Déjà géré (reconnexion, `seq`) ; le score doit être idempotent (envoyer l'état complet, pas des « +1 ») — c'est le cas avec le snapshot complet |
 | Vue télécommande dupliquant `Scoreboard` | Extraire hooks de gestes avant la phase 2 |
 
+## Audit post-3.0 (v3.0.1 → v3.1.0) — ✅ fait
+
+Quota d'écritures Cloudflare, repli audio, découpage du code, cibles tactiles 44 px, onglets de réglages, plein écran dédié, latence, score → chrono, historique et fin de match, mode équipe, E2E en CI.
+Non retenu pour l'instant : secret de salle hors URL (logs Cloudflare désactivés, changement de protocole coordonné requis), internationalisation, codes de partage courts.
+
 ## WIP — Score automatique depuis CueScore
 
 En attente. Objectif : récupérer le score d'un match CueScore au lieu de le saisir (réglage « Source du score : Manuelle / CueScore », manuel par défaut).

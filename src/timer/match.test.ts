@@ -156,6 +156,14 @@ describe('validation des données stockées', () => {
 
   it('sanitizes options', () => {
     const o = mergeMatchOptions({ enabled: false, lagAtStart: true, targetScore: 9999, showFerme: 'x', showBreaker: false });
-    expect(o).toEqual({ enabled: false, lagAtStart: true, targetScore: 500, showFerme: true, showBreaker: false });
+    expect(o).toEqual({
+      enabled: false,
+      lagAtStart: true,
+      targetScore: 500,
+      showFerme: true,
+      showBreaker: false,
+      sides: 'players',
+      frameRestartsTimer: true,
+    });
   });
 });

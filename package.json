@@ -1,7 +1,7 @@
 {
   "name": "pool-timer",
   "private": true,
-  "version": "3.0.1",
+  "version": "3.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,8 @@
     "test:mirror": "node scripts/mirror-probe.mjs",
     "icons": "node scripts/generate-icons.mjs",
     "sounds": "node scripts/generate-original-sounds.mjs",
-    "mirror:dev": "wrangler dev --config worker/wrangler.jsonc --port 8787"
+    "mirror:dev": "wrangler dev --config worker/wrangler.jsonc --port 8787",
+    "test:e2e": "node e2e/remote-to-display.e2e.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "jsdom": "^30.1.3",
+    "playwright": "1.63.0",
     "sharp": "^0.34.1",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",

@@ -23,6 +23,12 @@ describe('intégration continue (GitHub Actions)', () => {
     expect(yml).toContain('npm run test:mirror');
   });
 
+  it('runs the end-to-end scenario (remote → relay → Visual screen → OBS overlay) in a browser', () => {
+    const yml = readFileSync(path, 'utf8');
+    expect(yml).toContain('npx playwright install --with-deps chromium');
+    expect(yml).toContain('npm run test:e2e');
+  });
+
   it('never grants more than read access to the repository', () => {
     const yml = readFileSync(path, 'utf8');
     expect(yml).toMatch(/permissions:\s*\n\s*contents:\s*read/);
