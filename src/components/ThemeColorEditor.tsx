@@ -6,6 +6,7 @@ import {
   type ThemeColorGroup,
   type ThemeColorKey,
 } from '../timer/theme';
+import { themeContrastIssues } from '../timer/contrast';
 import type { ThemeColors } from '../timer/types';
 
 interface ThemeColorEditorProps {
@@ -16,8 +17,22 @@ interface ThemeColorEditorProps {
 const GROUP_ORDER: ThemeColorGroup[] = ['tableau', 'chrono', 'commandes', 'reglages'];
 
 export function ThemeColorEditor({ colors, onChange }: ThemeColorEditorProps) {
+  const issues = themeContrastIssues(colors);
   return (
     <div className="theme-color-editor" aria-label="Couleurs par zone">
+      {issues.length > 0 ? (
+        <div className="contrast-warning" role="alert">
+          <strong>Attention : contraste insuffisant</strong>
+          <ul>
+            {issues.map((issue) => (
+              <li key={issue.key}>
+                {issue.label} : {issue.ratio.toFixed(1).replace('.', ',')}:1 (minimum {String(issue.min).replace('.', ',')}:1)
+              </li>
+            ))}
+          </ul>
+          <span>Le chrono risque d’être illisible dans une salle éclairée.</span>
+        </div>
+      ) : null}
       {GROUP_ORDER.map((group) => {
         const zones = THEME_COLOR_ZONES.filter((zone) => zone.group === group);
         return (

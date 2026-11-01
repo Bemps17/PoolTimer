@@ -80,6 +80,9 @@ export type MirrorErrorCode =
   | 'unauthorized'
   | 'bad_push'
   | 'stale_seq'
+  | 'too_large'
+  | 'rate_limited'
+  | 'room_full'
   | 'unknown';
 
 export const WS_CLOSE_ROOM_BUSY = 4009;
@@ -399,6 +402,9 @@ function asErrorCode(value: unknown): MirrorErrorCode {
     case 'unauthorized':
     case 'bad_push':
     case 'stale_seq':
+    case 'too_large':
+    case 'rate_limited':
+    case 'room_full':
     case 'unknown':
       return value;
     default:

@@ -112,7 +112,7 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 5. Boutons « Partager » sur chaque preset / thème personnalisé ; thèmes personnalisés nommés et sauvegardés (aujourd'hui une seule palette éditable, pas de bibliothèque).
 6. *(Optionnel, si besoin réel)* codes courts via Worker + KV (option C) avec limite de débit.
 
-### Phase 5 — Finitions pour « application terminée » (v3.0.0)
+### Phase 5 — Finitions pour « application terminée » (v3.0.0) — ✅ fait (salle persistante, relais durci, contrastes, diapositives, CI, tests UI ; restent : E2E Playwright en CI, codes courts KV)
 - Mode **sync préférences par salle** : proposer à l'écran Visuel d'adopter l'apparence de la télécommande (déjà le cas) ou la sienne.
 - Sécurité du relais : limite de taille des messages et débit côté Worker, CORS restreint au domaine de prod, salle plus longue qu'un `sessionStorage` (persister en `localStorage` pour survivre à la fermeture de la PWA).
 - Accessibilité : contrastes des thèmes personnalisés (avertissement si contraste chrono/fond insuffisant), tailles de cibles ≥ 48 px, `aria-live` sur le score.

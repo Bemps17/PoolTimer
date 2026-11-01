@@ -122,8 +122,8 @@ export function StreamSettings({ room, onCopied }: StreamSettingsProps) {
             Copier le lien overlay
           </button>
           <p className="install-hint">
-            Le lien dépend de la salle miroir : si vous fermez la salle et en ouvrez une nouvelle, il faut recopier le
-            lien dans OBS.
+            La salle est conservée sur cet appareil, même si vous fermez l’application : le lien OBS reste valable tant
+            que vous n’utilisez pas « Fermer la salle ».
           </p>
         </>
       ) : (

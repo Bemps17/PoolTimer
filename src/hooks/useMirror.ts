@@ -138,6 +138,9 @@ export function useControllerMirror({ enabled, state, config, match }: UseContro
               if (message.code === 'room_busy' || message.code === 'unauthorized') {
                 markFatal(message.message);
                 wsSafeClose(ws);
+              } else if (message.code === 'rate_limited') {
+                // Le dernier état a pu être freiné : le renvoyer pour que l'écran ne reste pas en retard.
+                window.setTimeout(sendSnapshot, 700);
               }
               break;
             case 'snapshot':

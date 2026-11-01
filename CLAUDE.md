@@ -7,7 +7,7 @@ Chronomètre de tir (shot clock) billard / Blackball FFB, PWA React. Langue de l
 ```bash
 npm ci                # installer
 npm run dev           # Vite (http://localhost:5173)
-npm test              # vitest run (25 fichiers, ~150 tests, doit rester vert)
+npm test              # vitest run (tests unitaires + composants jsdom, doit rester vert)
 npx tsc -b            # typecheck (fait aussi partie de `npm run build`)
 npm run build         # tsc -b && vite build -> dist/
 npm run mirror:dev    # Worker Cloudflare local (ws://localhost:8787), .env.development le cible
@@ -58,13 +58,14 @@ Contrôleur (téléphone) → `push {seq, snapshot}` → Durable Object → `sna
 - **Audio** : tout son (fichiers `HTMLAudioElement`, imports, synthés Tone) doit passer par la chaîne maître de `toneAudio.ts` (volume → gain → limiteur -1 dBFS) via `outputRoute.ts`/`loudness.ts` ; ne pas régler `audio.volume` directement ni lire `config.volume` (utiliser `effectiveVolumeDb`). Un élément routé dépend du `AudioContext` (relancé sur `visibilitychange` / `pointerdown`).
 - Pas de sons ou d'assets sous droits (Voicemod, Illumination…) dans le dépôt.
 - Chaque évolution visible : bump `package.json` + entrée dans `src/changelog.ts` + `CHANGELOG.md` (des tests `changelog.test.ts` / `seo.test.ts` vérifient la cohérence).
-- Tests d'UI : composants non testés aujourd'hui ; garder la logique testable dans des modules purs (cf. `screenTap.ts`, `syncStatus.ts`).
+- **TDD** : test d'abord (rouge), puis code (vert). Logique dans des modules purs testés ; composants testés avec Testing Library (`// @vitest-environment jsdom` en tête de fichier `.test.tsx`). Le Worker se vérifie avec `npm run test:mirror` (limites, origines, inondation). La CI GitHub (`.github/workflows/ci.yml`) rejoue typecheck + tests + build + sonde.
+- **Relais** : tout nouveau garde-fou va dans `mirror/limits.ts` (pur, testé) avant d'être branché dans `worker/src/index.ts`.
 
 ## Pièges connus
 
 - `competitionMode` est une union fermée (`ffb | fbep | ffbTdTn | ffbMaster`) **recalculée** par `detectCompetitionMode` à chaque `mergeConfig`. Les presets personnalisés vivent à part (`timer/presets.ts`, clé `h8timer.presets`) : un preset actif est détecté par égalité des temps (`matchesPreset`), jamais stocké dans la config.
 - `Theme` est aussi une union fermée, dupliquée dans `protocol.ts` (`parseDisplayConfig`) : l'étendre aux deux endroits.
-- La salle miroir (code + secret) vit en `sessionStorage` : fermer l'onglet/PWA perd la salle côté contrôleur.
+- La salle miroir (code + secret) est conservée en `localStorage` (`mirror/storage.ts`, migration depuis `sessionStorage`) : le lien OBS survit à la fermeture ; seul « Fermer la salle » l'efface.
 - Le Worker supprime les salles après ~2 h sans connexion (alarm DO).
 - Les snapshots sont renvoyés toutes les 2 s tant que le chrono tourne, et à chaque changement de `config` (toute modif de réglage est poussée).
 

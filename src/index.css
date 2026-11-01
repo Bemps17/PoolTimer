@@ -45,6 +45,7 @@ body.theme-light {
     --c-text-secondary: #555;
     --c-border: #aaa;
     --c-digit-default: #333333;
+    --c-digit-warning: #c25700;
     --c-panel-bg: #f5f5f5;
     --c-panel-header-border: #ddd;
     --c-panel-input-bg: #fff;
@@ -1531,3 +1532,12 @@ html.overlay-bg-chroma body { background: #00ff00 !important; }
     resize: vertical;
 }
 .import-error { color: var(--c-digit-critical); }
+.contrast-warning {
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--c-digit-warning);
+    background: color-mix(in srgb, var(--c-digit-warning) 14%, var(--c-panel-input-bg));
+    color: var(--c-panel-text-primary);
+    font-size: 0.85rem;
+}
+.contrast-warning ul { margin: 0.25rem 0; padding-left: 1.1rem; }

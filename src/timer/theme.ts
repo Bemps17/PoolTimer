@@ -157,6 +157,8 @@ const LIGHT: ThemeColors = {
   textSecondary: '#555555',
   border: '#aaaaaa',
   digitDefault: '#333333',
+  // Orange foncé : #ff8c00 sur blanc n'atteignait que 2,3:1 (seuil WCAG 3:1 pour de grands chiffres).
+  digitWarning: '#c25700',
   panelBg: '#f5f5f5',
   panelHeaderBorder: '#dddddd',
   panelInputBg: '#ffffff',

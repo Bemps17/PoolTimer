@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img">
+  <rect width="360" height="240" rx="16" fill="#1f2128"/>
+  <text x="24" y="32" fill="#e1e3e8" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="start">Streaming OBS / Streamlabs</text>
+  <rect x="24" y="48" width="312" height="52" rx="8" fill="#111" stroke="#3498db"/>
+  <text x="40" y="80" fill="#e1e3e8" font-family="sans-serif" font-size="14" text-anchor="start">pooltimer.vercel.app/o/AB3K7Q</text>
+  <path d="M180 108 v18" stroke="#ff8c00" stroke-width="3"/>
+  <path d="M180 134 l-9 -14 h18 z" fill="#ff8c00"/>
+  <rect x="24" y="142" width="312" height="62" rx="8" fill="#0a0a0a" stroke="#2f3340"/>
+  <text x="110" y="186" fill="#e0e0e0" font-family="sans-serif" font-size="40" font-weight="800" text-anchor="middle">45</text>
+  <text x="250" y="176" fill="#3498db" font-family="sans-serif" font-size="22" font-weight="800" text-anchor="middle">3 - 1</text>
+  <text x="250" y="196" fill="#8b949e" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">F 0 · F 2</text>
+  <text x="24" y="222" fill="#8b949e" font-family="sans-serif" font-size="12" text-anchor="start">Source Navigateur, fond transparent, lecture seule</text>
+</svg>

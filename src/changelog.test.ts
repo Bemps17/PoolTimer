@@ -12,8 +12,12 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/partage/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/écran toujours allumé/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/salle miroir persistante/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/contraste/i);
+
+    const sharing = CHANGELOG.find((entry) => entry.version === '2.11.0');
+    expect(sharing?.notes.join(' ')).toMatch(/partage/i);
+    expect(sharing?.notes.join(' ')).toMatch(/écran toujours allumé/i);
 
     const loud = CHANGELOG.find((entry) => entry.version === '2.10.1');
     expect(loud?.notes.join(' ')).toMatch(/volume maximum|Maximum/i);

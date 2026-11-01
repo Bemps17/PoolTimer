@@ -2,6 +2,14 @@
 
 Toutes les dates sont en UTC.
 
+## 3.0.0 — 2026-11-01
+
+- **Salle miroir persistante** (`localStorage`, migration depuis la session) : le lien de l’écran Visuel et l’overlay OBS survivent à la fermeture de l’app ; « Fermer la salle » l’efface.
+- **Relais durci** : liste d’origines autorisées (production, aperçus Vercel du projet, localhost, `ALLOWED_ORIGINS` optionnel), messages ≤ 32 Ko, débit limité (seau à jetons), 40 écrans max par salle, nouveaux codes d’erreur `too_large` / `rate_limited` / `room_full`. **Redéployer le Worker** (`cd worker && npx wrangler deploy`).
+- **Accessibilité** : alerte de contraste WCAG dans l’éditeur de couleurs ; thème Clair : orange d’alerte du chrono foncé (2,3:1 → > 4:1).
+- **Tutoriel** : diapositives scoreur, streaming, partage.
+- **Qualité** : CI GitHub Actions (typecheck, tests, build, sonde du relais), tests d’interface (Testing Library).
+
 ## 2.11.0 — 2026-11-01
 
 - **Partage** de presets et de thèmes personnalisés par **lien (`#h8=…`), QR code ou fichier** `.h8preset.json` ; option « inclure mon apparence » (bundle). Format versionné `h8:1`, taille bornée, valeurs clampées, **confirmation + aperçu avant tout import** (⚙️ → Partage & import, ou ouverture directe du lien).

@@ -40,6 +40,9 @@ export default defineConfig({
         'tutorial/slide-reglages.svg',
         'tutorial/slide-miroir-remote.svg',
         'tutorial/slide-miroir-visuel.svg',
+        'tutorial/slide-score.svg',
+        'tutorial/slide-streaming.svg',
+        'tutorial/slide-partage.svg',
       ],
       manifest: {
         name: 'H8timer',

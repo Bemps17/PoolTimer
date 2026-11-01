@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.11.0';
+export const APP_VERSION = '3.0.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.0.0',
+    date: '2026-11-01',
+    title: 'H8timer 3.0 : fiabilité, sécurité et accessibilité',
+    notes: [
+      'Salle miroir persistante : le code et le secret sont conservés sur l’appareil, donc le lien de l’écran Visuel et l’overlay OBS restent valables après fermeture de l’application. « Fermer la salle » l’efface.',
+      'Relais plus sûr : origines autorisées (production, aperçus Vercel, localhost), messages limités à 32 Ko, débit de la télécommande limité, 40 écrans maximum par salle. Les rafales sont renvoyées automatiquement. Worker Cloudflare à redéployer.',
+      'Accessibilité : alerte de contraste (WCAG) dans l’éditeur de couleurs quand le chrono ou le menu deviennent illisibles ; couleur d’alerte du thème Clair corrigée (2,3:1 → plus de 4:1).',
+      'Tutoriel : trois nouvelles diapositives (scoreur, streaming OBS / Streamlabs, partage).',
+      'Qualité : intégration continue GitHub Actions (typecheck, tests, build, sonde du relais) et tests d’interface (scoreur, tirage, import, contraste).',
+    ],
+  },
   {
     version: '2.11.0',
     date: '2026-11-01',

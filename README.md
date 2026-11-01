@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.11.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **3.0.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -107,7 +107,9 @@ npx wrangler deploy
 
 Puis copier l’URL `https://h8timer-mirror.<compte>.workers.dev` dans `VITE_MIRROR_WS_URL` (le client ajoute `/ws`).
 
-Salles éphémères : une télécommande par code, écrans en lecture seule, snapshot renvoyé aux retards / reconnexions, expiration ~2 h d’inactivité.
+Salles éphémères côté relais : une télécommande par code, écrans en lecture seule, snapshot renvoyé aux retards / reconnexions, expiration ~2 h d’inactivité. Côté téléphone, le code de salle est **conservé** (même code après fermeture de l’app, donc lien OBS stable) jusqu’à « Fermer la salle ».
+
+**Garde-fous du relais** : origines autorisées (production, aperçus Vercel `pooltimer-…-bemps17s-projects.vercel.app`, localhost ; ajouter d’autres origines via la variable Worker `ALLOWED_ORIGINS`, séparées par des virgules), messages ≤ 32 Ko, débit limité, 40 écrans max par salle. `npm run test:mirror` vérifie ces limites.
 
 Après un correctif du Worker (ex. 2.5.3, relais `push`), **redéployer** est obligatoire : l’app Vercel ne suffit pas, le Durable Object tourne sur Cloudflare.
 

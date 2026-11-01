@@ -55,6 +55,14 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             </li>
           </ul>
 
+          <h3>Salle permanente</h3>
+          <ul>
+            <li>
+              Le code de salle est conservé sur le téléphone : même après avoir fermé l’application, le lien de l’écran
+              Visuel et l’overlay OBS restent valables. « Fermer la salle » efface le code.
+            </li>
+          </ul>
+
           <h3>Streaming (OBS / Streamlabs)</h3>
           <ul>
             <li>

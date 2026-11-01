@@ -6,6 +6,7 @@
  *   MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror
  */
 import { spawn } from 'node:child_process';
+import http from 'node:http';
 import { once } from 'node:events';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -112,6 +113,33 @@ function openClient(url) {
   return { ws, opened, closed, next, inbox };
 }
 
+/** Ouvre un upgrade WebSocket brut avec une Origin donnée et renvoie le statut HTTP (101 si accepté). */
+function upgradeStatus(baseUrl, params, origin) {
+  const url = new URL(wsUrl(baseUrl, params).replace(/^ws/, 'http'));
+  return new Promise((resolve, reject) => {
+    const request = http.request(url, {
+      headers: {
+        Connection: 'Upgrade',
+        Upgrade: 'websocket',
+        'Sec-WebSocket-Version': '13',
+        'Sec-WebSocket-Key': Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64'),
+        Origin: origin,
+      },
+    });
+    request.on('upgrade', (_response, socket) => {
+      socket.destroy();
+      resolve(101);
+    });
+    request.on('response', (response) => {
+      response.resume();
+      resolve(response.statusCode);
+    });
+    request.on('error', reject);
+    request.setTimeout(8_000, () => reject(new Error('upgrade timeout')));
+    request.end();
+  });
+}
+
 async function probe(baseUrl) {
   const room = roomCode();
   const secret = 'probe-secret-0001';
@@ -161,6 +189,26 @@ async function probe(baseUrl) {
     }),
   ]);
   if (busyError.code !== 'room_busy') throw new Error(`expected room_busy, got ${JSON.stringify(busyError)}`);
+
+  // Message démesuré : refusé sans casser la connexion.
+  controller.ws.send(JSON.stringify({ type: 'push', seq: 3, snapshot: { ...SNAPSHOT, junk: 'x'.repeat(40_000) } }));
+  const tooLarge = await controller.next((message) => message.type === 'error' && message.code === 'too_large');
+  if (!tooLarge.message) throw new Error('too_large missing message');
+
+  // Origine étrangère : refusée avant l'upgrade ; origine de production : acceptée.
+  const foreign = await upgradeStatus(baseUrl, { room, role: 'display' }, 'https://evil.example');
+  if (foreign !== 403) throw new Error(`foreign origin expected 403, got ${foreign}`);
+  const own = await upgradeStatus(baseUrl, { room, role: 'display' }, 'https://pooltimer.vercel.app');
+  if (own !== 101) throw new Error(`production origin expected 101, got ${own}`);
+
+  // Inondation : la télécommande est freinée (rate_limited), le relais reste vivant.
+  for (let seq = 10; seq < 140; seq += 1) {
+    controller.ws.send(JSON.stringify({ type: 'push', seq, snapshot: SNAPSHOT }));
+  }
+  const limited = await controller.next((message) => message.type === 'error' && message.code === 'rate_limited');
+  if (!limited.message) throw new Error('rate_limited missing message');
+  controller.ws.send(JSON.stringify({ type: 'ping' }));
+  await controller.next((message) => message.type === 'pong');
 
   display.ws.close();
   controller.ws.close();

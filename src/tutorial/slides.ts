@@ -2,6 +2,9 @@ import { publicAssetUrl } from './assetUrl';
 import slideAccueil from './assets/slide-accueil.svg?url';
 import slideDouble from './assets/slide-double.svg?url';
 import slideJoueurs from './assets/slide-joueurs.svg?url';
+import slidePartage from './assets/slide-partage.svg?url';
+import slideScore from './assets/slide-score.svg?url';
+import slideStreaming from './assets/slide-streaming.svg?url';
 import slideMiroirRemote from './assets/slide-miroir-remote.svg?url';
 import slideMiroirVisuel from './assets/slide-miroir-visuel.svg?url';
 import slideReglages from './assets/slide-reglages.svg?url';
@@ -16,7 +19,10 @@ export type TutorialSlideId =
   | 'temps'
   | 'reglages'
   | 'miroir-remote'
-  | 'miroir-visuel';
+  | 'miroir-visuel'
+  | 'score'
+  | 'streaming'
+  | 'partage';
 
 export interface TutorialSlide {
   id: TutorialSlideId;
@@ -39,6 +45,9 @@ const SLIDE_ASSETS: Record<TutorialSlideId, { fileName: string; bundled: string 
   reglages: { fileName: 'slide-reglages.svg', bundled: slideReglages },
   'miroir-remote': { fileName: 'slide-miroir-remote.svg', bundled: slideMiroirRemote },
   'miroir-visuel': { fileName: 'slide-miroir-visuel.svg', bundled: slideMiroirVisuel },
+  score: { fileName: 'slide-score.svg', bundled: slideScore },
+  streaming: { fileName: 'slide-streaming.svg', bundled: slideStreaming },
+  partage: { fileName: 'slide-partage.svg', bundled: slidePartage },
 };
 
 function slideImages(id: TutorialSlideId): Pick<TutorialSlide, 'image' | 'imageFallback' | 'fileName'> {
@@ -106,5 +115,26 @@ export const TUTORIAL_SLIDES: TutorialSlide[] = [
     caption: 'Sur la tablette ou la TV, ouvrez pooltimer.vercel.app puis scannez le QR (ou /d/CODE). Attendez Sync OK, puis lancez le match depuis la télécommande.',
     alt: 'Télécommande liée à un grand écran Visuel, Sync OK',
     ...slideImages('miroir-visuel'),
+  },
+  {
+    id: 'score',
+    title: 'Scoreur 1 contre 1',
+    caption: 'Score de chaque joueur avec + et −. La blanche indique qui casse : appui dessus pour inverser. F = casses fermes, un compteur séparé du score, en plus petit.',
+    alt: 'Scoreur avec bille blanche sur le casseur et compteurs F',
+    ...slideImages('score'),
+  },
+  {
+    id: 'streaming',
+    title: 'Streaming OBS / Streamlabs',
+    caption: 'Ouvrez une salle, puis ⚙️ → Streaming : copiez le lien overlay dans une source Navigateur d’OBS ou Streamlabs. Fond transparent, chrono et score au choix.',
+    alt: 'Lien overlay collé dans OBS avec chrono et score sur fond transparent',
+    ...slideImages('streaming'),
+  },
+  {
+    id: 'partage',
+    title: 'Partager presets et thèmes',
+    caption: 'Sur un preset ou un thème personnalisé : Partager. Lien, QR ou fichier ; le destinataire voit un aperçu et doit confirmer avant tout import.',
+    alt: 'Preset partagé par QR code vers un autre téléphone',
+    ...slideImages('partage'),
   },
 ];

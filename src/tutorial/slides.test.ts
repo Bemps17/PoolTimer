@@ -5,11 +5,13 @@ import { TUTORIAL_SLIDES } from './slides';
 
 describe('tutorial slides', () => {
   it('covers the main timer and the mirror remote / visual pair', () => {
-    expect(TUTORIAL_SLIDES.length).toBeGreaterThanOrEqual(8);
+    expect(TUTORIAL_SLIDES.length).toBeGreaterThanOrEqual(11);
     const ids = TUTORIAL_SLIDES.map((slide) => slide.id);
     expect(ids).toContain('accueil');
     expect(ids).toContain('miroir-remote');
     expect(ids).toContain('miroir-visuel');
+    // Fonctions ajoutées en 2.8 – 2.11 : chaque nouveauté visible a sa diapositive.
+    for (const id of ['score', 'streaming', 'partage']) expect(ids).toContain(id);
     for (const slide of TUTORIAL_SLIDES) {
       expect(slide.title.length).toBeGreaterThan(3);
       expect(slide.caption.length).toBeGreaterThan(20);
@@ -37,5 +39,20 @@ describe('tutorial slides', () => {
       const forbidden = [...bytes].filter((code) => code < 32 && code !== 9 && code !== 10 && code !== 13);
       expect(forbidden, slide.fileName).toEqual([]);
     }
+  });
+
+  it('explains the scoreur (white ball, F counter), the OBS overlay and sharing', () => {
+    const caption = (id: string) => TUTORIAL_SLIDES.find((slide) => slide.id === id)?.caption ?? '';
+    expect(caption('score')).toMatch(/blanche/i);
+    expect(caption('score')).toMatch(/casses? fermes?|F/);
+    expect(caption('streaming')).toMatch(/OBS|Streamlabs/);
+    expect(caption('streaming')).toMatch(/Navigateur/);
+    expect(caption('partage')).toMatch(/lien|QR/i);
+    expect(caption('partage')).toMatch(/confirm/i);
+  });
+
+  it('precaches every tutorial illustration for offline use', () => {
+    const config = readFileSync(new URL('../../vite.config.ts', import.meta.url), 'utf8');
+    for (const slide of TUTORIAL_SLIDES) expect(config, slide.fileName).toContain(`tutorial/${slide.fileName}`);
   });
 });
