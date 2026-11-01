@@ -26,9 +26,12 @@ export function FitText({ children, className, minFontPx = PLAYER_NAME_MIN_FONT_
     if (!el) return;
 
     let fittedKey = '';
+    // La clé inclut la police racine (réglage système agrandi) : sinon un changement de taille de texte ne réajusterait pas.
+    const keyOf = () =>
+      `${Math.round(el.clientWidth)}:${children}:${minFontPx}:${getComputedStyle(document.documentElement).fontSize}`;
     const fit = () => {
-      const key = `${Math.round(el.clientWidth)}:${children}:${minFontPx}`;
-      if (key === fittedKey) return;
+      const key = keyOf();
+      if (key === fittedKey && !overflows(el)) return;
 
       el.style.removeProperty('font-size');
       const maxPx = readCssFontPx(el);
@@ -85,7 +88,7 @@ export function FitText({ children, className, minFontPx = PLAYER_NAME_MIN_FONT_
         }
       }
       el.style.fontSize = `${best}px`;
-      fittedKey = `${Math.round(el.clientWidth)}:${children}:${minFontPx}`;
+      fittedKey = keyOf();
     };
 
     fit();
