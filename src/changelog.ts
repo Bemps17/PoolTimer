@@ -15,6 +15,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     notes: [
       'Onglets du menu ⚙️ renommés en libellés courts — Match · Écran · Thème · Son · Plus — pour ne plus déborder ni se chevaucher sur les petits téléphones, même avec une grande taille de police système.',
       'Icônes vectorielles modernes (style Lucide) à la place des emojis.',
+      'Noms des joueurs toujours sur une seule ligne, à l’accueil comme dans les réglages : la police se réduit pour que le nom tienne en entier au lieu d’être coupé. Le mot « modifier » devient une icône crayon.',
     ],
   },
   {

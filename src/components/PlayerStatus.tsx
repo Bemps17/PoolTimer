@@ -37,7 +37,9 @@ export function PlayerStatus({ name, color, active, extensionUsed, seat, onSelec
           : { borderColor: 'transparent', boxShadow: 'none' }
       }
     >
-      <FitText className="player-name">{shown}</FitText>
+      <FitText className="player-name" singleLine>
+        {shown}
+      </FitText>
       <span className={`ext-status ${extensionUsed ? 'ext-used' : 'ext-available'}`}>EXT</span>
     </div>
   );

@@ -19,6 +19,7 @@ import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../time
 import { previewAlertSound } from '../audio/toneAudio';
 import type { VolumeMode } from '../audio/loudness';
 import { dbToGain, gainToDb } from '../timer/volume';
+import { FitText } from './FitText';
 import { NumberStepper, VolumeSlider } from './NumberStepper';
 import { SegmentedField, SettingsCard, SettingsDisclosure, ToggleField } from './SettingsControls';
 import { ImportPanel } from './ImportPanel';
@@ -296,7 +297,9 @@ export function SettingsPanel({
                 onClick={() => selectTab(entry.id)}
               >
                 <entry.Icon className="settings-tab-icon" aria-hidden size={20} strokeWidth={1.75} />
-                <span className="settings-tab-label">{entry.label}</span>
+                <FitText className="settings-tab-label" singleLine minFontPx={8}>
+                  {entry.label}
+                </FitText>
               </button>
             ))}
           </div>

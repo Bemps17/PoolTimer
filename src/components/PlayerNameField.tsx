@@ -1,3 +1,5 @@
+import { Pencil } from 'lucide-react';
+import { FitText } from './FitText';
 import { useEffect, useRef, useState } from 'react';
 import { PLAYER_NAME_MAX_LENGTH, clampPlayerNameInput, displayPlayerName, storedPlayerName } from '../timer/playerName';
 
@@ -68,10 +70,10 @@ export function PlayerNameField({
             onClick={() => setEditing(true)}
             aria-label={`Modifier le nom ${label}`}
           >
-            <span className={name.trim() ? undefined : 'name-placeholder'}>
+            <FitText className={`name-value${name.trim() ? '' : ' name-placeholder'}`} singleLine minFontPx={10}>
               {name.trim() ? name : placeholder}
-            </span>
-            <span className="name-edit-hint">modifier</span>
+            </FitText>
+            <Pencil className="name-edit-hint" aria-hidden size={18} strokeWidth={1.75} />
           </button>
         )}
         <input

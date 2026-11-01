@@ -89,6 +89,49 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
+    // Noms longs : une seule ligne, police réduite pour tenir (accueil + réglages), à 100 % et 130 %.
+    for (const fontScale of ['100%', '130%']) {
+      const names = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
+      await names.goto(APP);
+      await names.evaluate(() =>
+        localStorage.setItem(
+          'billiardTimerConfig',
+          JSON.stringify({ defaultsVersion: 2, p1Name: 'Puilboreau', p2Name: 'Delacroix-Martin' }),
+        ),
+      );
+      await names.reload();
+      await names.evaluate((scale) => (document.documentElement.style.fontSize = scale), fontScale);
+      await names.evaluate(() => document.fonts.ready);
+      await names.waitForTimeout(400);
+      const check = (selector) =>
+        names.evaluate((sel) =>
+          [...document.querySelectorAll(sel)].map((el) => {
+            const style = getComputedStyle(el);
+            const lineHeight = Number.parseFloat(style.lineHeight) || Number.parseFloat(style.fontSize) * 1.3;
+            const oneLine = el.getBoundingClientRect().height <= lineHeight * 1.5;
+            const fits = el.scrollWidth <= el.clientWidth + 1;
+            return oneLine && fits ? null : `${el.textContent} (${oneLine ? '' : 'plusieurs lignes '}${fits ? '' : 'tronqué'})`;
+          }).filter(Boolean),
+        selector);
+      const home = await check('.top-bar .player-name');
+      assert(home.length === 0, `accueil, police ${fontScale} : noms sur une ligne, entiers ${home.join(', ')}`);
+      // Réglages (pleine largeur) : même le nom le plus long autorisé (32 caractères) tient sur une ligne.
+      await names.evaluate(() => {
+        const config = JSON.parse(localStorage.getItem('billiardTimerConfig'));
+        localStorage.setItem('billiardTimerConfig', JSON.stringify({ ...config, p2Name: 'Jean-Christophe Delacroix-Martin' }));
+      });
+      await names.reload();
+      await names.evaluate((scale) => (document.documentElement.style.fontSize = scale), fontScale);
+      await names.getByRole('button', { name: 'Ouvrir le menu' }).click();
+      await names.waitForTimeout(700);
+      const settings = await check('.name-readonly .fit-single');
+      assert(settings.length === 2 && settings.every((v) => v === null) || settings.length === 0,
+        `réglages, police ${fontScale} : noms sur une ligne, entiers ${settings.join(', ')}`);
+      const count = await names.locator('.name-readonly .fit-single').count();
+      assert(count === 2, `réglages : les 2 noms utilisent l’ajustement sur une ligne (${count})`);
+      await names.context().close();
+    }
+
     // Onglets du menu ⚙️ : aucun libellé ne déborde ni ne chevauche, même avec la police système à 130 %.
     for (const fontScale of ['100%', '130%']) {
       const menu = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();

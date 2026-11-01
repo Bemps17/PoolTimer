@@ -64,3 +64,20 @@ export function computeFitFontSize(options: {
   const heightScale = contentHeight > availableHeight ? availableHeight / contentHeight : 1;
   return Math.max(minFontSize, Math.min(maxFontSize, maxFontSize * Math.min(widthScale, heightScale)));
 }
+
+/**
+ * Texte sur UNE ligne : taille de police qui fait tenir `contentWidth` (mesuré à `maxFontSize`) dans
+ * `availableWidth`, avec 2 % de marge, bornée entre min et max. Sous le minimum, l'ellipse CSS prend le relais.
+ */
+export function fitSingleLineFontSize(options: {
+  availableWidth: number;
+  contentWidth: number;
+  maxFontSize: number;
+  minFontSize: number;
+}): number {
+  const { availableWidth, contentWidth, maxFontSize, minFontSize } = options;
+  if (!(maxFontSize > 0) || !(availableWidth > 0)) return minFontSize;
+  if (!(contentWidth > 0) || contentWidth <= availableWidth) return maxFontSize;
+  const scaled = (maxFontSize * availableWidth * 0.98) / contentWidth;
+  return Math.max(minFontSize, Math.min(maxFontSize, scaled));
+}
