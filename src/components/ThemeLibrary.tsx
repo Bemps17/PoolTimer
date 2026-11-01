@@ -21,7 +21,6 @@ export function ThemeLibrary({ config, controller, onApply, onShare, onNotify }:
 
   return (
     <div className="preset-manager">
-      <h4 className="preset-manager-title">Mes thèmes</h4>
       {themes.length === 0 ? (
         <p className="install-hint">Aucun thème enregistré. Réglez vos couleurs puis enregistrez-les ci-dessous.</p>
       ) : (

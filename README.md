@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **3.2.0** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **3.3.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -12,9 +12,10 @@ Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL c
 - **Après casse** configurable (`tempsApresCasse`, 90 s / 1:30 par défaut) : bouton arbitre qui charge cette durée pour le coup en cours, puis retour au temps de base au nouveau coup, au changement de joueur ou à la nouvelle manche. Masqué en **Ultimate FBEP** (pas de temps supplémentaire après la casse).
 - Extension configurable (`tempsExtension`, +15 s par défaut FFB / FBEP) : **une fois par joueur et par manche**
 - Presets **FFB Blackball** (45s / 1:30 / +15s), **FFB TD/TN** (45s / 1:30 / +45s), **FFB Blackball Master** (30s / 1:00 / +30s) et **Ultimate FBEP** (45s / +15s, sans après casse)
-- **Vision allégée** : le chrono seul par défaut (score activable, casses fermes masquées par défaut). **Voyant de synchro** sans texte (vert / orange / rouge) et **diagnostic** avec journal `.log` (⚙️ → Appareil & partage → Diagnostic, ou appui sur le voyant de l'écran Visuel).
+- **Menu ⚙️ en 5 onglets** (Match · Affichage · Apparence · Son · Plus) : interrupteurs, choix segmentés, réglages avancés repliés. Le mode d'interface (boutons visibles / invisibles) est séparé de l'apparence (thème, couleurs).
+- **Vision allégée** : le chrono seul par défaut (score activable, casses fermes masquées par défaut). **Voyant de synchro** sans texte (vert / orange / rouge) et **diagnostic** avec journal `.log` (⚙️ → Plus → Diagnostic, ou appui sur le voyant de l'écran Visuel).
 - **Partage** de presets / thèmes par lien, QR ou fichier (aperçu et confirmation à l'import). **Écran toujours allumé** sur la télécommande et l'écran Visuel (Wake Lock + repli vidéo).
-- **Presets personnalisés** : créez vos propres presets de chronométrage (⚙️ → Compétition & temps → Mes presets), en plus des presets FFB / FBEP intégrés.
+- **Presets personnalisés** : créez vos propres presets de chronométrage (⚙️ → Match → Chrono → Mes presets), en plus des presets FFB / FBEP intégrés.
 - Deux joueurs, noms et couleurs ; thèmes Sombre / Clair / Cyberpunk / FFB / Ultimate et couleurs par zone (indépendants des presets de compétition)
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable
@@ -142,5 +143,5 @@ Pas besoin du même Wi‑Fi (sync Internet). Une seule télécommande par salle.
 
 - **Pack classique (défaut)** : alerte initiale et clics déjà dans le dépôt (`public/sound/alert-time.mp3`, `clic.mp3`), plus la cloche / les bips Tone.js.
 - **Mode Minions** : appui long sur **NEW** (ou ⚙️ → Automatisation une fois déverrouillé). Rejoue `public/sound/minions-arghh.mp3` à la première alerte orange.
-- **Pack Crétins** et **Pack Minions-like (original)** : options supplémentaires dans ⚙️ → Bibliothèque d’alertes.
-- **Import** : ⚙️ → Bibliothèque d’alertes → Importer un fichier audio. Les extraits Voicemod / « funny » doivent être téléchargés par vos soins ; l’app ne les récupère pas (droits d’auteur).
+- **Pack Crétins** et **Pack Minions-like (original)** : options supplémentaires dans ⚙️ → Son → Bibliothèque d’alertes.
+- **Import** : ⚙️ → Son → Bibliothèque d’alertes → Importer un fichier audio. Les extraits Voicemod / « funny » doivent être téléchargés par vos soins ; l’app ne les récupère pas (droits d’auteur).

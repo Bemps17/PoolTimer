@@ -130,7 +130,7 @@ async function main() {
     const classic = await uncoveredTapTargets(remote);
     assert(classic.length === 0, `scoreur grand (vue classique) sur 360 px : boutons ≥ 44 px et accessibles ${classic.join(', ')}`);
     await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
-    await remote.getByRole('tab', { name: 'Appareil & partage' }).click();
+    await remote.getByRole('tab', { name: 'Plus' }).click();
     await remote.getByText('Miroir télécommande', { exact: true }).first().click();
     await remote.getByRole('button', { name: /Ouvrir une salle/ }).click();
     await remote.waitForFunction(() => localStorage.getItem('h8timer.mirror.room'));
@@ -182,7 +182,7 @@ async function main() {
     assert(((await end.textContent()) ?? '').includes('Dupont 2 – 0 Martin'), 'fin de match : victoire et résumé partageable');
     await end.getByRole('button', { name: /Fermer/ }).click();
     await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
-    await remote.getByRole('tab', { name: 'Appareil & partage' }).click();
+    await remote.getByRole('tab', { name: 'Plus' }).click();
     await remote.getByText('Diagnostic', { exact: true }).first().click();
     const median = await remote.locator('.diagnostics-row', { hasText: 'Aller-retour médiane' }).locator('dd').textContent();
     assert(/\d+ ms/.test(median ?? ''), `diagnostic : aller-retour médian mesuré (${median})`);

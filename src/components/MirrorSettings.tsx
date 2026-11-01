@@ -1,4 +1,4 @@
-import { parseBooleanSelect, SelectField } from './NumberStepper';
+import { ToggleField } from './SettingsControls';
 import { MirrorGuide } from './MirrorGuide';
 import { QrCodeSvg } from '../mirror/QrCodeSvg';
 import { formatRoomCode } from '../mirror/protocol';
@@ -20,10 +20,6 @@ interface MirrorSettingsProps {
   onCopyLink: () => void;
 }
 
-const YES_NO = [
-  { value: 'true', label: 'Oui' },
-  { value: 'false', label: 'Non' },
-];
 
 export function MirrorSettings({
   enabled,
@@ -62,18 +58,13 @@ export function MirrorSettings({
 
   return (
     <>
-      <p className="install-hint">
-        Le téléphone reste la commande ; une tablette, une TV ou un PC affiche le chrono via Internet (code court +
-        QR). Même Wi‑Fi non obligatoire. Diaporama : bouton <strong>Tutoriel</strong> en haut de ce menu.
-      </p>
-      <MirrorGuide variant="settings" />
-      <SelectField
-        label="Miroir télécommande"
-        htmlId="mirrorEnabled"
-        value={String(enabled)}
-        options={YES_NO}
-        onChange={(value) => onEnabledChange(parseBooleanSelect(value))}
+      <ToggleField
+        label="Activer le miroir"
+        checked={enabled}
+        onChange={onEnabledChange}
+        hint="Ce téléphone commande ; une tablette, une TV ou un PC affiche le chrono (code + QR, via Internet)."
       />
+      {enabled && !live ? <MirrorGuide variant="settings" /> : null}
       {enabled ? (
         <>
           {!configured ? (

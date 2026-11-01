@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 3.3.0 — 2026-11-01
+
+- **Menu ⚙️ repensé** (QoL d’abord) : 5 onglets — Match (joueurs, chrono, score), Affichage (mode d’interface, écran distant), Apparence (thème, couleurs repliées, mes thèmes), Son, Plus (miroir, streaming, diagnostic, partage, application). Dernier onglet mémorisé.
+- **Mode d’interface séparé de l’apparence** : boutons visibles / invisibles d’un côté, thème et couleurs de l’autre.
+- **Contrôles** : `ToggleField` (interrupteurs, rôle `switch`), `SegmentedField` (choix segmentés), `SettingsCard` (sections toujours ouvertes), `SettingsDisclosure` (avancé replié). Options du score affichées seulement si le score est activé. Miroir et streaming convertis.
+- **Correctif** : chiffres dimensionnés sur la place libre (`.timer-content`) — EXTENSION et APRÈS CASSE ne sont plus masqués quand le score et la blanche sont visibles ; boutons d’action ≥ 44 px. Couvert en e2e (360×640, 360×780, 412×915).
+
 ## 3.2.0 — 2026-11-01
 
 - **Chrono seul par défaut** : `matchOptions.enabled = false`, `showFerme = false` ; migration ponctuelle des configs ≤ 3.1 (`defaultsVersion = 2`).

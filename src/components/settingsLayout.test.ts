@@ -6,25 +6,18 @@ function source(relative: string): string {
 }
 
 describe('settings layout', () => {
-  it('groups related settings into collapsible sections', () => {
+  it('organises settings by function: interface mode apart from colours, switches instead of Oui/Non lists', () => {
     const panel = source('components/SettingsPanel.tsx');
-    expect(panel).toContain('title="Joueurs"');
-    expect(panel).toContain('title="Score"');
-    expect(panel).toContain('<PresetManager');
-    expect(panel).toContain('title="Affichage télécommande & écran"');
-    expect(panel).toContain('title="Streaming (OBS / Streamlabs)"');
-    expect(panel).toContain('htmlId="matchLagAtStart"');
-    expect(panel).toContain('title="Compétition & temps"');
-    expect(panel).toContain('title="Apparence"');
-    expect(panel).toContain('title="Sons & vibration"');
-    expect(panel).toContain('title="Automatisation"');
-    expect(panel).toContain('title="Miroir télécommande"');
-    expect(panel).toContain('title="Application"');
+    for (const title of ['Joueurs', 'Chrono', 'Score', 'Mode d’interface', 'Écran distant', 'Thème', 'Mes thèmes', 'Volume', 'Alertes & vibration', 'Partage & import', 'Application']) {
+      expect(panel).toContain(`title="${title}"`);
+    }
+    expect(panel).toContain('title="Personnaliser les couleurs"');
+    expect(panel).toContain('title="Réglages avancés"');
     expect(panel).toContain('<SoundLibrarySettings');
-    expect(panel).toContain('htmlId="themeVisuel"');
     expect(panel).toContain('<ThemeColorEditor');
-    expect(panel).toContain('Réinitialiser les couleurs du thème');
-    expect(panel).toContain('htmlId="volumeSonore"');
+    expect(panel).toContain('<PresetManager');
+    expect(panel).not.toContain('YES_NO');
+    expect(panel).not.toContain('<SelectField');
   });
 
   it('keeps a single Tutoriel button in the settings drawer', () => {

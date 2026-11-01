@@ -137,6 +137,8 @@ Non retenu pour l'instant : secret de salle hors URL (logs Cloudflare désactiv�
 
 ## v3.2.0 — vision allégée, batterie, latence, voyant et diagnostic — ✅ fait
 
+## v3.3.0 — menu des paramètres repensé (QoL) — ✅ fait
+
 ## WIP — Score automatique depuis CueScore
 
 En attente. Objectif : récupérer le score d'un match CueScore au lieu de le saisir (réglage « Source du score : Manuelle / CueScore », manuel par défaut).

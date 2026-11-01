@@ -51,7 +51,6 @@ export function PresetManager({ config, controller, onApply, onNotify, onShare }
 
   return (
     <div className="preset-manager">
-      <h4 className="preset-manager-title">Mes presets</h4>
       {presets.length === 0 ? (
         <p className="install-hint">Aucun preset personnel. Créez-en un ci-dessous à partir de vos réglages ou d’un preset FFB.</p>
       ) : (

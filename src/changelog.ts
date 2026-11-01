@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.2.0';
+export const APP_VERSION = '3.3.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.3.0',
+    date: '2026-11-01',
+    title: 'Menu des paramètres repensé',
+    notes: [
+      'Menu ⚙️ en 5 onglets, une fonction chacun : Match (joueurs, chrono, score), Affichage (mode d’interface, écran distant), Apparence (thème, couleurs, mes thèmes), Son, Plus (miroir, streaming, diagnostic, partage, application).',
+      'Le mode d’interface (boutons visibles / invisibles) est séparé de l’apparence ; la personnalisation des couleurs est repliée sous le choix du thème.',
+      'Plus intuitif : interrupteurs au lieu des listes Oui / Non, choix segmentés, options du score visibles seulement quand le score est activé, réglages avancés repliés, le menu rouvre sur le dernier onglet.',
+      'Correctif : avec le score et la blanche affichés, les boutons EXTENSION et APRÈS CASSE ne passent plus sous la barre de commandes sur les petits téléphones.',
+    ],
+  },
   {
     version: '3.2.0',
     date: '2026-11-01',
