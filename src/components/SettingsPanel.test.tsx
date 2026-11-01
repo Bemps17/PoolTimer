@@ -48,7 +48,13 @@ describe('menu ⚙️ : 5 onglets, une fonction par onglet', () => {
   it('has short, distinct tabs and opens on Match', () => {
     renderPanel();
     const tabs = within(screen.getByRole('tablist')).getAllByRole('tab');
-    expect(tabs.map((tab) => tab.getAttribute('aria-label'))).toEqual(['Match', 'Affichage', 'Apparence', 'Son', 'Plus']);
+    expect(tabs.map((tab) => tab.getAttribute('aria-label'))).toEqual(['Match', 'Écran', 'Thème', 'Son', 'Plus']);
+    // Libellés courts (≤ 5 lettres) et icônes vectorielles, pas d'emoji : rien ne déborde sur un petit écran.
+    for (const tab of tabs) {
+      expect(tab.textContent!.length).toBeLessThanOrEqual(5);
+      expect(tab.querySelector('svg')).not.toBeNull();
+      expect(tab.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
+    }
     expect(screen.getByRole('tab', { name: 'Match' }).getAttribute('aria-selected')).toBe('true');
     expect(cards()).toEqual(['Joueurs', 'Chrono', 'Score']);
   });
@@ -61,9 +67,9 @@ describe('menu ⚙️ : 5 onglets, une fonction par onglet', () => {
     expect(screen.getByRole('tab', { name: 'Son' }).getAttribute('aria-selected')).toBe('true');
   });
 
-  it('Affichage = interface mode, separated from colours', () => {
+  it('Écran = interface mode, separated from colours', () => {
     const onChange = renderPanel();
-    openTab('Affichage');
+    openTab('Écran');
     expect(cards()).toEqual(['Mode d’interface', 'Écran distant']);
     expect(screen.queryByText(/Personnaliser les couleurs/)).toBeNull();
     const visible = screen.getByRole('radio', { name: 'Boutons visibles' });
@@ -74,7 +80,7 @@ describe('menu ⚙️ : 5 onglets, une fonction par onglet', () => {
 
   it('Apparence = theme and colours only, colour editor folded by default', () => {
     renderPanel();
-    openTab('Apparence');
+    openTab('Thème');
     expect(cards()).toEqual(['Thème', 'Mes thèmes']);
     expect(screen.queryByRole('radio', { name: 'Boutons invisibles' })).toBeNull();
     const details = screen.getByText('Personnaliser les couleurs').closest('details')!;

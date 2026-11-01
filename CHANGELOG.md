@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 3.3.1 — 2026-11-01
+
+- **Onglets du menu ⚙️** : libellés courts **Match · Écran · Thème · Son · Plus** (les anciens « Affichage » / « Apparence » débordaient sur un vrai téléphone avec police agrandie) et **icônes Lucide** (`lucide-react` : Timer, MonitorSmartphone, Palette, Volume2, Ellipsis) à la place des emojis.
+- e2e : aucun onglet ne déborde ni ne chevauche sur 360 px, police à 100 % et 130 %.
+
 ## 3.3.0 — 2026-11-01
 
 - **Menu ⚙️ repensé** (QoL d’abord) : 5 onglets — Match (joueurs, chrono, score), Affichage (mode d’interface, écran distant), Apparence (thème, couleurs repliées, mes thèmes), Son, Plus (miroir, streaming, diagnostic, partage, application). Dernier onglet mémorisé.

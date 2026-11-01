@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import { Ellipsis, MonitorSmartphone, Palette, Timer, Volume2, type LucideIcon } from 'lucide-react';
 import { APP_VERSION } from '../changelog';
 import { installButtonCopy, type PwaInstallStatus } from '../pwa/installStatus';
 import { rollbackCopy } from '../pwa/updateChoice';
@@ -79,12 +80,13 @@ const INTERFACE_OPTIONS: Array<{ value: InterfaceMode; label: string }> = [
 
 type SettingsTab = 'match' | 'affichage' | 'apparence' | 'son' | 'plus';
 
-const SETTINGS_TABS: Array<{ id: SettingsTab; label: string; icon: string }> = [
-  { id: 'match', label: 'Match', icon: '🎱' },
-  { id: 'affichage', label: 'Affichage', icon: '📱' },
-  { id: 'apparence', label: 'Apparence', icon: '🎨' },
-  { id: 'son', label: 'Son', icon: '🔊' },
-  { id: 'plus', label: 'Plus', icon: '⋯' },
+/** Libellés courts (≤ 5 lettres) + icônes Lucide : lisibles et sans débordement, même police système agrandie. */
+const SETTINGS_TABS: Array<{ id: SettingsTab; label: string; Icon: LucideIcon }> = [
+  { id: 'match', label: 'Match', Icon: Timer },
+  { id: 'affichage', label: 'Écran', Icon: MonitorSmartphone },
+  { id: 'apparence', label: 'Thème', Icon: Palette },
+  { id: 'son', label: 'Son', Icon: Volume2 },
+  { id: 'plus', label: 'Plus', Icon: Ellipsis },
 ];
 
 const TAB_STORAGE_KEY = 'h8timer.settings.tab';
@@ -293,10 +295,8 @@ export function SettingsPanel({
                 className={`settings-tab${tab === entry.id ? ' active' : ''}`}
                 onClick={() => selectTab(entry.id)}
               >
-                <span className="settings-tab-icon" aria-hidden>
-                  {entry.icon}
-                </span>
-                <span>{entry.label}</span>
+                <entry.Icon className="settings-tab-icon" aria-hidden size={20} strokeWidth={1.75} />
+                <span className="settings-tab-label">{entry.label}</span>
               </button>
             ))}
           </div>

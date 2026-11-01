@@ -13,7 +13,11 @@ describe('changelog', () => {
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
     expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/onglets/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/EXTENSION/);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Lucide/);
+
+    const menu = CHANGELOG.find((entry) => entry.version === '3.3.0');
+    expect(menu?.notes.join(' ')).toMatch(/onglets/i);
+    expect(menu?.notes.join(' ')).toMatch(/EXTENSION/);
 
     const light = CHANGELOG.find((entry) => entry.version === '3.2.0');
     expect(light?.notes.join(' ')).toMatch(/voyant/i);

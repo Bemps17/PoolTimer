@@ -89,6 +89,31 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
+    // Onglets du menu ⚙️ : aucun libellé ne déborde ni ne chevauche, même avec la police système à 130 %.
+    for (const fontScale of ['100%', '130%']) {
+      const menu = await (await browser.newContext({ viewport: { width: 360, height: 780 } })).newPage();
+      await menu.goto(APP);
+      await menu.evaluate((scale) => (document.documentElement.style.fontSize = scale), fontScale);
+      await menu.getByRole('button', { name: 'Ouvrir le menu' }).click();
+      await menu.getByRole('tablist').waitFor();
+      await menu.waitForTimeout(700); // fin de l'animation d'ouverture du panneau
+      const overflow = await menu.evaluate(() => {
+        const tabs = [...document.querySelectorAll('.settings-tab')];
+        return tabs.flatMap((tab, index) => {
+          const label = tab.querySelector('.settings-tab-label');
+          const box = tab.getBoundingClientRect();
+          const next = tabs[index + 1]?.getBoundingClientRect();
+          const problems = [];
+          if (label && label.scrollWidth > label.clientWidth + 1) problems.push(`${tab.getAttribute('aria-label')} déborde`);
+          if (next && box.right > next.left + 0.5) problems.push(`${tab.getAttribute('aria-label')} chevauche`);
+          if (box.right > innerWidth) problems.push(`${tab.getAttribute('aria-label')} hors écran`);
+          return problems;
+        });
+      });
+      assert(overflow.length === 0, `onglets du menu sur 360 px, police ${fontScale} : rien ne déborde ${overflow.join(', ')}`);
+      await menu.context().close();
+    }
+
     // Petits écrans : score + blanche + casses fermes ne doivent jamais masquer EXTENSION ni les commandes.
     for (const [width, height] of [[360, 640], [360, 780], [412, 915]]) {
       const small = await (await browser.newContext({ viewport: { width, height } })).newPage();

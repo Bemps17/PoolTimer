@@ -1,7 +1,7 @@
 {
   "name": "pool-timer",
   "private": true,
-  "version": "3.3.0",
+  "version": "3.3.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "test:e2e": "node e2e/remote-to-display.e2e.mjs"
   },
   "dependencies": {
+    "lucide-react": "^1.66.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tone": "^15.1.22",

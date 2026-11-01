@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.3.0';
+export const APP_VERSION = '3.3.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.3.1',
+    date: '2026-11-01',
+    title: 'Onglets du menu : icônes modernes, plus de débordement',
+    notes: [
+      'Onglets du menu ⚙️ renommés en libellés courts — Match · Écran · Thème · Son · Plus — pour ne plus déborder ni se chevaucher sur les petits téléphones, même avec une grande taille de police système.',
+      'Icônes vectorielles modernes (style Lucide) à la place des emojis.',
+    ],
+  },
   {
     version: '3.3.0',
     date: '2026-11-01',
