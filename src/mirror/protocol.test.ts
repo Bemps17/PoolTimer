@@ -293,3 +293,25 @@ describe('mirror protocol — scoreur (match)', () => {
     expect(parseMirrorMatch({ scores: { 1: 0, 2: 0 }, fermes: { 1: 0, 2: 0 }, breaker: 3 })).toBeUndefined();
   });
 });
+
+describe('mirror protocol — mise en page de l’écran Visuel', () => {
+  const config = getDefaultConfig();
+  const state = createInitialState(config);
+
+  it('carries displayLayout (timer first by default) through the relay', () => {
+    const wire = JSON.parse(JSON.stringify(buildSnapshot(state, config, 1)));
+    expect(parseSnapshot(wire)?.config.displayLayout).toBe('timer');
+    const score = JSON.parse(
+      JSON.stringify(buildSnapshot(state, { ...config, viewOptions: { ...config.viewOptions, displayLayout: 'score' } }, 1)),
+    );
+    expect(parseSnapshot(score)?.config.displayLayout).toBe('score');
+  });
+
+  it('drops an unknown layout and accepts legacy snapshots without it', () => {
+    const wire = JSON.parse(JSON.stringify(buildSnapshot(state, config, 1)));
+    wire.config.displayLayout = 'hacked';
+    expect(parseSnapshot(wire)?.config.displayLayout).toBeUndefined();
+    delete wire.config.displayLayout;
+    expect(parseSnapshot(wire)).toBeDefined();
+  });
+});

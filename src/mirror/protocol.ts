@@ -1,3 +1,4 @@
+import { isDisplayLayout, type DisplayLayout } from '../timer/viewOptions';
 import { MATCH_LIMITS, type MatchOptions, type MatchState } from '../timer/match';
 import { readStoredPlayerName } from '../timer/playerName';
 import { colorsForTheme, parseThemeColors } from '../timer/theme';
@@ -23,6 +24,8 @@ export interface MirrorDisplayConfig {
   p2Color: string;
   theme: Theme;
   colors: ThemeColors;
+  /** Mise en page de l'écran Visuel, pilotée par la télécommande (absent = chrono d'abord). */
+  displayLayout?: DisplayLayout;
 }
 
 /** Scoreur (optionnel : absent des anciennes télécommandes ou si le scoreur est masqué). */
@@ -157,6 +160,7 @@ export function toDisplayConfig(config: TimerConfig): MirrorDisplayConfig {
     p2Color: config.p2Color,
     theme: config.theme,
     colors: config.colors,
+    displayLayout: config.viewOptions.displayLayout,
   };
 }
 
@@ -326,6 +330,7 @@ function parseDisplayConfig(raw: unknown): MirrorDisplayConfig | undefined {
     p2Color: value.p2Color,
     theme,
     colors: parseThemeColors(value.colors, colorsForTheme(theme)),
+    ...(isDisplayLayout(value.displayLayout) ? { displayLayout: value.displayLayout } : {}),
   };
 }
 

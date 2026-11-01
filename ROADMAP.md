@@ -83,7 +83,7 @@ Ajouts demandés pour H8timer :
 
 *Critère de fin* : un point marqué sur le téléphone apparaît < 1 s sur l'écran Visuel, survit à un rechargement et à une reconnexion WebSocket.
 
-### Phase 2 — Mode télécommande dédié (v2.9.0)
+### Phase 2 — Mode télécommande dédié + overlay streaming (v2.9.0) — ✅ fait (priorité : le chrono, score discret)
 Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Quand une salle est ouverte (`mirror.room != null`), afficher **`RemoteControllerView`** :
 - Chrono **petit** (aperçu) + état de connexion bien visible (écran lié / sync OK).
 - **Grosses cibles tactiles** : Start/Pause (énorme), Nouveau coup, Après casse, Extension, bascule joueur (P1/P2 grands, couleur du joueur).
@@ -91,7 +91,9 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 - Palette/typographie distinctes (« mode manette ») pour qu'on ne confonde jamais téléphone et écran Visuel ; thème de l'écran Visuel inchangé.
 - Anti-erreur : Reset manche / Nouvelle partie avec appui long ou confirmation ; `navigator.wakeLock` pour garder le téléphone allumé ; retour haptique.
 - Possibilité de revenir à la vue classique (bascule dans ⚙️).
-- Extraire d'abord la logique de gestes de `Scoreboard.tsx` (325 lignes) dans un hook pour la réutiliser sans dupliquer.
+- Réalisé en **variante** du `Scoreboard` (pas de duplication de la logique de gestes) : classe `remote-mode`, bandeau de liaison, score compact/grand/masqué, wake lock.
+- **Overlay streaming** (ajout client) : route `/o/CODE` + paramètres d'URL, lecture seule, fond transparent/sombre/chroma ; réglages dans ⚙️ → Streaming.
+- **Reste** : code de salle persistant pour ne pas recopier le lien OBS à chaque nouvelle salle (voir Phase 5), slide de tutoriel.
 
 *Point d'attention* : l'aperçu chrono du téléphone doit rester fiable même hors ligne (le moteur reste local au téléphone).
 

@@ -1372,3 +1372,97 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
     cursor: pointer;
     overflow-wrap: anywhere;
 }
+
+/* ---------- Écran Visuel : mise en page pilotée par la télécommande (chrono d'abord) ---------- */
+.display-layout-timer .match-bar-display { margin-top: 0.5rem; }
+.display-layout-timer .match-bar-display .match-side { padding: 0.2rem 0.6rem; }
+.display-layout-timer .match-bar-display .match-score { font-size: clamp(1.6rem, 6vh, 3.2rem); }
+.display-layout-timer .match-bar-display .match-ball { width: clamp(16px, 3.2vh, 28px); height: clamp(16px, 3.2vh, 28px); }
+.display-layout-timer .match-bar-display .match-ferme { font-size: clamp(0.8rem, 2.4vh, 1.3rem); }
+.display-layout-timer .display-screen { flex: 1 1 auto; margin: 0.5rem 0; }
+
+.display-layout-balanced .match-bar-display .match-score { font-size: clamp(2.5rem, 12vh, 6rem); }
+
+.display-layout-score .display-screen { flex: 0.55; }
+.display-layout-score .match-bar-display { flex: 1; }
+
+/* ---------- Vue télécommande : chrono en vedette, grosses commandes, score discret ---------- */
+.scoreboard-body.remote-mode {
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 22px color-mix(in srgb, var(--c-primary) 70%, transparent);
+}
+.remote-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: color-mix(in srgb, var(--c-primary) 80%, #000);
+}
+.remote-badge-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #fff; opacity: 0.9; }
+.remote-badge-ok { background: color-mix(in srgb, var(--c-play) 75%, #000); }
+.remote-badge-ok .remote-badge-dot { background: var(--c-play); box-shadow: 0 0 8px var(--c-play); }
+.remote-badge-error, .remote-badge-waiting_sync {
+    background: color-mix(in srgb, var(--c-digit-critical) 75%, #000);
+}
+.scoreboard-body.remote-mode .control-game-btn { width: 84px; height: 84px; }
+.scoreboard-body.remote-mode .control-game-btn svg { width: 36px; height: 36px; }
+.scoreboard-body.remote-mode .timer-action-bar { min-height: 3.4rem; font-size: 1.05rem; }
+
+/* Score compact : bandeau discret (le chrono reste prioritaire) */
+.match-size-compact .match-side { padding: 0.1rem 0.3rem; flex-direction: row; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+.match-size-compact .match-score { font-size: 1.7rem; }
+.match-size-compact .match-step { width: 2rem; height: 2rem; font-size: 1.2rem; }
+.match-size-compact .match-ball { width: 18px; height: 18px; }
+.match-size-compact .match-ferme-step { width: 1.6rem; height: 1.4rem; font-size: 1rem; }
+.match-size-compact .match-ferme { font-size: 0.8rem; }
+.match-size-compact .match-undo { width: 2rem; height: 2rem; font-size: 1.1rem; }
+.match-size-compact .match-win { font-size: 0.65rem; }
+
+/* ---------- Overlay streaming (OBS / Streamlabs) ---------- */
+html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { background: transparent !important; overflow: hidden; }
+html.overlay-bg-dark body { background: rgba(0, 0, 0, 0.65) !important; }
+html.overlay-bg-chroma body { background: #00ff00 !important; }
+#root.overlay-root-host { padding: 0; }
+.overlay-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    color: #fff;
+}
+.overlay-root.overlay-column { flex-direction: column; }
+.overlay-timer-box { flex: 1 1 55%; min-width: 0; min-height: 0; align-self: stretch; display: grid; place-items: center; }
+.overlay-parts-timer .overlay-timer-box, .overlay-parts-score .overlay-score-box { flex: 1 1 100%; }
+.overlay-score-box { flex: 1 1 45%; min-width: 0; display: grid; place-items: center; }
+.overlay-column .overlay-timer-box { flex: 1 1 60%; width: 100%; }
+.overlay-column .overlay-score-box { flex: 0 0 auto; width: 100%; }
+.overlay-root .timer-officiel, .overlay-root .match-score, .overlay-root .match-ferme, .overlay-root .match-name {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+.overlay-root .match-bar { width: 100%; }
+.overlay-root .match-side { background: transparent; }
+.overlay-root .match-bar-display .match-score { font-size: clamp(2.2rem, 22vh, 9rem); }
+.overlay-root .match-bar-display .match-ball { width: clamp(20px, 7vh, 44px); height: clamp(20px, 7vh, 44px); }
+.overlay-root .match-bar-display .match-ferme { font-size: clamp(0.9rem, 5vh, 1.8rem); color: #fff; }
+.match-name {
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: clamp(0.9rem, 3.2vh, 1.6rem);
+    color: var(--c-text-primary);
+}

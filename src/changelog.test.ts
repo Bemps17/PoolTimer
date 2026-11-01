@@ -12,8 +12,11 @@ describe('changelog', () => {
     expect(published.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/score|casses? fermes?|blanche/i);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/OBS|Streamlabs|overlay/i);
     expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/télécommande|miroir/i);
+
+    const scoreur = CHANGELOG.find((entry) => entry.version === '2.8.0');
+    expect(scoreur?.notes.join(' ')).toMatch(/score|casses? fermes?|blanche/i);
 
     const seo = CHANGELOG.find((entry) => entry.version === '2.7.1');
     expect(seo?.notes.join(' ')).toMatch(/SEO|référencement|sitemap|robots/i);

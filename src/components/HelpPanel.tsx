@@ -43,6 +43,15 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             <li>L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche.</li>
           </ul>
 
+          <h3>Streaming (OBS / Streamlabs)</h3>
+          <ul>
+            <li>
+              Ouvrez une salle, puis ⚙️ → <strong>Streaming</strong> : copiez le lien overlay et collez-le dans une
+              source <strong>Navigateur</strong> d’OBS ou Streamlabs. Fond transparent, lecture seule.
+            </li>
+            <li>Choisissez chrono seul, score seul ou les deux, la disposition, la taille et le fond.</li>
+          </ul>
+
           <h3>Contrôles Principaux</h3>
           <ul>
             <li>

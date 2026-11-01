@@ -2,6 +2,13 @@
 
 Toutes les dates sont en UTC.
 
+## 2.9.0 — 2026-11-01
+
+- **Vue télécommande** : salle miroir ouverte → vue dédiée du téléphone (bandeau de liaison, cadre accentué, grosses commandes). Le **chrono reste prioritaire**, le score est un bandeau discret (compact / grand / masqué). Écran du téléphone gardé allumé (option).
+- **Écran Visuel** : mise en page pilotée depuis la télécommande — chrono en grand (défaut), équilibré, score en grand.
+- **Streaming OBS / Streamlabs** : lien `/o/CODE` (source Navigateur), lecture seule, fond transparent / sombre / vert chroma ; chrono seul, score seul ou les deux ; paramètres dans l’URL (`p`, `l`, `n`, `f`, `b`, `s`, `bg`).
+- Pas de redéploiement du Worker nécessaire (le champ `displayLayout` est optionnel). Redéployer reste utile pour le score (2.8.0).
+
 ## 2.8.0 — 2026-11-01
 
 - **Scoreur 1 contre 1** (joueur ou équipe) : score avec +/− et annulation, **casses fermes (F)** en compteur séparé et en plus petit chiffre.

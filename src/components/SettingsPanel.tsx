@@ -11,6 +11,7 @@ import {
   withSyncedCompetitionMode,
 } from '../timer/config';
 import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
+import type { DisplayLayout, RemoteLayout, RemoteScoreMode, ViewOptions } from '../timer/viewOptions';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
@@ -42,6 +43,7 @@ interface SettingsPanelProps {
   onApplyUpdate?: () => void;
   onSnoozeUpdate?: () => void;
   extraSections?: ReactNode;
+  streamSection?: ReactNode;
 }
 
 const THEME_OPTIONS = [
@@ -70,6 +72,23 @@ const ON_OFF = [
 const VIBRATION = [
   { value: 'true', label: 'Activée' },
   { value: 'false', label: 'Désactivée' },
+];
+
+const REMOTE_LAYOUT_OPTIONS = [
+  { value: 'remote', label: 'Télécommande (chrono en vedette)' },
+  { value: 'classic', label: 'Classique' },
+];
+
+const REMOTE_SCORE_OPTIONS = [
+  { value: 'compact', label: 'Bandeau compact' },
+  { value: 'full', label: 'Grand' },
+  { value: 'hidden', label: 'Masqué' },
+];
+
+const DISPLAY_LAYOUT_OPTIONS = [
+  { value: 'timer', label: 'Chrono en grand (score discret)' },
+  { value: 'balanced', label: 'Équilibré' },
+  { value: 'score', label: 'Score en grand' },
 ];
 
 const COMPETITION_PRESET_CARDS: Array<{
@@ -106,6 +125,7 @@ export function SettingsPanel({
   onApplyUpdate,
   onSnoozeUpdate,
   extraSections,
+  streamSection,
 }: SettingsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -125,6 +145,10 @@ export function SettingsPanel({
 
   const patchMatch = (partial: Partial<MatchOptions>) => {
     onChange({ ...config, matchOptions: { ...config.matchOptions, ...partial } });
+  };
+
+  const patchView = (partial: Partial<ViewOptions>) => {
+    onChange({ ...config, viewOptions: { ...config.viewOptions, ...partial } });
   };
 
   const hideApresCasse = !showsApresCasseControl(config);
@@ -479,6 +503,45 @@ export function SettingsPanel({
           </SettingsSection>
 
           {extraSections ? <SettingsSection title="Miroir télécommande">{extraSections}</SettingsSection> : null}
+
+          <SettingsSection title="Affichage télécommande & écran">
+            <SelectField
+              label="Vue du téléphone quand une salle est ouverte"
+              htmlId="remoteLayout"
+              value={config.viewOptions.remoteLayout}
+              options={REMOTE_LAYOUT_OPTIONS}
+              onChange={(remoteLayout) => patchView({ remoteLayout: remoteLayout as RemoteLayout })}
+            />
+            <SelectField
+              label="Score sur la télécommande"
+              htmlId="remoteScore"
+              value={config.viewOptions.remoteScore}
+              options={REMOTE_SCORE_OPTIONS}
+              onChange={(remoteScore) => patchView({ remoteScore: remoteScore as RemoteScoreMode })}
+            />
+            <SelectField
+              label="Garder l’écran du téléphone allumé"
+              htmlId="remoteWakeLock"
+              value={String(config.viewOptions.remoteWakeLock)}
+              options={YES_NO}
+              onChange={(value) => patchView({ remoteWakeLock: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Mise en page de l’écran Visuel"
+              htmlId="displayLayout"
+              value={config.viewOptions.displayLayout}
+              options={DISPLAY_LAYOUT_OPTIONS}
+              onChange={(displayLayout) => patchView({ displayLayout: displayLayout as DisplayLayout })}
+            />
+            <p className="install-hint">
+              Le chrono reste toujours l’élément principal. « Chrono en grand » réduit le score à un bandeau discret ;
+              le choix s’applique à tous les écrans Visuel de la salle.
+            </p>
+          </SettingsSection>
+
+          {streamSection ? (
+            <SettingsSection title="Streaming (OBS / Streamlabs)">{streamSection}</SettingsSection>
+          ) : null}
 
           <SettingsSection title="Application">
             <p className="app-version">H8timer v{APP_VERSION}</p>

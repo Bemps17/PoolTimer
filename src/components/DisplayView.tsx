@@ -72,7 +72,7 @@ export function DisplayView({ room }: DisplayViewProps) {
   return (
     <main
       id="app"
-      className={`display-root${flashClass ? ` ${flashClass}` : ''}`}
+      className={`display-root display-layout-${config?.displayLayout ?? 'timer'}${flashClass ? ` ${flashClass}` : ''}`}
       onClick={() => {
         void toggle();
       }}

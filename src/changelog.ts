@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.8.0';
+export const APP_VERSION = '2.9.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.9.0',
+    date: '2026-11-01',
+    title: 'Vue télécommande, mises en page et overlay de streaming',
+    notes: [
+      'Vue télécommande : quand une salle miroir est ouverte, le téléphone passe en vue dédiée (bandeau de liaison, cadre accentué, grosses commandes). Le chrono reste l’élément principal et le score devient un bandeau discret (compact, grand ou masqué).',
+      'Écran Visuel : mise en page réglable depuis la télécommande (chrono en grand par défaut, équilibré, score en grand).',
+      'Streaming OBS / Streamlabs : lien overlay /o/CODE à coller dans une source Navigateur. Chrono seul, score seul ou les deux, côte à côte ou empilés, taille, fond transparent / sombre / vert chroma, noms, F et blanche au choix.',
+      'L’écran du téléphone reste allumé en mode télécommande (option).',
+      'Réglages dans ⚙️ → Affichage télécommande & écran, et ⚙️ → Streaming. Compatible avec les anciennes télécommandes ; aucun redéploiement du Worker requis pour cette version.',
+    ],
+  },
   {
     version: '2.8.0',
     date: '2026-11-01',

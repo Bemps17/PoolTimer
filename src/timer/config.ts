@@ -1,5 +1,6 @@
 import { defaultIdsForPack, isAlertPackId, isAlertPickMode, isCriticalAlertStyle, sanitizeSoundIdList } from '../audio/soundCatalog';
 import { getDefaultMatchOptions, mergeMatchOptions } from './match';
+import { getDefaultViewOptions, mergeViewOptions } from './viewOptions';
 import { readStoredPlayerName } from './playerName';
 import {
   colorsForTheme,
@@ -126,6 +127,7 @@ export function getDefaultConfig(): TimerConfig {
     colors: colorsForTheme('sombre'),
     competitionMode: 'ffb',
     matchOptions: getDefaultMatchOptions(),
+    viewOptions: getDefaultViewOptions(),
   };
 }
 
@@ -268,6 +270,7 @@ export function mergeConfig(saved: unknown): TimerConfig {
     colors: parseThemeColors(s.colors, colorsForTheme(asTheme(s.theme))),
     competitionMode: asCompetitionMode(s.competitionMode),
     matchOptions: mergeMatchOptions(s.matchOptions),
+    viewOptions: mergeViewOptions(s.viewOptions),
   };
   return withSyncedCompetitionMode(merged);
 }

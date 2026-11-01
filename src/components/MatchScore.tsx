@@ -19,9 +19,21 @@ interface MatchScoreProps {
   p2Color: string;
   /** Absent = écran Visuel en lecture seule. */
   controls?: MatchScoreControls;
+  /** compact = bandeau discret (télécommande, le chrono reste prioritaire). */
+  size?: 'compact' | 'full';
+  showNames?: boolean;
 }
 
-export function MatchScore({ match, p1Name, p2Name, p1Color, p2Color, controls }: MatchScoreProps) {
+export function MatchScore({
+  match,
+  p1Name,
+  p2Name,
+  p1Color,
+  p2Color,
+  controls,
+  size = 'full',
+  showNames = false,
+}: MatchScoreProps) {
   const winner = matchWinner(match, match.targetScore);
   const sides: Array<{ player: PlayerId; name: string; color: string }> = [
     { player: 1, name: displayPlayerName(p1Name, 1), color: p1Color },
@@ -30,7 +42,7 @@ export function MatchScore({ match, p1Name, p2Name, p1Color, p2Color, controls }
 
   return (
     <section
-      className={`match-bar${controls ? ' match-bar-controller' : ' match-bar-display'}`}
+      className={`match-bar${controls ? ' match-bar-controller' : ' match-bar-display'} match-size-${size}`}
       aria-label="Score du match"
     >
       {sides.map(({ player, name, color }) => {
@@ -42,6 +54,7 @@ export function MatchScore({ match, p1Name, p2Name, p1Color, p2Color, controls }
             className={`match-side${isBreaker && match.showBreaker ? ' is-breaker' : ''}${won ? ' is-winner' : ''}`}
             style={{ borderColor: won ? color : undefined }}
           >
+            {showNames ? <p className="match-name">{name}</p> : null}
             <div className="match-main">
               {match.showBreaker ? (
                 controls ? (

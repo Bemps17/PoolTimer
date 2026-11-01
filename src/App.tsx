@@ -3,6 +3,8 @@ import { minionsToggleMessage, toggleMinionsMode } from './audio/minions';
 import { APP_VERSION } from './changelog';
 import { ChangelogPanel } from './components/ChangelogPanel';
 import { DisplayView } from './components/DisplayView';
+import { OverlayView } from './components/OverlayView';
+import { StreamSettings } from './components/StreamSettings';
 import { HelpPanel } from './components/HelpPanel';
 import { LagPrompt } from './components/LagPrompt';
 import { MatchScore } from './components/MatchScore';
@@ -15,15 +17,23 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useMatch } from './hooks/useMatch';
+import { useWakeLock } from './hooks/useWakeLock';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
+import { parseOverlayOptions, parseOverlayRoom } from './mirror/overlay';
 import { displayUrl, parseDisplayRoom, toMirrorMatch } from './mirror/protocol';
 import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
+import { isRemoteViewActive } from './timer/viewOptions';
 import type { TimerConfig } from './timer/types';
 
 export default function App() {
+  const [overlayRoom] = useState(() => parseOverlayRoom(window.location.pathname));
+  const [overlayOptions] = useState(() => parseOverlayOptions(window.location.search));
   const [displayRoom] = useState(() => parseDisplayRoom(window.location.pathname, window.location.search));
+  if (overlayRoom) {
+    return <OverlayView room={overlayRoom} options={overlayOptions} />;
+  }
   if (displayRoom) {
     return <DisplayView room={displayRoom} />;
   }
@@ -117,6 +127,9 @@ function ControllerApp() {
     setToastVisible(true);
   }, [matchControl.newMatch]);
 
+  const viewOptions = timer.config.viewOptions;
+  const remoteActive = isRemoteViewActive(Boolean(mirror.room), viewOptions);
+  useWakeLock(remoteActive && viewOptions.remoteWakeLock);
   const matchOptions = timer.config.matchOptions;
   const mirrorMatch = toMirrorMatch(matchControl.match, matchOptions);
   const lagPrompt = matchOptions.enabled && matchOptions.lagAtStart && matchControl.match.lagPending;
@@ -136,7 +149,7 @@ function ControllerApp() {
 
   return (
     <>
-      {mirror.room ? (
+      {mirror.room && !remoteActive ? (
         <aside
           className={`mirror-live-chip mirror-live-chip-${mirror.sync.health}`}
           aria-live="polite"
@@ -159,14 +172,24 @@ function ControllerApp() {
           setMenuOpen(true);
         }}
         onToggleMinions={handleToggleMinions}
+        remote={
+          remoteActive
+            ? {
+                label: mirror.sync.chip || `Télécommande · ${mirror.room}`,
+                health: mirror.sync.health,
+                scorePlacement: viewOptions.remoteScore,
+              }
+            : undefined
+        }
         matchBar={
-          matchOptions.enabled ? (
+          matchOptions.enabled && !(remoteActive && viewOptions.remoteScore === 'hidden') ? (
             <MatchScore
               match={mirrorMatch}
               p1Name={timer.config.p1Name}
               p2Name={timer.config.p2Name}
               p1Color={timer.config.p1Color}
               p2Color={timer.config.p2Color}
+              size={remoteActive && viewOptions.remoteScore === 'compact' ? 'compact' : 'full'}
               controls={{
                 onScore: matchControl.addScore,
                 onFerme: matchControl.addFerme,
@@ -213,6 +236,15 @@ function ControllerApp() {
         updateSnoozed={pwaUpdate.snoozed}
         onApplyUpdate={pwaUpdate.applyUpdate}
         onSnoozeUpdate={handleSnoozeUpdate}
+        streamSection={
+          <StreamSettings
+            room={mirror.room}
+            onCopied={(message) => {
+              setToastMessage(message);
+              setToastVisible(true);
+            }}
+          />
+        }
         extraSections={
           <MirrorSettings
             enabled={mirrorEnabled}
