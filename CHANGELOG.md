@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 3.5.1 — 2026-11-01
+
+- **Correctif paysage, toucher du chrono** : la gestion des appuis sur l'écran (un appui = départ / pause, double appui = nouveau coup) est sortie de `Scoreboard` dans `hooks/useTimerScreenTap.ts` (décision pure inchangée : `timer/screenTap.ts`) et branchée sur la zone centrale du paysage (chrono ou aperçu distant).
+- **Boutons invisibles en paysage** : Départ, Nouveau coup et NEW masqués ; Extension, Après casse et ⚙️ conservés (comme en portrait). Tests composants + e2e (appareil tactile 740×360).
+
 ## 3.5.0 — 2026-11-01
 
 - **Paysage Non · Auto · Forcé** (`viewOptions.landscape: LandscapeMode`, l'ancien booléen est relu : vrai → `auto`). `orientationLockTarget()` : `portrait` / `any` / `landscape`. En Auto, `screen.orientation.lock('any')` au lieu de `unlock()` : Chrome Android garde le manifeste d'installation (ancien `portrait`) et `unlock()` y revenait — d'où le paysage toujours bloqué en 3.4.1. Forcé : verrou paysage ; message si le navigateur refuse.

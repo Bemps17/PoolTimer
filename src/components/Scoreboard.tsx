@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { computeTimerFontSize, showsApresCasseControl } from '../timer/config';
 import { canUseExtension, getDigitState, getFlashClass } from '../timer/engine';
 import { formatSecondsClock, formatTime } from '../timer/format';
-import { DOUBLE_TAP_MS, createScreenTapSession, resolveTimerScreenTap, shouldAcceptControlActivation } from '../timer/screenTap';
+import { shouldAcceptControlActivation } from '../timer/screenTap';
+import { useTimerScreenTap } from '../hooks/useTimerScreenTap';
 import type { EngineState, PlayerId, TimerConfig } from '../timer/types';
 import { PauseIcon, PlayIcon, ResetIcon, SettingsIcon } from './Icons';
 import { PlayerStatus } from './PlayerStatus';
@@ -40,11 +41,7 @@ export function Scoreboard({
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const tapSessionRef = useRef(createScreenTapSession());
-  const pendingTapTimeoutRef = useRef<number | null>(null);
   const playButtonPointerAtRef = useRef(0);
-  const isRunningRef = useRef(state.isRunning);
-  isRunningRef.current = state.isRunning;
   const newGameHoldRef = useRef<{ timer: number | null; unlockedThisPress: boolean }>({
     timer: null,
     unlockedThisPress: false,
@@ -75,10 +72,8 @@ export function Scoreboard({
     };
   }, [resizeTimer, state.remainingTime, config.affichageMs]);
 
-  // Pending single-tap confirmation must survive remainingTime ticks (every 50ms while running).
   useEffect(() => {
     return () => {
-      if (pendingTapTimeoutRef.current) window.clearTimeout(pendingTapTimeoutRef.current);
       if (newGameHoldRef.current.timer !== null) window.clearTimeout(newGameHoldRef.current.timer);
     };
   }, []);
@@ -110,60 +105,12 @@ export function Scoreboard({
     newGameHoldRef.current.unlockedThisPress = false;
   };
 
-  const handleTimerScreenTap = (kind: 'pointer' | 'click', event: { target: EventTarget | null; button?: number }) => {
-    const target = event.target as HTMLElement | null;
-    if (target?.closest('.timer-action-bar')) return;
-    if (typeof event.button === 'number' && event.button !== 0) return;
-
-    const result = resolveTimerScreenTap({
-      isRunning: isRunningRef.current,
-      now: Date.now(),
-      kind,
-      session: tapSessionRef.current,
-    });
-    tapSessionRef.current = result.session;
-
-    const clearPendingTap = () => {
-      if (pendingTapTimeoutRef.current !== null) {
-        window.clearTimeout(pendingTapTimeoutRef.current);
-        pendingTapTimeoutRef.current = null;
-      }
-    };
-
-    switch (result.action) {
-      case 'ignore':
-        return;
-      case 'arm-pause':
-        clearPendingTap();
-        pendingTapTimeoutRef.current = window.setTimeout(() => {
-          pendingTapTimeoutRef.current = null;
-          if (isRunningRef.current) {
-            isRunningRef.current = false;
-            onTogglePlayPause();
-          }
-        }, DOUBLE_TAP_MS);
-        return;
-      case 'arm-play':
-        clearPendingTap();
-        pendingTapTimeoutRef.current = window.setTimeout(() => {
-          pendingTapTimeoutRef.current = null;
-          if (!isRunningRef.current) {
-            isRunningRef.current = true;
-            onTogglePlayPause();
-          }
-        }, DOUBLE_TAP_MS);
-        return;
-      case 'reset':
-        clearPendingTap();
-        isRunningRef.current = false;
-        onResetShot();
-        return;
-      default: {
-        const exhaustive: never = result.action;
-        return exhaustive;
-      }
-    }
-  };
+  const screenTap = useTimerScreenTap({
+    isRunning: state.isRunning,
+    onTogglePlayPause,
+    onResetShot,
+    ignoreSelector: '.timer-action-bar',
+  });
 
   const handlePlayPauseControl = (kind: 'pointer' | 'click', event: { button?: number }) => {
     if (typeof event.button === 'number' && event.button !== 0) return;
@@ -232,11 +179,8 @@ export function Scoreboard({
         id="timerScreen"
         aria-label="Chronomètre"
         ref={screenRef}
-        onPointerUp={(event) => {
-          if (event.pointerType !== 'mouse') event.preventDefault();
-          handleTimerScreenTap('pointer', event);
-        }}
-        onClick={(event) => handleTimerScreenTap('click', event)}
+        onPointerUp={screenTap.onPointerUp}
+        onClick={screenTap.onClick}
       >
         <div className="timer-content" ref={contentRef}>
           <div className={`timer-officiel ${digitClass}`} id="timerDisplay" ref={timerRef}>

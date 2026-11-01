@@ -13,7 +13,8 @@ describe('changelog', () => {
     expect(CHANGELOG[0]?.version).toBe(APP_VERSION);
     expect(CHANGELOG[0]?.notes.length).toBeGreaterThan(0);
     expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/paysage/i);
-    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Forcé/);
+    expect(CHANGELOG[0]?.notes.join(' ')).toMatch(/Boutons invisibles/);
+    expect(CHANGELOG.find((entry) => entry.version === '3.5.0')?.notes.join(' ')).toMatch(/Forcé/);
 
     const remote = CHANGELOG.find((entry) => entry.version === '3.4.0');
     expect(remote?.notes.join(' ')).toMatch(/télécommande/i);
