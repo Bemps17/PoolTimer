@@ -18,6 +18,8 @@ interface LandscapeBoardProps extends BoardActions {
   match?: MirrorMatch;
   /** Salle ouverte : le centre devient l'aperçu de l'écran distant, avec son voyant. */
   remoteLevel?: SyncLevel;
+  /** Score sur les côtés (option « Score sur l'écran du téléphone ») ; l'aperçu distant le garde toujours. */
+  scoreOnSides?: boolean;
   menuOpen: boolean;
   onScore: (player: PlayerId, delta: number) => void;
 }
@@ -30,6 +32,7 @@ export function LandscapeBoard({
   state,
   match,
   remoteLevel,
+  scoreOnSides = true,
   menuOpen,
   onTogglePlayPause,
   onResetShot,
@@ -45,11 +48,13 @@ export function LandscapeBoard({
   const showApresCasse = showsApresCasseControl(config);
   const flashClass = remoteLevel ? '' : getFlashClass(state.remainingTime, state.isRunning, config);
 
+  const sideMatch = scoreOnSides ? match : undefined;
+
   const side = (seat: PlayerId) => {
     const name = displayPlayerName(seat === 1 ? config.p1Name : config.p2Name, seat, config.matchOptions.sides);
     const color = seat === 1 ? config.p1Color : config.p2Color;
     const active = state.currentPlayer === seat;
-    const breaks = Boolean(match?.showBreaker && match.breaker === seat);
+    const breaks = Boolean(sideMatch?.showBreaker && sideMatch.breaker === seat);
     return (
       <section
         data-zone={`p${seat}`}
@@ -69,22 +74,22 @@ export function LandscapeBoard({
           <FitText className="landscape-name" singleLine minFontPx={9}>
             {name}
           </FitText>
-          {match ? (
+          {sideMatch ? (
             <span className="landscape-score" aria-label={`Score ${name}`} style={{ color }}>
-              {match.scores[seat]}
+              {sideMatch.scores[seat]}
             </span>
           ) : null}
           <span className="landscape-meta">
             {breaks ? <span className="match-ball active" role="img" aria-label={`${name} casse`} /> : null}
-            {match?.showFerme ? (
+            {sideMatch?.showFerme ? (
               <span className="landscape-ferme" aria-label={`Casses fermes ${name}`}>
-                F {match.fermes[seat]}
+                F {sideMatch.fermes[seat]}
               </span>
             ) : null}
             <span className={`ext-status ${state.extensionsUsedInGame[seat] ? 'ext-used' : 'ext-available'}`}>EXT</span>
           </span>
         </button>
-        {match ? (
+        {sideMatch ? (
           <div className="landscape-steps">
             <button
               type="button"

@@ -2,6 +2,11 @@
 
 Toutes les dates sont en UTC.
 
+## 3.5.0 — 2026-11-01
+
+- **Paysage Non · Auto · Forcé** (`viewOptions.landscape: LandscapeMode`, l'ancien booléen est relu : vrai → `auto`). `orientationLockTarget()` : `portrait` / `any` / `landscape`. En Auto, `screen.orientation.lock('any')` au lieu de `unlock()` : Chrome Android garde le manifeste d'installation (ancien `portrait`) et `unlock()` y revenait — d'où le paysage toujours bloqué en 3.4.1. Forcé : verrou paysage ; message si le navigateur refuse.
+- **Score sur l'écran du téléphone** (`matchOptions.showOnPhone`, vrai par défaut ; `scoreOnPhone()`) : masqué sur l'écran de jeu (classique et côtés du paysage), toujours compté dans ⚙️ → Match (« Score en cours ») et envoyé à l'écran distant / overlay. Interrupteur principal renommé « Activer le score ».
+
 ## 3.4.1 — 2026-11-01
 
 - **Correctif paysage** : le manifeste PWA verrouillait l'app installée en portrait (`orientation: 'portrait'`), donc tourner le téléphone ne faisait rien. Manifeste en `orientation: 'any'` ; tant que l'option paysage est désactivée, `useOrientationLock` demande le portrait (`screen.orientation.lock`, accepté par Android en app installée, ignoré ailleurs) ; option activée → `unlock()`. Logique pure `orientationLockTarget()` testée.

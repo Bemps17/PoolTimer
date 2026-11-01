@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.4.1';
+export const APP_VERSION = '3.5.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.5.0',
+    date: '2026-11-01',
+    title: 'Paysage forcé et score masquable sur le téléphone',
+    notes: [
+      'Disposition paysage en trois choix (⚙️ → Écran) : Non (portrait), Auto (suit la rotation du téléphone) ou Forcé (l’écran passe en paysage tout seul, application installée).',
+      'Correctif Android (application installée) : Auto demande maintenant explicitement toutes les orientations au téléphone ; l’ancien réglage portrait gardé par Chrome ne bloque plus la rotation.',
+      'Score : « Activer le score » le compte et l’affiche sur l’écran distant et dans ⚙️ → Match ; « Score sur l’écran du téléphone » permet de le masquer sur le téléphone sans le perdre ailleurs.',
+    ],
+  },
   {
     version: '3.4.1',
     date: '2026-11-01',
