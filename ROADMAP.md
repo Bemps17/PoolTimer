@@ -146,6 +146,7 @@ Détails, prérequis et plan en 3 phases (audit de l'API publique d'abord, aucun
 
 | Date (UTC) | Version Worker | Contenu | Retour arrière |
 | --- | --- | --- | --- |
+| 2026-11-01 | `f694928a-923d-4c8e-96e4-18726b0b06df` | H8timer 3.2.0 : diffusion avant écriture, `allowUnconfirmed` (latence) | `c95c53ce-19d1-4ce4-82b8-cb94bfdacfad` |
 | 2026-11-01 | `c95c53ce-19d1-4ce4-82b8-cb94bfdacfad` | H8timer 3.1.0 : `match.sides` (mode équipe) relayé | `1acbdc15-8450-4b06-affe-adbf0ee47281` |
 | 2026-11-01 | `1acbdc15-8450-4b06-affe-adbf0ee47281` | H8timer 3.0.1 : écritures limitées (clé `state`, 30 s / 10 min) pour le quota gratuit | `dcb3967d-848c-47e0-b34b-011c90c3e6ea` |
 | 2026-11-01 | `dcb3967d-848c-47e0-b34b-011c90c3e6ea` | H8timer 3.0 : score, `displayLayout`, origines autorisées, messages ≤ 32 Ko, débit limité, 40 écrans max | `8a9199f4-b6c9-40bb-a01d-fa3a5e4b12c3` (2026-09-20) |
