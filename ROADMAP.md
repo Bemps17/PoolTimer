@@ -130,6 +130,11 @@ Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Qua
 | Latence / perte de WebSocket en salle | Déjà géré (reconnexion, `seq`) ; le score doit être idempotent (envoyer l'état complet, pas des « +1 ») — c'est le cas avec le snapshot complet |
 | Vue télécommande dupliquant `Scoreboard` | Extraire hooks de gestes avant la phase 2 |
 
+## WIP — Score automatique depuis CueScore
+
+En attente. Objectif : récupérer le score d'un match CueScore au lieu de le saisir (réglage « Source du score : Manuelle / CueScore », manuel par défaut).
+Détails, prérequis et plan en 3 phases (audit de l'API publique d'abord, aucun endpoint supposé) : [docs/integrations/cuescore.md](docs/integrations/cuescore.md).
+
 ## Journal de déploiement du relais (Cloudflare Worker `h8timer-mirror`)
 
 | Date (UTC) | Version Worker | Contenu | Retour arrière |
