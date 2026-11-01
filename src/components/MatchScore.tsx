@@ -1,3 +1,4 @@
+import { FitText } from './FitText';
 import type { MirrorMatch } from '../mirror/protocol';
 import { matchWinner } from '../timer/match';
 import { displayPlayerName } from '../timer/playerName';
@@ -72,7 +73,11 @@ export function MatchScore({
             className={`match-side${isBreaker && match.showBreaker ? ' is-breaker' : ''}${won ? ' is-winner' : ''}`}
             style={{ borderColor: won ? color : undefined }}
           >
-            {showNames ? <p className="match-name">{name}</p> : null}
+            {showNames ? (
+              <FitText className="match-name" singleLine minFontPx={10}>
+                {name}
+              </FitText>
+            ) : null}
             {controls && !compact && ball ? <div className="match-ball-row">{ball}</div> : null}
             <div className="match-main">
               {controls ? null : ball}

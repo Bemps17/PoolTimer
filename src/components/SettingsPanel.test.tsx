@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import type React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDefaultConfig } from '../timer/config';
 import type { TimerConfig } from '../timer/types';
@@ -8,7 +9,7 @@ import { SettingsPanel } from './SettingsPanel';
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
-function renderPanel(config: TimerConfig = getDefaultConfig(), onChange = vi.fn()) {
+function renderPanel(config: TimerConfig = getDefaultConfig(), onChange = vi.fn(), liveScore?: React.ReactNode) {
   const noop = vi.fn();
   render(
     <SettingsPanel
@@ -36,6 +37,7 @@ function renderPanel(config: TimerConfig = getDefaultConfig(), onChange = vi.fn(
       extraSections={<p>miroir</p>}
       streamSection={<p>stream</p>}
       diagnosticsSection={<p>diagnostic</p>}
+      liveScore={liveScore}
     />,
   );
   return onChange;
@@ -121,6 +123,33 @@ describe('Score : un interrupteur, options seulement si activé', () => {
     expect(onChange.mock.calls.at(-1)![0].matchOptions.showFerme).toBe(true);
     fireEvent.click(screen.getByRole('radio', { name: 'Équipes' }));
     expect(onChange.mock.calls.at(-1)![0].matchOptions.sides).toBe('teams');
+  });
+});
+
+describe('Score en cours : réglé dans ⚙️ (+/−), plus sur l’écran de la télécommande', () => {
+  it('puts the live score first in the Match tab when the score is on', () => {
+    const base = getDefaultConfig();
+    renderPanel({ ...base, matchOptions: { ...base.matchOptions, enabled: true } }, vi.fn(), <p>score en cours +/−</p>);
+    expect(cards()).toEqual(['Score en cours', 'Joueurs', 'Chrono', 'Score']);
+    const card = screen.getByText('Score en cours').closest('.settings-card')!;
+    expect(within(card as HTMLElement).getByText('score en cours +/−')).toBeTruthy();
+  });
+
+  it('hides them when the score is off', () => {
+    renderPanel(getDefaultConfig(), vi.fn(), <p>score en cours +/−</p>);
+    expect(screen.queryByText('score en cours +/−')).toBeNull();
+  });
+});
+
+describe('Écran : disposition paysage en option', () => {
+  it('offers the landscape layout, off by default, and no more remote score choice', () => {
+    const onChange = renderPanel();
+    openTab('Écran');
+    const landscape = screen.getByRole('switch', { name: 'Disposition paysage (téléphone tourné)' });
+    expect(landscape.getAttribute('aria-checked')).toBe('false');
+    expect(screen.queryByText('Score sur la télécommande')).toBeNull();
+    fireEvent.click(landscape);
+    expect(onChange.mock.calls.at(-1)![0].viewOptions.landscape).toBe(true);
   });
 });
 

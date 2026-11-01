@@ -76,6 +76,23 @@ async function hiddenActions(page) {
   );
 }
 
+/** Boutons d'un écran (sélecteur CSS) : ≥ 44 px, entiers à l'écran et non recouverts. */
+async function badButtons(page, selector) {
+  return page.evaluate((sel) =>
+    [...document.querySelectorAll(sel)]
+      .filter((element) => getComputedStyle(element).display !== 'none')
+      .filter((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        return (
+          box.height < 44 || box.width < 44 || box.bottom > innerHeight + 0.5 || box.top < 0 || box.right > innerWidth + 0.5 ||
+          !(hit === element || element.contains(hit))
+        );
+      })
+      .map((element) => element.getAttribute('aria-label') ?? element.textContent?.trim()),
+  selector);
+}
+
 function assert(condition, message) {
   if (!condition) throw new Error(`ÉCHEC : ${message}`);
   console.log(`  ✓ ${message}`);
@@ -206,8 +223,13 @@ async function main() {
     assert(/^[A-Z2-9]{6}$/.test(room), `salle ouverte (${room}), conservée sur l’appareil`);
     await remote.getByRole('button', { name: 'Fermer le menu' }).click();
     await remote.waitForTimeout(400);
-    const covered = await uncoveredTapTargets(remote);
-    assert(covered.length === 0, `scoreur compact sur 360 px : tous les boutons font ≥ 44 px et sont accessibles ${covered.join(', ')}`);
+    // Télécommande dédiée : aperçu de l'écran distant, grosses commandes, pas de score à l'écran.
+    await remote.locator('.remote-board').waitFor();
+    assert((await remote.locator('.remote-board .match-bar').count()) === 0, 'télécommande : pas de score à l’écran (réglé dans ⚙️)');
+    const remoteBad = await badButtons(remote, '.remote-board button, .remote-board [role="button"]');
+    assert(remoteBad.length === 0, `télécommande 360 px : commandes ≥ 44 px, entières et accessibles ${remoteBad.join(', ')}`);
+    const previewText = (await remote.getByRole('group', { name: 'Aperçu de l’écran distant' }).textContent()) ?? '';
+    assert(previewText.includes('Dupont') && /\d/.test(previewText), 'télécommande : aperçu de l’écran distant (joueurs + chrono)');
 
     const display = await (await browser.newContext({ viewport: { width: 1000, height: 560 } })).newPage();
     await display.goto(`${APP}/d/${room}`);
@@ -218,13 +240,19 @@ async function main() {
     await remote.getByRole('img', { name: /Synchronisation OK/ }).waitFor({ timeout: 10_000 });
     assert(true, 'télécommande : voyant vert');
 
+    await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    await remote.getByRole('tab', { name: 'Match' }).click();
     const t0 = Date.now();
-    await remote.getByLabel('Ajouter une manche à Dupont').click();
+    await remote.locator('.settings-live-score').getByLabel('Ajouter une manche à Dupont').click();
     await display.getByLabel('Score Dupont').filter({ hasText: '1' }).waitFor({ timeout: 10_000 });
     const latency = Date.now() - t0;
-    assert(latency < 1_000, `le score marqué arrive sur l’écran Visuel en ${latency} ms (relais local)`);
-    const active = (await remote.locator('.player-status.active').textContent()) ?? '';
+    assert(latency < 1_000, `le score marqué (⚙️ → Match) arrive sur l’écran Visuel en ${latency} ms (relais local)`);
+    await remote.getByRole('button', { name: 'Fermer le menu' }).click();
+    await remote.waitForTimeout(400);
+    const active = (await remote.locator('.remote-players .player-status.active').textContent()) ?? '';
     assert(active.includes('Martin'), 'marquer la manche relance le chrono avec le joueur qui casse (Martin)');
+    const previewScore = (await remote.locator('.remote-preview-score').first().textContent()) ?? '';
+    assert(previewScore.startsWith('1'), `aperçu de l’écran distant à jour : score ${previewScore}`);
 
     await remote.locator('#btnPlayPause').click();
     await display.waitForTimeout(2_500);
@@ -244,11 +272,37 @@ async function main() {
     const transparent = [look.body, look.html, look.root].every((value) => value === 'rgba(0, 0, 0, 0)');
     assert(transparent, `overlay OBS : fond transparent ${transparent ? '' : JSON.stringify(look)}`);
     assert((await overlay.getByLabel('Score Dupont').textContent()) === '1', 'overlay OBS : score affiché');
+    // Paysage (option) : téléphone tourné → joueur 1 à gauche, aperçu au centre, joueur 2 à droite.
+    await remote.setViewportSize({ width: 780, height: 360 });
+    await remote.waitForTimeout(300);
+    assert((await remote.locator('.landscape-board').count()) === 0, 'paysage désactivé par défaut : le téléphone tourné reste en portrait');
+    await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    await remote.getByRole('tab', { name: 'Écran' }).click();
+    await remote.getByRole('switch', { name: 'Disposition paysage (téléphone tourné)' }).click();
+    await remote.getByRole('button', { name: 'Fermer le menu' }).click();
+    await remote.locator('.landscape-board').waitFor({ timeout: 3_000 });
+    const zones = await remote.evaluate(() =>
+      [...document.querySelectorAll('[data-zone]')].map((el) => [el.getAttribute('data-zone'), Math.round(el.getBoundingClientRect().left)]),
+    );
+    assert(
+      zones.map(([zone]) => zone).join(',') === 'p1,center,p2' && zones[0][1] < zones[1][1] && zones[1][1] < zones[2][1],
+      `paysage : joueur 1 à gauche, centre, joueur 2 à droite (${JSON.stringify(zones)})`,
+    );
+    await remote.waitForTimeout(400);
+    const landscapeBad = await badButtons(remote, '.landscape-board button');
+    assert(landscapeBad.length === 0, `paysage 780×360 : boutons ≥ 44 px, entiers et accessibles ${landscapeBad.join(', ')}`);
+    assert(
+      (await remote.getByRole('group', { name: 'Aperçu de l’écran distant' }).count()) === 1,
+      'paysage avec salle ouverte : l’aperçu de l’écran distant est au centre',
+    );
     await remote.getByLabel('Ajouter une manche à Dupont').click();
     const end = remote.getByRole('dialog', { name: /Victoire de Dupont/ });
     await end.waitFor({ timeout: 5_000 });
-    assert(((await end.textContent()) ?? '').includes('Dupont 2 – 0 Martin'), 'fin de match : victoire et résumé partageable');
+    assert(((await end.textContent()) ?? '').includes('Dupont 2 – 0 Martin'), 'fin de match (score marqué en paysage) : victoire et résumé partageable');
     await end.getByRole('button', { name: /Fermer/ }).click();
+    await remote.setViewportSize({ width: 360, height: 780 });
+    await remote.locator('.remote-board').waitFor({ timeout: 3_000 });
+    assert(true, 'retour en portrait : télécommande dédiée');
     await remote.getByRole('button', { name: 'Ouvrir le menu' }).click();
     await remote.getByRole('tab', { name: 'Plus' }).click();
     await remote.getByText('Diagnostic', { exact: true }).first().click();

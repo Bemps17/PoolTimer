@@ -83,7 +83,7 @@ Ajouts demandés pour H8timer :
 
 *Critère de fin* : un point marqué sur le téléphone apparaît < 1 s sur l'écran Visuel, survit à un rechargement et à une reconnexion WebSocket.
 
-### Phase 2 — Mode télécommande dédié + overlay streaming (v2.9.0) — ✅ fait (priorité : le chrono, score discret)
+### Phase 2 — Mode télécommande dédié + overlay streaming (v2.9.0) — ✅ fait (priorité : le chrono, score discret) ; refondu en v3.4.0 (télécommande dédiée avec aperçu de l'écran distant, score dans ⚙️, paysage en option)
 Aujourd'hui le téléphone affiche un chrono géant redondant avec l'écran. Quand une salle est ouverte (`mirror.room != null`), afficher **`RemoteControllerView`** :
 - Chrono **petit** (aperçu) + état de connexion bien visible (écran lié / sync OK).
 - **Grosses cibles tactiles** : Start/Pause (énorme), Nouveau coup, Après casse, Extension, bascule joueur (P1/P2 grands, couleur du joueur).

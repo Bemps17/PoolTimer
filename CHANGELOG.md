@@ -2,6 +2,14 @@
 
 Toutes les dates sont en UTC.
 
+## 3.4.0 — 2026-11-01
+
+- **Télécommande dédiée** (`components/RemoteControl.tsx`, salle ouverte, portrait) : aperçu en direct de l'écran distant (`RemotePreview` : joueurs, EXT, score s'il est envoyé, chiffres et couleurs d'alerte, `SyncDot`), très gros Départ / Pause, grille Nouveau coup · Extension · Après casse · Nouvelle manche, ⚙️ dans l'en-tête de l'aperçu. Plus de score sur l'écran de la télécommande.
+- **Score en cours dans ⚙️ → Match** (carte en tête de l'onglet, `MatchScore` avec noms et + / −) ; option « Score sur la télécommande » (`viewOptions.remoteScore`) supprimée (ignorée à la lecture des anciennes configs).
+- **Nouvelle manche à l'appui long** (`HoldButton`, 600 ms, jauge ; activation clavier directe) ; retour tactile (`haptic`) si la vibration est activée.
+- **Disposition paysage** (`components/LandscapeBoard.tsx`, `viewOptions.landscape`, faux par défaut ; `boardLayout()` pur et testé ; `useIsLandscape`) : joueur 1 à gauche, chrono (ou aperçu si salle ouverte) et commandes au centre, joueur 2 à droite ; score / F / blanche / + / − sur les côtés si le score est activé.
+- Ancien mode télécommande intégré à `Scoreboard` retiré. Tests : composants (Testing Library) + e2e (télécommande 360 px, paysage 780×360, score depuis ⚙️, retour en portrait).
+
 ## 3.3.1 — 2026-11-01
 
 - **Onglets du menu ⚙️** : libellés courts **Match · Écran · Thème · Son · Plus** (les anciens « Affichage » / « Apparence » débordaient sur un vrai téléphone avec police agrandie) et **icônes Lucide** (`lucide-react` : Timer, MonitorSmartphone, Palette, Volume2, Ellipsis) à la place des emojis.

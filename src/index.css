@@ -1385,36 +1385,6 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
 .display-layout-score .display-screen { flex: 0.55; }
 .display-layout-score .match-bar-display { flex: 1; }
 
-/* ---------- Vue télécommande : chrono en vedette, grosses commandes, score discret ---------- */
-.scoreboard-body.remote-mode {
-    border-color: var(--c-primary);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 22px color-mix(in srgb, var(--c-primary) 70%, transparent);
-}
-.remote-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #fff;
-    background: color-mix(in srgb, var(--c-primary) 80%, #000);
-}
-.remote-badge-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #fff; opacity: 0.9; }
-.remote-badge-ok { background: color-mix(in srgb, var(--c-play) 75%, #000); }
-.remote-badge-ok .remote-badge-dot { background: var(--c-play); box-shadow: 0 0 8px var(--c-play); }
-.remote-badge-error, .remote-badge-waiting_sync {
-    background: color-mix(in srgb, var(--c-digit-critical) 75%, #000);
-}
-.scoreboard-body.remote-mode .control-game-btn { width: 84px; height: 84px; }
-.scoreboard-body.remote-mode .control-game-btn svg { width: 36px; height: 36px; }
-.scoreboard-body.remote-mode .timer-action-bar { min-height: 3.4rem; font-size: 1.05rem; }
-
 /* Score compact : bandeau discret (le chrono reste prioritaire) */
 .match-size-compact .match-side { padding: 0.1rem 0.3rem; flex-direction: row; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
 .match-size-compact .match-score { font-size: 1.7rem; }
@@ -1711,7 +1681,7 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
     opacity: 0.6;
 }
 .display-minimal { position: relative; }
-.remote-sync-dot, .mirror-live-dot {
+.mirror-live-dot {
     position: absolute;
     top: 0.35rem;
     right: 0.45rem;
@@ -1721,9 +1691,7 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 }
 .mirror-live-dot { position: fixed; top: 0.6rem; right: 0.6rem; }
 .top-bar { position: relative; }
-/* Voyant de la télécommande : coin haut-droit de la zone du chrono (vide), sans gêner les appuis. */
 .timer-screen { position: relative; }
-.timer-screen .remote-sync-dot { top: 0.5rem; right: 0.6rem; }
 
 /* Le score ne doit jamais repousser APRÈS CASSE / EXTENSION : seuls les chiffres rétrécissent. */
 .scoreboard-body .timer-screen { min-height: 0; grid-template-rows: minmax(0, 1fr) auto; }
@@ -1915,3 +1883,134 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 .player-config input[type='color'] { width: clamp(36px, 11vw, 3.5rem); flex: 0 0 auto; }
 .player-config { gap: clamp(8px, 2.5vw, 1rem); }
 .name-readonly { padding: 10px 8px; gap: 6px; }
+
+/* ---------- Appui long (nouvelle manche) : une jauge se remplit, l'action part à la fin ---------- */
+.hold-button { position: relative; overflow: hidden; }
+.hold-button .hold-fill {
+    position: absolute; inset: 0; transform: scaleX(0); transform-origin: left center;
+    background: color-mix(in srgb, var(--c-digit-critical) 35%, transparent); pointer-events: none;
+}
+.hold-button.holding .hold-fill { transform: scaleX(1); transition: transform var(--hold-ms, 600ms) linear; }
+.hold-button .hold-content { position: relative; }
+
+/* ---------- Télécommande dédiée (portrait) : aperçu de l'écran distant + grosses commandes ---------- */
+.scoreboard-body.remote-board {
+    justify-content: flex-start;
+    gap: clamp(0.4rem, 1.4vh, 0.7rem);
+    border-color: color-mix(in srgb, var(--c-primary) 55%, var(--c-border));
+}
+.remote-preview {
+    flex: 1 1 auto; min-height: 140px; display: flex; flex-direction: column; gap: 0.35rem;
+    padding: 0.45rem; border-radius: 16px; background: var(--c-player-chip-bg);
+    border: 1px solid color-mix(in srgb, var(--c-text-secondary) 25%, transparent);
+}
+.remote-preview-label {
+    display: flex; align-items: center; gap: 0.45rem; padding: 0 0.2rem;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-secondary);
+}
+.remote-preview-screen {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.4rem;
+    border-radius: 10px; background: var(--c-screen); border: 2px solid color-mix(in srgb, var(--c-text-secondary) 35%, transparent);
+}
+.remote-preview-players { display: flex; gap: 0.35rem; }
+.remote-preview-player {
+    flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.35rem;
+    border-radius: 6px; border: 1px solid transparent; background: var(--c-player-chip-bg); opacity: 0.55;
+    color: var(--c-text-primary); font-family: var(--font-body); font-weight: 600;
+}
+.remote-preview-player.active { opacity: 1; }
+.remote-preview-name { flex: 1 1 auto; min-width: 0; font-size: clamp(0.7rem, 3.2vw, 0.85rem); }
+.remote-preview-score { flex: 0 0 auto; font-family: var(--font-timer); font-size: clamp(0.85rem, 4vw, 1.1rem); }
+.remote-preview-score small { font-size: 0.65em; color: var(--c-text-secondary); }
+.remote-preview-ext { flex: 0 0 auto; font-size: 0.6rem; font-weight: 800; }
+.remote-preview-ext.ext-available { color: var(--c-ext-available); }
+.remote-preview-ext.ext-used { color: var(--c-ext-used); text-decoration: line-through; }
+.remote-preview-timer { flex: 1 1 auto; min-height: 0; container-type: size; display: grid; place-items: center; overflow: hidden; }
+.remote-preview-timer .timer-officiel { font-size: min(82cqh, 42cqw); }
+
+.remote-players { display: flex; gap: 0.5rem; }
+.remote-players .player-status { min-height: 48px; }
+
+.remote-play {
+    display: flex; align-items: center; justify-content: center; gap: 0.7rem; width: 100%;
+    height: clamp(84px, 17vh, 150px); border-radius: 22px; cursor: pointer; touch-action: manipulation;
+    border: 2px solid var(--c-play); color: var(--c-play);
+    background: color-mix(in srgb, var(--c-play) 12%, var(--c-bezel));
+    font-family: var(--font-body); font-weight: 800; font-size: clamp(1.4rem, 7.5vw, 2.1rem);
+    transition: transform 0.08s ease-out, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+#btnPlayPause.remote-play, #btnPlayPause.landscape-play { opacity: 1; }
+.remote-play svg { width: clamp(28px, 9vw, 40px); height: clamp(28px, 9vw, 40px); }
+.remote-play.playing { background: color-mix(in srgb, var(--c-play) 22%, var(--c-bezel)); box-shadow: 0 0 16px color-mix(in srgb, var(--c-play) 60%, transparent); }
+.remote-play:active, .remote-action:active, .landscape-action:active { transform: translateY(2px); }
+
+.remote-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.remote-actions > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.remote-action, .landscape-action {
+    min-height: clamp(56px, 9vh, 78px); border-radius: 14px; cursor: pointer; touch-action: manipulation;
+    display: flex; align-items: center; justify-content: center; gap: 0.45rem; flex-wrap: wrap; padding: 0.3rem 0.5rem;
+    background: var(--c-button-bg); color: var(--c-text-primary);
+    border: 1px solid color-mix(in srgb, var(--c-text-secondary) 30%, transparent);
+    font-family: var(--font-body); font-weight: 700; font-size: clamp(0.9rem, 4.2vw, 1.1rem); line-height: 1.1;
+}
+.remote-action svg, .landscape-action svg { width: 22px; height: 22px; }
+.remote-action small { font-weight: 500; font-size: 0.72em; color: var(--c-text-secondary); }
+.remote-action-ext, .landscape-ext {
+    color: var(--c-ext-available); border-color: var(--c-ext-available);
+    background: color-mix(in srgb, var(--c-ext-available) 12%, var(--c-button-bg));
+}
+.remote-action-ext.disabled, .landscape-ext.disabled { opacity: 0.35; cursor: not-allowed; }
+.remote-action-casse, .landscape-casse {
+    color: var(--c-primary); border-color: var(--c-primary);
+    background: color-mix(in srgb, var(--c-primary) 14%, var(--c-button-bg));
+}
+.remote-action-casse.active-shot, .landscape-casse.active-shot { box-shadow: 0 0 12px color-mix(in srgb, var(--c-primary) 70%, transparent); }
+.remote-preview-action { margin-left: auto; }
+.remote-menu-btn {
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    background: var(--c-button-bg); color: var(--c-text-secondary); touch-action: manipulation;
+    border: 1px solid color-mix(in srgb, var(--c-text-secondary) 30%, transparent);
+}
+.remote-menu-btn svg { width: 24px; height: 24px; }
+.remote-menu-btn.active { border-color: var(--c-primary); color: var(--c-primary); }
+
+/* ---------- Paysage : joueur 1 à gauche, chrono au centre, joueur 2 à droite ---------- */
+.scoreboard-body.landscape-board {
+    max-width: none; flex-direction: row; align-items: stretch; justify-content: stretch;
+    gap: clamp(0.4rem, 1.2vw, 0.8rem); padding: clamp(0.4rem, 1.5vh, 0.8rem); border-radius: 22px;
+}
+.landscape-side {
+    flex: 0 0 clamp(104px, 20vw, 260px); min-width: 0; display: flex; flex-direction: column; gap: 0.4rem;
+    padding: clamp(4px, 0.8vw, 0.4rem); border-radius: 16px; border: 2px solid transparent; background: var(--c-player-chip-bg);
+    opacity: 0.6; transition: opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.landscape-side.active { opacity: 1; }
+.landscape-select {
+    flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.25rem; padding: 0.3rem 2px; border: 0; border-radius: 12px; background: transparent; color: var(--c-text-primary);
+    cursor: pointer; touch-action: manipulation; font-family: var(--font-body); font-weight: 700;
+}
+.landscape-name { width: 100%; font-size: clamp(0.95rem, 2.6vw, 1.5rem); text-align: center; }
+.landscape-score { font-family: var(--font-timer); font-size: clamp(2.4rem, 18vh, 5.5rem); line-height: 1; }
+.landscape-meta { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: clamp(0.75rem, 2vw, 0.95rem); }
+.landscape-meta .match-ball { width: 22px; height: 22px; }
+.landscape-ferme { color: var(--c-text-secondary); }
+.landscape-steps { display: flex; gap: 0.4rem; justify-content: center; }
+.landscape-steps .match-step { width: clamp(44px, 8vw, 52px); height: 44px; }
+.landscape-center { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.landscape-center .remote-preview { min-height: 0; }
+.landscape-timer {
+    flex: 1 1 auto; min-height: 0; container-type: size; display: grid; place-items: center; overflow: hidden;
+    border-radius: 16px; background: var(--c-screen);
+}
+.landscape-timer .timer-officiel { font-size: min(calc(min(76cqh, 38cqw) * var(--digit-scale, 1)), 90cqh, 48cqw); }
+.landscape-actions { display: flex; gap: clamp(0.25rem, 0.8vw, 0.4rem); }
+.landscape-action { flex: 1 1 0; min-width: 44px; min-height: 48px; height: clamp(48px, 15vh, 66px); padding: 0.2rem; font-size: clamp(0.85rem, 2vw, 1.05rem); }
+.landscape-casse { font-size: clamp(0.72rem, 1.7vw, 0.95rem); padding: 0; }
+.landscape-play { color: var(--c-play); border: 2px solid var(--c-play); background: color-mix(in srgb, var(--c-play) 12%, var(--c-button-bg)); flex-grow: 1.6; }
+.landscape-play svg { width: 28px; height: 28px; }
+.landscape-play.playing { box-shadow: 0 0 12px color-mix(in srgb, var(--c-play) 60%, transparent); }
+.landscape-action.active { border-color: var(--c-primary); }
+
+/* Score en cours dans ⚙️ → Match : noms + / − (la télécommande ne l'affiche plus en grand). */
+.settings-live-score .match-bar { margin: 0 0 0.4rem; }

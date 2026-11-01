@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.3.1';
+export const APP_VERSION = '3.4.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.4.0',
+    date: '2026-11-01',
+    title: 'Télécommande dédiée et disposition paysage',
+    notes: [
+      'Mode télécommande à part entière (salle miroir ouverte) : en haut, un aperçu en direct de ce qu’affiche l’écran distant (joueurs, score s’il est affiché, chiffres et couleurs d’alerte, voyant de synchro) ; au centre, un très gros bouton Départ / Pause ; dessous, Nouveau coup, Extension, Après casse et Nouvelle manche.',
+      'Le contrôle du temps passe en premier : plus de score sur l’écran de la télécommande. Le score et les casses fermes se règlent dans ⚙️ → Match, carte « Score en cours » en tête de l’onglet (+ / − par joueur).',
+      'Nouvelle manche à l’appui long (une jauge se remplit) : plus de remise à zéro par erreur. Petit retour par vibration sur chaque commande.',
+      'Disposition paysage, en option (⚙️ → Écran, désactivée par défaut) : téléphone tourné, joueur 1 à gauche (nom, score, F, + / −), chrono et commandes au centre, joueur 2 à droite ; appui sur un côté = c’est son tour. Avec une salle ouverte, le centre montre l’aperçu de l’écran distant. Retour automatique en portrait quand on redresse le téléphone.',
+      'Mise en page fluide en largeur, du petit téléphone (320 px) à la tablette : toutes les commandes font au moins 44 px.',
+    ],
+  },
   {
     version: '3.3.1',
     date: '2026-11-01',
