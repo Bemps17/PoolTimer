@@ -1,3 +1,5 @@
+import type { MatchOptions } from './match';
+
 export type Theme = 'sombre' | 'light' | 'cyberpunk' | 'ffb' | 'fbep';
 export type CompetitionMode = 'ffb' | 'fbep' | 'ffbTdTn' | 'ffbMaster';
 export type InterfaceMode = 'boutons' | 'tactile';
@@ -65,6 +67,7 @@ export interface TimerConfig {
   theme: Theme;
   colors: ThemeColors;
   competitionMode: CompetitionMode | null;
+  matchOptions: MatchOptions;
 }
 
 export interface AlertsFired {

@@ -4,6 +4,8 @@ import { APP_VERSION } from './changelog';
 import { ChangelogPanel } from './components/ChangelogPanel';
 import { DisplayView } from './components/DisplayView';
 import { HelpPanel } from './components/HelpPanel';
+import { LagPrompt } from './components/LagPrompt';
+import { MatchScore } from './components/MatchScore';
 import { MirrorSettings } from './components/MirrorSettings';
 import { Scoreboard } from './components/Scoreboard';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -12,10 +14,11 @@ import { TutorialSlideshow } from './components/TutorialSlideshow';
 import { UpdateBanner } from './components/UpdateBanner';
 import { useBilliardTimer } from './hooks/useBilliardTimer';
 import { useFullscreen } from './hooks/useFullscreen';
+import { useMatch } from './hooks/useMatch';
 import { useControllerMirror } from './hooks/useMirror';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
-import { displayUrl, parseDisplayRoom } from './mirror/protocol';
+import { displayUrl, parseDisplayRoom, toMirrorMatch } from './mirror/protocol';
 import { loadMirrorEnabled, saveMirrorEnabled } from './mirror/storage';
 import type { TimerConfig } from './timer/types';
 
@@ -29,6 +32,7 @@ export default function App() {
 
 function ControllerApp() {
   const timer = useBilliardTimer();
+  const matchControl = useMatch(timer.config.matchOptions);
   const { isFullscreen, toggle } = useFullscreen();
   const pwaInstall = usePwaInstall();
   const pwaUpdate = usePwaUpdate();
@@ -43,6 +47,7 @@ function ControllerApp() {
     enabled: mirrorEnabled,
     state: timer.state,
     config: timer.config,
+    match: matchControl.match,
   });
 
   useEffect(() => {
@@ -105,6 +110,17 @@ function ControllerApp() {
     setToastVisible(true);
   }, [pwaUpdate.snoozeUpdate]);
 
+  const handleNewMatch = useCallback(() => {
+    if (!window.confirm('Remettre le score, les casses fermes et le tirage à zéro (nouveau match) ?')) return;
+    matchControl.newMatch();
+    setToastMessage('Nouveau match');
+    setToastVisible(true);
+  }, [matchControl.newMatch]);
+
+  const matchOptions = timer.config.matchOptions;
+  const mirrorMatch = toMirrorMatch(matchControl.match, matchOptions);
+  const lagPrompt = matchOptions.enabled && matchOptions.lagAtStart && matchControl.match.lagPending;
+
   const displayLink = mirror.room ? displayUrl(window.location.origin, mirror.room) : null;
 
   const handleCopyLink = useCallback(async () => {
@@ -143,7 +159,35 @@ function ControllerApp() {
           setMenuOpen(true);
         }}
         onToggleMinions={handleToggleMinions}
+        matchBar={
+          matchOptions.enabled ? (
+            <MatchScore
+              match={mirrorMatch}
+              p1Name={timer.config.p1Name}
+              p2Name={timer.config.p2Name}
+              p1Color={timer.config.p1Color}
+              p2Color={timer.config.p2Color}
+              controls={{
+                onScore: matchControl.addScore,
+                onFerme: matchControl.addFerme,
+                onToggleBreaker: matchControl.swapBreaker,
+                onUndo: matchControl.undoLast,
+                canUndo: matchControl.canUndo,
+              }}
+            />
+          ) : null
+        }
       />
+      {lagPrompt ? (
+        <LagPrompt
+          p1Name={timer.config.p1Name}
+          p2Name={timer.config.p2Name}
+          p1Color={timer.config.p1Color}
+          p2Color={timer.config.p2Color}
+          onChoose={matchControl.chooseFirstBreaker}
+          onSkip={matchControl.dismissLag}
+        />
+      ) : null}
       <SettingsPanel
         open={menuOpen}
         config={timer.config}
@@ -153,6 +197,9 @@ function ControllerApp() {
         onShowHelp={() => setHelpOpen(true)}
         onShowChangelog={() => setChangelogOpen(true)}
         onShowTutorial={openTutorial}
+        onNewMatch={handleNewMatch}
+        onUndoMatch={matchControl.undoLast}
+        canUndoMatch={matchControl.canUndo}
         onToggleFullscreen={toggle}
         installStatus={pwaInstall.status}
         onInstall={() => {

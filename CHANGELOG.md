@@ -2,6 +2,14 @@
 
 Toutes les dates sont en UTC.
 
+## 2.8.0 — 2026-11-01
+
+- **Scoreur 1 contre 1** (joueur ou équipe) : score avec +/− et annulation, **casses fermes (F)** en compteur séparé et en plus petit chiffre.
+- **Blanche** = qui casse ; appui pour inverser ; la casse alterne à chaque manche marquée.
+- **Tirage à la bande** (option) : une seule fois au début du match, désigne le premier casseur.
+- Course à N optionnelle, bouton **Nouveau match** (⚙️ → Score).
+- **Écran Visuel** : score en grand, F en petit, blanche sur le casseur. Champ `match` optionnel dans le snapshot (anciennes télécommandes compatibles). **Worker Cloudflare à redéployer** (`cd worker && npx wrangler deploy`).
+
 ## 2.7.1 — 2026-09-21
 
 - **SEO** : titre et description Google axés sur le **contrôle à distance** (télécommande + écran Visuel en miroir).

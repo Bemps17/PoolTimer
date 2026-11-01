@@ -2,7 +2,7 @@
 
 Chronomètre de tir (shot clock) pour le billard / Blackball FFB. Application web installable (PWA), pensée pour mobile, tablette et ordinateur.
 
-Version actuelle : **2.7.1** (voir [CHANGELOG.md](CHANGELOG.md)).
+Version actuelle : **2.8.0** (voir [CHANGELOG.md](CHANGELOG.md)).
 
 Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL canonique).
 
@@ -16,6 +16,7 @@ Production : [https://pooltimer.vercel.app](https://pooltimer.vercel.app) (URL c
 - Modes boutons visibles ou boutons invisibles (réglages toujours accessibles)
 - Taille des chiffres du chrono réglable
 - Alertes visuelles, sonores et vibration. Pack **classique** (fichiers d’origine du dépôt + cloche Tone.js), Pack Crétins et Pack Minions-like (originaux H8timer), tirage aléatoire, bips 1 s ou alerte ~5 s. Import local de vos fichiers (Voicemod : téléchargement manuel, pas de fetch)
+- **Scoreur 1v1** (joueur ou équipe) : score, **casses fermes (F)** en compteur séparé, **blanche** sur le casseur (appui pour inverser, alternance à chaque manche), tirage à la bande optionnel au début du match, course à N. Visible en grand sur l'écran Visuel.
 - Plein écran (dans les réglages, pour le navigateur), sauvegarde automatique dans `localStorage`
 - **Pas de clavier mobile pendant le match** : aucun champ texte sur l'écran de jeu ; dans ⚙️, durées via +/− **et** saisie au clavier ; noms éditables uniquement après un appui explicite « modifier » (un nom vide est autorisé)
 - **Miroir télécommande** : téléphone = commandes, tablette/PC = grand chrono, pairing code + QR, sync Internet. Tutoriel illustré : bouton **Tutoriel** en haut du menu ⚙️.

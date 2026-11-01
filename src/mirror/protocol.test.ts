@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getDefaultConfig } from '../timer/config';
 import { createInitialState, startTimer } from '../timer/engine';
+import { createMatch, setFirstBreaker, updateFerme, updateScore } from '../timer/match';
 import {
   buildSnapshot,
   displayPath,
@@ -12,7 +13,9 @@ import {
   normalizeRoomCode,
   parseClientMessage,
   parseDisplayRoom,
+  parseMirrorMatch,
   parseServerMessage,
+  parseSnapshot,
   remainingAtSend,
   remainingFromSnapshot,
   seqFromWelcome,
@@ -236,5 +239,57 @@ describe('ephemeral room', () => {
     expect(room.snapshot?.remainingTime).toBe(45_000);
     expect(room.acceptSnapshot(1, snapshot)).toBe(true);
     expect(room.seq).toBe(1);
+  });
+});
+
+describe('mirror protocol — scoreur (match)', () => {
+  const config = getDefaultConfig();
+  const state = createInitialState(config);
+
+  it('carries score, F (separate counter), breaker and options in the snapshot', () => {
+    let match = createMatch({ lagAtStart: true });
+    match = setFirstBreaker(match, 2);
+    match = updateScore(match, 2, 1);
+    match = updateFerme(match, 2, 1);
+    const snapshot = buildSnapshot(state, { ...config, matchOptions: { ...config.matchOptions, targetScore: 7 } }, 1, match);
+    expect(snapshot.match).toEqual({
+      scores: { 1: 0, 2: 1 },
+      fermes: { 1: 0, 2: 1 },
+      breaker: 1,
+      lagPending: false,
+      targetScore: 7,
+      showFerme: true,
+      showBreaker: true,
+    });
+  });
+
+  it('survives the relay: parseSnapshot keeps the match (the worker strips unknown fields)', () => {
+    const match = updateFerme(createMatch({ lagAtStart: false }), 1, 1);
+    const wire = JSON.parse(JSON.stringify(buildSnapshot(state, config, 5, match)));
+    expect(parseSnapshot(wire)?.match?.fermes).toEqual({ 1: 1, 2: 0 });
+  });
+
+  it('omits the match when the scoreur is disabled or absent (legacy controllers)', () => {
+    const match = createMatch({ lagAtStart: false });
+    const off = buildSnapshot(state, { ...config, matchOptions: { ...config.matchOptions, enabled: false } }, 1, match);
+    expect(off.match).toBeUndefined();
+    expect(buildSnapshot(state, config, 1).match).toBeUndefined();
+  });
+
+  it('still accepts a v2.7.1 snapshot without match', () => {
+    const legacy = JSON.parse(JSON.stringify(buildSnapshot(state, config, 1)));
+    delete legacy.match;
+    expect(parseSnapshot(legacy)).toBeDefined();
+    expect(parseSnapshot(legacy)?.match).toBeUndefined();
+  });
+
+  it('ignores an invalid match without rejecting the whole snapshot, and clamps values', () => {
+    const base = JSON.parse(JSON.stringify(buildSnapshot(state, config, 1, createMatch({ lagAtStart: false }))));
+    expect(parseSnapshot({ ...base, match: { scores: 'x' } })?.match).toBeUndefined();
+    expect(parseSnapshot({ ...base, match: { scores: 'x' } })?.remainingTime).toBe(base.remainingTime);
+    expect(
+      parseMirrorMatch({ scores: { 1: -4, 2: 1e9 }, fermes: { 1: 2, 2: 0 }, breaker: 2, targetScore: 'a' }),
+    ).toMatchObject({ scores: { 1: 0, 2: 99 }, breaker: 2, targetScore: 0 });
+    expect(parseMirrorMatch({ scores: { 1: 0, 2: 0 }, fermes: { 1: 0, 2: 0 }, breaker: 3 })).toBeUndefined();
   });
 });

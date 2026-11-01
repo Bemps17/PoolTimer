@@ -5,6 +5,7 @@ import { formatTime } from '../timer/format';
 import { useDisplayMirror } from '../hooks/useMirror';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { formatRoomCode } from '../mirror/protocol';
+import { MatchScore } from './MatchScore';
 import { PlayerStatus } from './PlayerStatus';
 
 interface DisplayViewProps {
@@ -104,6 +105,15 @@ export function DisplayView({ room }: DisplayViewProps) {
             extensionUsed={Boolean(snapshot?.extensionsUsedInGame[2])}
           />
         </div>
+      ) : null}
+      {config && snapshot?.match ? (
+        <MatchScore
+          match={snapshot.match}
+          p1Name={config.p1Name}
+          p2Name={config.p2Name}
+          p1Color={config.p1Color}
+          p2Color={config.p2Color}
+        />
       ) : null}
       <div className="display-screen" ref={screenRef}>
         {waiting ? (

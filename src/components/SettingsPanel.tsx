@@ -10,6 +10,7 @@ import {
   showsApresCasseControl,
   withSyncedCompetitionMode,
 } from '../timer/config';
+import { MATCH_LIMITS, type MatchOptions } from '../timer/match';
 import { formatSecondsClock } from '../timer/format';
 import type { CompetitionMode, InterfaceMode, Theme, TimerConfig } from '../timer/types';
 import { dbToGain, gainToDb } from '../timer/volume';
@@ -28,6 +29,9 @@ interface SettingsPanelProps {
   onShowHelp: () => void;
   onShowChangelog: () => void;
   onShowTutorial: () => void;
+  onNewMatch: () => void;
+  onUndoMatch: () => void;
+  canUndoMatch: boolean;
   onToggleFullscreen: () => void;
   installStatus: PwaInstallStatus;
   onInstall: () => void;
@@ -89,6 +93,9 @@ export function SettingsPanel({
   onShowHelp,
   onShowChangelog,
   onShowTutorial,
+  onNewMatch,
+  onUndoMatch,
+  canUndoMatch,
   onToggleFullscreen,
   installStatus,
   onInstall,
@@ -114,6 +121,10 @@ export function SettingsPanel({
 
   const patchTimings = (partial: Partial<TimerConfig>, resetShot = false) => {
     onChange(withSyncedCompetitionMode({ ...config, ...partial }), { resetShot });
+  };
+
+  const patchMatch = (partial: Partial<MatchOptions>) => {
+    onChange({ ...config, matchOptions: { ...config.matchOptions, ...partial } });
   };
 
   const hideApresCasse = !showsApresCasseControl(config);
@@ -217,6 +228,59 @@ export function SettingsPanel({
               onColorChange={(p2Color) => patch({ p2Color })}
             />
             <p className="install-hint">Nom vide autorisé (affichage « Joueur 1 / 2 » à l’écran, sans réécrire P1).</p>
+          </SettingsSection>
+
+          <SettingsSection title="Score" defaultOpen>
+            <SelectField
+              label="Scoreur (1 contre 1)"
+              htmlId="matchEnabled"
+              value={String(config.matchOptions.enabled)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ enabled: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Tirage à la bande au début du match"
+              htmlId="matchLagAtStart"
+              value={String(config.matchOptions.lagAtStart)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ lagAtStart: parseBooleanSelect(value) })}
+            />
+            <p className="install-hint">
+              Sert à désigner le premier casseur (joueur ou équipe), une seule fois par match. Ensuite la casse alterne
+              à chaque manche marquée. Désactivé : la casse commence au joueur 1.
+            </p>
+            <NumberStepper
+              label="Course à (0 = sans limite)"
+              htmlId="matchTargetScore"
+              value={config.matchOptions.targetScore}
+              min={MATCH_LIMITS.targetScore.min}
+              max={MATCH_LIMITS.targetScore.max}
+              suffix=""
+              onChange={(targetScore) => patchMatch({ targetScore })}
+            />
+            <SelectField
+              label="Afficher les casses fermes (F)"
+              htmlId="matchShowFerme"
+              value={String(config.matchOptions.showFerme)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ showFerme: parseBooleanSelect(value) })}
+            />
+            <SelectField
+              label="Afficher la blanche (qui casse)"
+              htmlId="matchShowBreaker"
+              value={String(config.matchOptions.showBreaker)}
+              options={YES_NO}
+              onChange={(value) => patchMatch({ showBreaker: parseBooleanSelect(value) })}
+            />
+            <p className="install-hint">
+              Score et casses fermes sont deux compteurs séparés. Appui sur la blanche : inverser le casseur.
+            </p>
+            <button type="button" className="bouton-menu" onClick={onUndoMatch} disabled={!canUndoMatch}>
+              Annuler la dernière action du score
+            </button>
+            <button type="button" className="bouton-menu bouton-menu-secondary" onClick={onNewMatch}>
+              Nouveau match (tout remettre à zéro)
+            </button>
           </SettingsSection>
 
           <SettingsSection title="Compétition & temps" defaultOpen>

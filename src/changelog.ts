@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.7.1';
+export const APP_VERSION = '2.8.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.8.0',
+    date: '2026-11-01',
+    title: 'Scoreur 1 contre 1 : score, casses fermes et blanche',
+    notes: [
+      'Scoreur 1 contre 1 (joueur ou équipe) sur la télécommande : score de chaque côté avec +/−, annulation de la dernière action.',
+      'Casses fermes (F) : compteur séparé du score, affiché en plus petit chiffre à côté du score.',
+      'La blanche indique qui casse ; appui sur la blanche pour inverser. La casse alterne à chaque manche marquée.',
+      'Option Tirage à la bande : une seule fois au début du match, pour désigner le premier casseur.',
+      'Course à N optionnelle avec annonce de victoire. Réglages dans ⚙️ → Score, bouton Nouveau match.',
+      'L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche. Compatible avec les anciennes télécommandes.',
+    ],
+  },
   {
     version: '2.7.1',
     date: '2026-09-21',

@@ -26,6 +26,23 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
             en haut du menu ⚙️.
           </p>
 
+          <h3>Scoreur 1 contre 1</h3>
+          <ul>
+            <li>
+              <strong>Score :</strong> +/− sous les noms (joueur ou équipe). <strong>F</strong> = casses fermes,
+              compteur séparé du score, affiché en plus petit.
+            </li>
+            <li>
+              <strong>Blanche :</strong> indique qui casse. Appui dessus pour inverser. La casse alterne à chaque
+              manche marquée.
+            </li>
+            <li>
+              <strong>Tirage à la bande :</strong> option dans ⚙️ → Score ; désigne le premier casseur une seule fois,
+              au début du match. <strong>Nouveau match</strong> remet tout à zéro.
+            </li>
+            <li>L’écran Visuel (miroir) affiche le score en grand, les F en petit et la blanche.</li>
+          </ul>
+
           <h3>Contrôles Principaux</h3>
           <ul>
             <li>

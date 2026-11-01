@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { computeTimerFontSize, showsApresCasseControl } from '../timer/config';
 import { canUseExtension, getDigitState, getFlashClass } from '../timer/engine';
 import { formatSecondsClock, formatTime } from '../timer/format';
@@ -19,6 +19,8 @@ interface ScoreboardProps {
   onSelectPlayer: (player: PlayerId) => void;
   onToggleMenu: () => void;
   onToggleMinions: () => void;
+  /** Scoreur 1v1 (score, F, blanche), affiché sous les bandeaux joueurs. */
+  matchBar?: ReactNode;
 }
 
 export function Scoreboard({
@@ -33,6 +35,7 @@ export function Scoreboard({
   onSelectPlayer,
   onToggleMenu,
   onToggleMinions,
+  matchBar,
 }: ScoreboardProps) {
   const screenRef = useRef<HTMLElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
@@ -216,6 +219,7 @@ export function Scoreboard({
             onSelect={() => onSelectPlayer(2)}
           />
         </div>
+        {matchBar}
       </header>
 
       <section

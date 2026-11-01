@@ -74,7 +74,7 @@ Ajouts demandés pour H8timer :
 - [ ] Ajouter `npm run typecheck` (`tsc -b --noEmit`) et un workflow CI GitHub Actions (`npm ci && npm test && npm run build`)
 - [ ] Test de non-régression du **contrat de protocole** : un snapshot v2.7.1 doit toujours être accepté (rétro-compat)
 
-### Phase 1 — Score (v2.8.0) — *prioritaire*
+### Phase 1 — Score (v2.8.0) — ✅ fait (reste : redéployer le Worker Cloudflare, slide de tutoriel illustrée)
 1. `timer/match.ts` (logique pure, tests) portée de Scoreurv3 : `MatchState { scores: {1,2}, fermes: {1,2}, breaker: 1|2, history }`, `scoreAfterDelta`, `breakerAfterScoreDelta`, `updateFerme`, `toggleBreaker`, `setFirstBreaker(winner)` (tirage à la bande), `undo`, `shouldDeclareVictory` ; réglages `breakRule: 'alternate'|'lag'`, `targetScore`, `showFerme`, `fermeFontScale`, `showBreaker`.
 2. Persistance + `mergeMatch` (validation, bornes).
 3. **Protocole** : `MirrorSnapshot.match?: MirrorMatch` optionnel ; `parseSnapshot` le parse explicitement (sinon le Worker le supprime) ; tests de rétro-compat ; **redéployer le Worker**.
