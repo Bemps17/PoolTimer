@@ -2,20 +2,20 @@
 
 > Fichier de mémoire pour reprendre le projet dans une nouvelle conversation sans rien perdre.
 > **À lire en premier**, puis `CLAUDE.md` (règles) et `ROADMAP.md` (feuille de route).
-> Dernière mise à jour : 2026-11-01, après la fusion de la PR #24 (v3.3.0 en production).
+> Dernière mise à jour : 2026-11-01, après la fusion de la PR #26 (v3.3.1 en production).
 
 ## 1. Où en est le projet
 
 | Élément | État |
 | --- | --- |
-| Version en production | **3.3.0** (v3.3.1 prête sur la branche de travail : onglets Lucide) |
+| Version en production | **3.3.1** (onglets Lucide, noms sur une ligne) |
 | Site | https://pooltimer.vercel.app (Vercel, projet `pooltimer`, déploiement automatique depuis `main`) |
 | Relais miroir | Cloudflare Worker `h8timer-mirror`, version active **`f694928a-923d-4c8e-96e4-18726b0b06df`** |
 | Branche de travail | `claude/app-completion-roadmap-eyqp6k` (repartie de `main`, propre) |
-| Tests | 324 tests Vitest, sonde du relais, scénario e2e Playwright : tout vert (local + CI GitHub) |
+| Tests | 328 tests Vitest, sonde du relais, scénario e2e Playwright : tout vert (local + CI GitHub) |
 | CueScore | **En attente (WIP)**, rien de codé — voir `docs/integrations/cuescore.md` |
 
-Historique des PR fusionnées : #22 (v3.0.1), #23 (v3.1.0), #24 (v3.2.0 + v3.3.0).
+Historique des PR fusionnées : #22 (v3.0.1), #23 (v3.1.0), #24 (v3.2.0 + v3.3.0), #25 (docs), #26 (v3.3.1).
 Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et retours arrière : fin de `ROADMAP.md`.
 
 ## 2. Ce que veut l'utilisateur (préférences durables)
@@ -53,6 +53,7 @@ Journal détaillé de chaque version : `CHANGELOG.md`. Versions du Worker et ret
   - **Déployer le Worker sans wrangler login** : `npx wrangler deploy --dry-run --minify --outdir /tmp/wbundle --config worker/wrangler.jsonc`, puis `PUT /accounts/{id}/workers/scripts/h8timer-mirror` en multipart (metadata : `main_module: index.js`, `compatibility_date: 2026-09-20`, binding `durable_object_namespace` `ROOMS` → classe `TimerRoom`, **sans nouvelle migration**). Vérifier ensuite `/deployments` et `/content/v2`. Noter la version dans le journal de `ROADMAP.md`.
 - **Réseau du conteneur** : `workers.dev`, `api.cuescore.com` et `developers.cloudflare.com` étaient bloqués → impossible de sonder le vrai relais depuis la session ; la sonde réelle se lance sur le poste de l'utilisateur : `MIRROR_WS_URL=wss://h8timer-mirror.h8timer.workers.dev npm run test:mirror`.
 - **Playwright** : `playwright@1.63.0` en devDependency (navigateurs dans `/opt/pw-browsers`, ne pas réinstaller). Scripts de capture ad hoc : `NODE_PATH=$PWD/node_modules node script.cjs`.
+- CI : les polices y sont rendues ~3 % plus larges qu'en local ; un texte ajusté au minimum de `FitText` peut passer en local et être tronqué en CI → garder une marge (éléments voisins en px/vw, pas en rem).
 - Piège shell : `pkill -f "vite …"` peut tuer le shell courant → utiliser des motifs `"[v]ite --port 5199"`.
 
 ## 6. Commandes de vérification (avant tout push)
@@ -65,6 +66,7 @@ npm run test:e2e         # télécommande → relais → écran Visuel → overl
 
 ## 7. Prochaines étapes possibles
 
+0. **Mode télécommande dédié (en attente du choix de l'utilisateur)** : maquettes dans `docs/propositions/telecommande.html` (+ `.png`). A = télécommande pure (aperçu temps réel de l'écran distant + gros Départ/Pause, score réglé dans ⚙️ par +/−) — recommandée ; B = score discret + feuille +/− ; C = minimale ; D = paysage (joueur 1 à gauche, chrono au centre, joueur 2 à droite), option dans ⚙️ → Écran, **pas par défaut** (défaut portrait). Demande : priorité au contrôle du temps, voir clairement ce qu'affiche l'écran distant, meilleur responsive en largeur. Ne rien coder avant le choix ; ensuite TDD.
 1. **Essai en salle** sur de vrais téléphones / TV / OBS : batterie, latence réelle, lisibilité. Récupérer les fichiers `.log` (⚙️ → Plus → Diagnostic) pour analyse.
 2. **CueScore (WIP)** : phase 1 = audit de l'API publique (autoriser `api.cuescore.com` dans le réseau de la session + URL d'un tournoi public actif). Ne rien supposer (endpoints, champs, quotas). Réglage prévu : « Source du score : Manuelle / CueScore ».
 3. Non retenus pour l'instant : secret de salle hors URL, traduction (anglais), codes de partage courts (Worker + KV).
