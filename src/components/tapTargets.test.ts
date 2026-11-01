@@ -36,10 +36,8 @@ describe('cibles tactiles du scoreur et des presets (≥ 44 px)', () => {
   for (const selector of [
     '.match-step',
     '.match-ferme-step',
-    '.match-undo',
     '.match-size-compact .match-step',
     '.match-size-compact .match-ferme-step',
-    '.match-size-compact .match-undo',
   ]) {
     it(selector, () => {
       expect(minSize(selector, 'width'), `${selector} largeur`).toBeGreaterThanOrEqual(MIN_REM);

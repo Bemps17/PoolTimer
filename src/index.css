@@ -1306,7 +1306,7 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
     0%, 100% { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.35); }
     50% { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.7), 0 0 18px rgba(255,255,255,0.7); }
 }
-.match-step, .match-ferme-step, .match-undo {
+.match-step, .match-ferme-step {
     font-family: var(--font-body);
     font-weight: 700;
     color: var(--c-text-primary);
@@ -1318,8 +1318,6 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
 }
 .match-step { width: 2.6rem; height: 2.6rem; font-size: 1.6rem; line-height: 1; }
 .match-ferme-step { width: 2rem; height: 1.6rem; font-size: 1.1rem; line-height: 1; }
-.match-undo { align-self: center; width: 2.4rem; height: 2.4rem; font-size: 1.3rem; }
-.match-undo:disabled { opacity: 0.3; cursor: default; }
 .match-win { margin: 0; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; color: var(--c-play); }
 .match-lag-note {
     position: absolute;
@@ -1424,7 +1422,6 @@ button.match-ball:not(.active) { opacity: 0.18; transform: scale(0.85); }
 .match-size-compact .match-ball { width: 18px; height: 18px; }
 .match-size-compact .match-ferme-step { width: 1.6rem; height: 1.4rem; font-size: 1rem; }
 .match-size-compact .match-ferme { font-size: 0.8rem; }
-.match-size-compact .match-undo { width: 2rem; height: 2rem; font-size: 1.1rem; }
 .match-size-compact .match-win { font-size: 0.65rem; }
 
 /* ---------- Overlay streaming (OBS / Streamlabs) ---------- */
@@ -1545,10 +1542,8 @@ html.overlay-bg-chroma body { background: #00ff00 !important; }
 /* ---------- Cibles tactiles ≥ 44 px (v3.1) : le visuel reste compact, la zone de tap grandit ---------- */
 .match-step { width: 2.75rem; height: 2.75rem; }
 .match-ferme-step { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; }
-.match-undo { width: 2.75rem; height: 2.75rem; }
 .match-size-compact .match-step { width: 2.75rem; height: 2.75rem; font-size: 1.3rem; }
 .match-size-compact .match-ferme-step { width: 2.75rem; height: 2.75rem; font-size: 1.1rem; }
-.match-size-compact .match-undo { width: 2.75rem; height: 2.75rem; }
 /* Compact : score et F sur une seule ligne pour ne pas voler de hauteur au chrono. */
 .match-size-compact .match-side { flex-wrap: nowrap; gap: 0.25rem; }
 .match-size-compact .match-main, .match-size-compact .match-ferme-row { width: auto; gap: 0.2rem; }
@@ -1637,17 +1632,16 @@ button.match-ball:focus-visible { outline: 2px solid var(--c-primary); outline-o
 /* Overlay OBS : jamais de fondu de couleur (sinon flash sombre au chargement et à chaque changement de thème). */
 html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition: none !important; }
 
-/* Compact (télécommande) : grille « côté | annuler | côté », 2 lignes par côté, cibles de 44 px qui tiennent en 360 px. */
+/* Compact (télécommande) : 2 colonnes, 2 lignes par côté, cibles de 44 px qui tiennent en 360 px. */
 .match-bar-controller.match-size-compact {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 0.3rem;
 }
 .match-size-compact .match-side { flex-direction: column; flex-wrap: nowrap; gap: 0.1rem; padding: 0.15rem 0.1rem; }
 .match-size-compact .match-side:nth-of-type(1) { grid-column: 1; grid-row: 1; }
-.match-size-compact .match-side:nth-of-type(2) { grid-column: 3; grid-row: 1; }
-.match-size-compact .match-undo { grid-column: 2; grid-row: 1; }
+.match-size-compact .match-side:nth-of-type(2) { grid-column: 2; grid-row: 1; }
 .match-size-compact .match-main,
 .match-size-compact .match-ferme-row { display: flex; align-items: center; justify-content: center; width: 100%; gap: 0.15rem; }
 .match-size-compact .match-score { min-width: 1.6ch; }
@@ -1660,3 +1654,4 @@ html.overlay-mode, html.overlay-mode body, html.overlay-mode #root { transition:
 .match-bar-controller .match-main, .match-bar-controller .match-ferme-row { flex-wrap: nowrap; }
 /* La blanche inactive est atténuée par son pseudo-élément ; la zone de tap, elle, garde 44 px et reste opaque. */
 .match-bar-controller button.match-ball:not(.active) { transform: none; opacity: 1; }
+.match-ferme { white-space: nowrap; }

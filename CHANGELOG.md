@@ -9,7 +9,7 @@ Suite de l’audit (TDD, scénario de bout en bout en CI).
 - **Score → chrono** : marquer une manche lance la nouvelle manche du chrono avec le casseur suivant (`matchOptions.frameRestartsTimer`, oui par défaut ; `newGame(state, config, firstPlayer)`).
 - **Historique des manches** (`match.frames` : vainqueur, casseur, heure) et **fenêtre de fin de match** (`MatchEndDialog`, `matchSummary`) avec partage du résultat.
 - **Mode équipe** (`matchOptions.sides`), transmis à l’écran Visuel (`match.sides`, optionnel). **Worker à redéployer.**
-- **Ergonomie** : réglages en 3 onglets ; cibles tactiles ≥ 44 px (scoreur compact sur 2 lignes, −F via Annuler) ; toast de preset limité à 2 changements.
+- **Ergonomie** : réglages en 3 onglets ; cibles tactiles ≥ 44 px (scoreur compact sur 2 lignes) ; bouton « annuler » retiré de la barre de score (reste dans ⚙️ → Score) ; toast de preset limité à 2 changements.
 - **Écran Visuel** : bouton plein écran dédié ; compensation de la latence (moitié de la médiane des pings).
 - **Performance** : vues chargées à la demande (`React.lazy`) ; écran Visuel ≈ 88 Ko gzip au lieu de 188 ; overlay sans fondu de fond (flash sombre dans OBS).
 - **Qualité** : scénario Playwright `npm run test:e2e` (télécommande → relais → écran Visuel → overlay, cibles tactiles sur 360 px) ajouté à la CI.

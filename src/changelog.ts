@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       'Historique des manches et fenêtre de fin de match : vainqueur, score, course à N, nombre de manches, durée, casses fermes, avec « Partager le résultat » et « Nouveau match ».',
       'Mode équipe : « Équipe A / B » à la place de « Joueur 1 / 2 » sur la télécommande, l’écran Visuel et l’overlay.',
       'Réglages en 3 onglets (Match, Apparence, Appareil & partage) ; boutons du scoreur d’au moins 44 px, même sur un téléphone de 360 px ; aperçu de preset court.',
+      'Barre de score allégée : le bouton « annuler » est retiré (toujours disponible dans ⚙️ → Score), la place revient au score et aux casses fermes.',
       'Écran Visuel : bouton « Plein écran » dédié (un appui ne quitte plus le plein écran), chrono compensé de la latence réseau.',
       'Plus rapide : l’écran Visuel et l’overlay OBS chargent environ deux fois moins de code ; l’overlay n’a plus de flash sombre au chargement.',
     ],

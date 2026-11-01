@@ -273,8 +273,6 @@ export default function ControllerApp() {
                 onScore: handleScore,
                 onFerme: matchControl.addFerme,
                 onToggleBreaker: matchControl.swapBreaker,
-                onUndo: matchControl.undoLast,
-                canUndo: matchControl.canUndo,
               }}
             />
           ) : null

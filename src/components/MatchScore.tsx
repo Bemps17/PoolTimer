@@ -7,8 +7,6 @@ export interface MatchScoreControls {
   onScore: (player: PlayerId, delta: number) => void;
   onFerme: (player: PlayerId, delta: number) => void;
   onToggleBreaker: () => void;
-  onUndo: () => void;
-  canUndo: boolean;
 }
 
 interface MatchScoreProps {
@@ -35,7 +33,7 @@ export function MatchScore({
   showNames = false,
 }: MatchScoreProps) {
   const winner = matchWinner(match, match.targetScore);
-  // Compact (télécommande) : 2 lignes par côté, « − score + » puis « blanche · F · +F » ; −F via Annuler.
+  // Compact (télécommande) : 2 lignes par côté, « − score + » puis « blanche · −F · F · +F ».
   const compact = size === 'compact' && Boolean(controls);
   const sides: Array<{ player: PlayerId; name: string; color: string }> = [
     { player: 1, name: displayPlayerName(p1Name, 1, match.sides), color: p1Color },
@@ -105,7 +103,7 @@ export function MatchScore({
             {match.showFerme || (compact && match.showBreaker) ? (
               <div className="match-ferme-row">
                 {compact ? ball : null}
-                {controls && !compact && match.showFerme ? (
+                {controls && match.showFerme ? (
                   <button
                     type="button"
                     className="match-ferme-step"
@@ -136,17 +134,6 @@ export function MatchScore({
           </div>
         );
       })}
-      {controls ? (
-        <button
-          type="button"
-          className="match-undo"
-          aria-label="Annuler la dernière action du score"
-          disabled={!controls.canUndo}
-          onClick={controls.onUndo}
-        >
-          ↶
-        </button>
-      ) : null}
       {!controls && match.lagPending ? (
         <p className="match-lag-note" role="status">
           Tirage à la bande en cours…
