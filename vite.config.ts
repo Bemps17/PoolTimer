@@ -54,7 +54,8 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        orientation: 'portrait',
+        // Toutes orientations : le paysage est une option (⚙️ → Écran) ; sinon l'app se verrouille en portrait (useOrientationLock).
+        orientation: 'any',
         background_color: '#0a0a0a',
         theme_color: '#1a1a1a',
         icons: [

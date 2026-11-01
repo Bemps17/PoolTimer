@@ -19,3 +19,28 @@ export function useIsLandscape(): boolean {
   }, []);
   return landscape;
 }
+
+type LockableOrientation = ScreenOrientation & {
+  lock?: (orientation: 'portrait') => Promise<void>;
+  unlock?: () => void;
+};
+
+/**
+ * Applique le verrouillage d'orientation (best effort) : accepté par Android en app installée,
+ * refusé ailleurs (onglet de navigateur, iOS) — sans conséquence, l'erreur est ignorée.
+ */
+export function useOrientationLock(target: 'portrait' | null): void {
+  useEffect(() => {
+    const orientation = (typeof screen !== 'undefined' ? screen.orientation : undefined) as LockableOrientation | undefined;
+    if (!orientation) return;
+    try {
+      if (target) {
+        void orientation.lock?.(target)?.catch(() => undefined);
+      } else {
+        orientation.unlock?.();
+      }
+    } catch {
+      // API absente ou refusée : le téléphone garde son comportement
+    }
+  }, [target]);
+}

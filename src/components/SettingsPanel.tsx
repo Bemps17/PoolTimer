@@ -509,7 +509,7 @@ export function SettingsPanel({
                     onChange={(landscape) => patchView({ landscape })}
                     hint={
                       config.viewOptions.landscape
-                        ? 'Téléphone en largeur : joueur 1 à gauche, chrono au centre, joueur 2 à droite.'
+                        ? 'Tournez le téléphone : joueur 1 à gauche, chrono au centre, joueur 2 à droite. La rotation automatique du téléphone doit être activée.'
                         : undefined
                     }
                   />
