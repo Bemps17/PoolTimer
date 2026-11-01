@@ -42,16 +42,23 @@ Validation par clamp (`CONFIG_LIMITS`) et `parseThemeColors` existants ; taille 
 
 **Recommandé** : un preset personnalisé = **chronométrage + règles de score** (course à N, option après-casse, sans après-casse) ; **l'apparence reste un objet séparé** (cohérent avec la décision v2.7.0). Un « bundle » optionnel regroupe preset + thème pour un partage en un seul lien.
 
-### D3 — Score : périmètre (précisé par le client)
+### D3 — Score : périmètre (précisé par le client, calé sur Scoreurv3)
 
-Match **1 contre 1** uniquement. Le scoreur gère :
-- **Score** de chaque joueur (manches gagnées), course à N optionnelle.
-- **Qui casse** : indicateur visible (ex. pastille « ● CASSE » sur le joueur), mis à jour automatiquement à chaque manche selon la règle choisie : *alternance* (défaut) ou *le gagnant casse*, avec correction manuelle possible (inversion en un appui) et choix du premier à casser au début du match.
-- **Casses fermes (F)** = parties parfaites : le joueur gagne la manche sur sa propre casse, sans que l'adversaire ne joue. Compteur **par joueur**, affiché en **plus petit chiffre** à côté du score, avec le symbole F (ex. `5` grand, `F2` petit en exposant). Une casse ferme **compte aussi comme manche gagnée**.
-- Annulation (undo) de la dernière manche, pour corriger une erreur de saisie.
-- Remise à zéro avec confirmation ; « manche suivante » conserve scores et F.
+Référence fonctionnelle : dépôt `Bemps17/Scoreurv3` (`apps/web/src/store/gameStore.ts`, `components/PlayerZone.tsx`, `packages/shared/src/index.ts`, `apps/web/styles.css`). On **reprend le comportement** (logique pure portée en TypeScript dans `src/timer/match.ts`, avec tests), pas le code React/Zustand ni l'infra (Supabase, Neon, tournois : hors périmètre de H8timer).
 
-Saisie : à la fin de chaque manche, 2 gestes max côté télécommande : « Manche à J1 / J2 », et un bouton **F** (actif seulement pour le joueur qui a cassé) qui ajoute la manche **et** la casse ferme.
+Match **1 contre 1** uniquement. Comportement repris de Scoreurv3 :
+- **Score** par joueur (+ / −, jamais négatif), objectif de points / course à N optionnel (0 = pas de victoire auto, sinon 1–500) avec détection de victoire.
+- **Blanche = casseur** : une bille blanche visible (pastille ronde, dégradé blanc, halo pulsant) sur le joueur qui casse. **Appui sur la blanche = inverser le casseur** à la main. Option pour la masquer.
+- **Alternance par défaut** : à chaque point marqué (+1), le casseur passe à l'autre joueur ; un −1 ne change pas le casseur.
+- **Casses fermes (F)** : compteur **séparé du score**, par joueur, avec − / +, affiché en **chiffre plus petit** que le score, taille réglable indépendamment (`fermeFontScale`), affichage masquable (`showFerme`).
+- **Annuler** (pile d'undo restaurant score, F et casseur), nouvelle partie, persistance locale.
+- Les compteurs F sont conservés dans l'historique / le résumé de la partie.
+
+Ajouts demandés pour H8timer :
+- **Option « Tirage à la bande »** (désactivée par défaut, l'alternance reste la règle par défaut) : au début de la manche, un écran demande qui a gagné la bande (« J1 » / « J2 ») ; le gagnant reçoit la blanche. Le tirage remplace l'alternance automatique tant que l'option est active. La blanche reste modifiable à la main.
+- **Tout est visible sur l'écran Visuel** : score en grand, F en petit, blanche sur le casseur ; le tirage et les corrections se font uniquement sur la télécommande.
+
+À confirmer : (1) tirage à la bande **à chaque manche** ou **seulement à la première** (hypothèse : à chaque manche quand l'option est active) ; (2) une casse ferme doit-elle **aussi ajouter 1 au score** (comme une manche gagnée) ? Scoreurv3 les garde indépendants → **défaut = indépendants**, avec réglage « F compte aussi une manche » pour ceux qui le veulent.
 
 ### D4 — Où vit l'état de score ?
 
@@ -63,14 +70,15 @@ Saisie : à la fin de chaque manche, 2 gestes max côté télécommande : « Man
 
 ### Phase 0 — Fondations (0,5 j)
 - [x] Analyse, `CLAUDE.md`, `ROADMAP.md`
+- [x] Analyse de Scoreurv3 (référence score / F / blanche)
 - [ ] Ajouter `npm run typecheck` (`tsc -b --noEmit`) et un workflow CI GitHub Actions (`npm ci && npm test && npm run build`)
 - [ ] Test de non-régression du **contrat de protocole** : un snapshot v2.7.1 doit toujours être accepté (rétro-compat)
 
 ### Phase 1 — Score (v2.8.0) — *prioritaire*
-1. `timer/match.ts` : `MatchState { scores: {1,2}, breakFlawless: {1,2} (casses fermes), breaker: 1|2, breakRule: 'alternate'|'winnerBreaks', raceTo: number|null, history: Frame[] }`, fonctions pures `winFrame(player, {flawless})`, `undoLastFrame`, `swapBreaker`, `resetMatch`, `isMatchWon` + tests (F impossible si le joueur n'a pas cassé, alternance, undo restaure score/F/casseur).
-2. Persistance + `mergeMatch` (validation, bornes 0–99).
+1. `timer/match.ts` (logique pure, tests) portée de Scoreurv3 : `MatchState { scores: {1,2}, fermes: {1,2}, breaker: 1|2, history }`, `scoreAfterDelta`, `breakerAfterScoreDelta`, `updateFerme`, `toggleBreaker`, `setBreakerFromLag(winner)`, `undo`, `shouldDeclareVictory` ; réglages `breakRule: 'alternate'|'lag'`, `targetScore`, `showFerme`, `fermeFontScale`, `showBreaker`, `fermeCountsAsFrame`.
+2. Persistance + `mergeMatch` (validation, bornes).
 3. **Protocole** : `MirrorSnapshot.match?: MirrorMatch` optionnel ; `parseSnapshot` le parse explicitement (sinon le Worker le supprime) ; tests de rétro-compat ; **redéployer le Worker**.
-4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), **casses fermes en petit chiffre `F n`** à côté du score, **pastille de casse** sur le joueur qui casse, indicateur « manche N / course à N », bannière de victoire.
+4. UI : score dans les bandeaux joueurs (`PlayerStatus`), gros et lisible sur `DisplayView` (c'est la demande clé : *visible côté Visuel*), **casses fermes en petit chiffre `F n`** sous/à côté du score, **blanche pulsante** sur le joueur qui casse (appui = inversion), écran « Tirage à la bande » si l'option est active, indicateur « manche N / course à N », bannière de victoire.
 5. Réglage « Course à N » dans ⚙️ ; tutoriel + aide mis à jour.
 
 *Critère de fin* : un point marqué sur le téléphone apparaît < 1 s sur l'écran Visuel, survit à un rechargement et à une reconnexion WebSocket.
