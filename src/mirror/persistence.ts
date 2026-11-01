@@ -35,3 +35,19 @@ export function createWritePlanner(): WritePlanner {
     },
   };
 }
+
+/**
+ * Alarme d'expiration à repousser ? Seulement si elle n'existe pas ou si plus de la moitié du délai est passée :
+ * une reconnexion (écran, télécommande) ne coûte alors aucune écriture.
+ */
+export function alarmNeedsRefresh(currentAlarm: number | null, now: number, ttlMs: number): boolean {
+  return currentAlarm === null || currentAlarm - now < ttlMs / 2;
+}
+
+/**
+ * Prise de la salle par la télécommande : écrire seulement si le secret change (nouvelle salle) ou si la séquence
+ * persistée doit repartir à 0 (sinon, après une mise en veille, les pushes seraient rejetés comme obsolètes).
+ */
+export function claimNeedsPersist(stored: { storedSecret: string | null; storedSeq: number }, secret: string): boolean {
+  return stored.storedSecret !== secret || stored.storedSeq !== 0;
+}

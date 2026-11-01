@@ -1,4 +1,4 @@
-export const APP_VERSION = '3.5.1';
+export const APP_VERSION = '3.5.2';
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '3.5.2',
+    date: '2026-11-01',
+    title: 'Sécurité : relais protégé et en-têtes du site',
+    notes: [
+      'Sécurité du relais : un appareil qui enchaîne les connexions est freiné (40 par minute), et les reconnexions ne consomment plus le quota gratuit de Cloudflare, pour que le miroir reste disponible pour tout le monde.',
+      'Sécurité du site : l’application ne peut plus être intégrée dans une autre page (protection contre les clics piégés) et le navigateur n’exécute que le code de l’application (politique de sécurité du contenu).',
+    ],
+  },
   {
     version: '3.5.1',
     date: '2026-11-01',

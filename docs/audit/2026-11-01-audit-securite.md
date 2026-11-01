@@ -29,6 +29,10 @@ Pas de comptes, pas de base de données, pas de données personnelles hormis des
 | S7 | Info | **Secret dans l'URL du WebSocket** (`?secret=`) : chiffré par TLS, mais visible dans d'éventuels journaux (`wrangler tail`, outils réseau). | L'envoyer dans le premier message plutôt que dans l'URL (changement de protocole rétro-compatible). |
 | S8 | Info | Lecture d'une salle sans secret : quiconque a le code voit le chrono et les noms (par conception : écrans publics). | Rien, à documenter ; code de 6 caractères sur 32 symboles (≈ 1 milliard de combinaisons), pas d'énumération réaliste. |
 
+## Suivi
+
+- **S1** et **S2** corrigés en v3.5.2 (voir `CHANGELOG.md`).
+
 ## Priorités
 
 1. **S1** (disponibilité du service) puis **S2** (en-têtes) : peu de code, gain réel.
